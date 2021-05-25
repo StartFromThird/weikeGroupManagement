@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>营运点管理</title>
+    <link rel="stylesheet" href="../../static/libs/element/element.css" />
+    <link rel="stylesheet" href="../../static/admin/css/admin.css" />
+    <script src="../../static/libs/vue.js"></script>
+    <script src="../../static/libs/element/element.js"></script>
+    <script src="../../static/libs/Sortable.min.js"></script>
+    <script src="../../static/libs/vuedraggable.js"></script>
+    <script src="../../static/libs/moment.js"></script>
+    <!-- <script src="./static/jquery/jquery.js"></script> -->
+    <script src="../../static/libs/api.js"></script>
+    <link
+      rel="stylesheet"
+      href="../../static/operationPoint/operationPoint.css"
+    />
+  </head>
+  <body>
+    <div id="operationPointUpdate"></div>
+  </body>
+
+  <script>
+    new Vue({
+      el: "#operationPointUpdate",
+      name: "operationPointUpdate",
+      template: `  <div class="operationPointUpdateWrap">
+    <el-form
+      label-position="left"
+      label-width="100px"
+      ref="form"
+      size="mini"
+      :model="form"
+      :rules="rules"
+    >
+      <el-row :gutter="20">
+        <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
+          <el-form-item label="营运点名称" prop="operation">
+            <el-input
+              v-model.trim="form.operation"
+              show-word-limit
+              maxlength="30"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="营运点状态" prop="status">
+            <el-switch
+              v-model="form.status"
+              :active-value="1"
+              :inactive-value="0"
+            ></el-switch>
+          </el-form-item>
+          <el-form-item label="EHRcode">
+            <el-input v-model.trim="form.EHRcode"></el-input>
+          </el-form-item>
+          <el-form-item label="storecode">
+            <el-input v-model.trim="form.storecode"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
+          <el-form-item label="营运点地址">
+            <div class="selectAddressWrap">
+              <el-select
+                v-model="form.provinceValue"
+                clearable
+                placeholder="省"
+                @change="provinceChange"
+              >
+                <el-option
+                  v-for="item in provinceOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
+              <el-select
+                v-model="form.cityValue"
+                clearable
+                placeholder="市"
+                @change="cityChange"
+              >
+                <el-option
+                  v-for="item in cityOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
+              <el-select v-model="form.areaValue" clearable placeholder="区">
+                <el-option
+                  v-for="item in areaOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
+            </div>
+          </el-form-item>
+          <el-form-item label="" prop="address">
+            <el-input
+              v-model.trim="form.address"
+              show-word-limit
+              maxlength="60"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="营运时间" prop="time">
+            <el-time-picker
+              format="HH:mm"
+              is-range
+              v-model="form.time"
+              range-separator="至"
+              start-placeholder="开始时间"
+              end-placeholder="结束时间"
+              step="00:15"
+              placeholder="选择时间范围"
+            ></el-time-picker>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col>
+          <el-form-item label="营运点成员">
+            <div class="selectMemberWrap">
+              <div class="left">
+                <div class="filter">
+                  <el-input
+                    placeholder="请输入用户名称搜索"
+                    @clear="clearSearchMemberKey"
+                    @keyup.enter.native="searchMemberByKey"
+                    v-model.trim="keyword"
+                    clearable
+                    size="mini"
+                  >
+                    <el-button
+                      slot="append"
+                      icon="el-icon-search"
+                      @click="searchMemberByKey"
+                    ></el-button>
+                  </el-input>
+                </div>
+                <div class="memberTree" v-loading="memberTreeloading">
+                  <template v-if="memberTreeType === 'default'">
+                    <el-tree
+                      class="orgTreeWrap"
+                      ref="tree"
+                      :data="treeData"
+                      default-expand-all
+                      node-key="id"
+                      :props="defaultProps"
+                      @node-click="handleNodeClick"
+                      :highlight-current="true"
+                    ></el-tree>
+                  </template>
+                  <div class="member-box" v-if="memberTreeType === 'search'">
+                    <div
+                      class="member-item"
+                      v-for="item in searchMemberResultList"
+                      :key="item.id"
+                      :label="item.department_name"
+                      :value="item.id"
+                      @click="selectSearchMember(item)"
+                    >
+                      <span>{{ item.department_name }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="right">
+                <p>已选中营运点成员</p>
+                <div class="selectedMember">
+                  <el-tag
+                    v-for="(tag, i) in selectedMembers"
+                    :key="tag.id"
+                    closable
+                    @close="handleDelMember(i)"
+                  >
+                    {{ tag.member_name }}
+                  </el-tag>
+                </div>
+              </div>
+            </div>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row class="btns">
+        <el-button size="mini" type="primary" @click="handleReset">重置</el-button>
+        <el-button size="mini" type="primary" @click="handleSubmit">提交</el-button>
+      </el-row>
+    </el-form>
+  </div>`,
+      props: {},
+      data() {
+        return {
+          // add 新增 edit 编辑
+          type: "add",
+          form: {},
+          baseForm: {},
+          rules: {
+            operation: [
+              { required: true, message: "请输入营运点名称", trigger: "blur" },
+              {
+                min: 0,
+                max: 30,
+                message: "长度不超过 30 个字",
+                trigger: "blur",
+              },
+            ],
+            status: [
+              { required: true, message: "请输入营运状态", trigger: "change" },
+            ],
+            address: [
+              {
+                min: 0,
+                max: 60,
+                message: "长度不超过 60 个字",
+                trigger: "blur",
+              },
+            ],
+            time: [
+              { required: true, message: "请输入营运时间", trigger: "change" },
+            ],
+          },
+          selectedMembers: [],
+          memberTreeloading: false,
+          memberTreeType: "default",
+          memberList: [],
+          keyword: "",
+          treeData: [],
+          defaultProps: {
+            children: "children",
+            label: "department_name",
+          },
+          searchMemberResultList: [],
+          keyword1: "",
+          // 地址省市区相关
+          provinceOptions: [],
+          cityOptions: [],
+          areaOptions: [],
+        };
+      },
+      computed: {},
+      async created() {
+        this.initPage();
+        this.treeData = await this.getOrgList(0);
+        this.provinceOptions = await this.getProvinceOptions();
+      },
+      mounted() {},
+      watch: {},
+      methods: {
+        handleReset() {
+          Object.assign(this.form, this.baseForm);
+        },
+        handleSubmit() {
+          // this.form
+        },
+        clearSearchMemberKey() {
+          this.keyword = "";
+          // 数据还原
+          this.memberTreeType = "default";
+        },
+        // 树选中营运点成员
+        handleSelectMember(data) {
+          const res = this.selectedMembers.filter((ele) => ele.id === data.id);
+          if (res && res.length) {
+            return;
+          }
+          this.selectedMembers.push(data);
+        },
+        // 已选中营运点成员 删除
+        handleDelMember(i) {
+          this.selectedMembers.splice(i, 1);
+        },
+        // 左侧树节点点击
+        async handleNodeClick(data, node) {
+          // 点击成员节点 保存右侧
+          if (!data.isOrg) {
+            this.handleSelectMember(data);
+            return;
+          }
+          // 判断部门节点 子节点 是否已请求过
+          if (node.childNodes && node.childNodes.length) {
+            return;
+          }
+          let key = node.key;
+          let child = [];
+          // 判断部门节点 子节点 是部门还是成员 data.isNextOrg
+          if (key < 3) {
+            child = await this.getOrgList(key);
+          } else {
+            child = await this.getMember(key);
+          }
+          if (child && child.length) {
+            this.$refs.tree.updateKeyChildren(key, child);
+          }
+        },
+        // 关键字搜索成员
+        async searchMemberByKey() {
+          if (this.keyword) {
+            this.memberTreeType = "search";
+            let list = await this.getMember();
+            this.searchMemberResultList = [...list];
+          } else {
+            this.memberTreeType = "default";
+            this.treeData = await this.getOrgList(0);
+          }
+        },
+        clearSearchMemberKey() {
+          this.keyword = "";
+          this.memberTreeType = "default";
+        },
+        async selectSearchMember(item) {
+          this.keyword = item.department_name;
+          this.memberTreeType = "default";
+          // 通过成员反向查树节点
+          // await this.getParentTree(item.id)
+          this.treeData = [
+            {
+              department_name: `反向查树1`,
+              id: 201,
+              isOrg: true,
+              children: [
+                {
+                  department_name: `反向查树1-1`,
+                  id: 202,
+                  isOrg: true,
+                  children: [
+                    {
+                      ...item,
+                    },
+                  ],
+                },
+                {
+                  department_name: `反向查树1-2`,
+                  id: 203,
+                  isOrg: true,
+                },
+              ],
+            },
+          ];
+        },
+        // 获取成员
+        async getMember(id, label = [], parentNode) {
+          let params = {};
+          params.id = id || "";
+          params.keyword = this.keyword || "";
+          // http.getMember(params).then((res) => {
+          //   let memberList = res.data.list
+          //   memberList = memberList.map((ele) => {
+          //     return {
+          //       ...ele,
+          //       department_name: ele.qw_name,
+          //       department_id: ele.id,
+          //       department_name: ele.qw_name
+          //     }
+          //   })
+          //   console.log('成员res===', memberList)
+          // })
+          if (this.keyword) {
+            return [
+              {
+                member_name: `关键词查询__1`,
+                department_name: `关键词查询__1`,
+                id: 101,
+                isOrg: false,
+              },
+              {
+                member_name: `关键词查询__2`,
+                department_name: `关键词查询__2`,
+                id: 102,
+                isOrg: false,
+              },
+            ];
+          }
+          // 造成员数据
+          let node = [];
+          const pre = `成员节点__`;
+          for (let i = id; i < id + 2; i++) {
+            let o = {
+              member_name: `${pre}${id}__${id + i}`,
+              id: id + i,
+              isOrg: false,
+            };
+            o.department_name = o.member_name;
+            node.push(o);
+          }
+          return node;
+        },
+        // 获取部门
+        async getOrgList(id, groupInfo = {}) {
+          // 此处应该是按部门id 逐级去查询
+          // let res = await http.getGroupList({
+          //   'department_id': _id,
+          //   'levelGap': 1
+          // })
+          // if (res && res.data) {
+          //   this.treeData = res.data
+          // }
+          let node = [];
+          const pre = `部门节点__`;
+          if (id === 0) {
+            node[0] = {
+              department_name: `${pre}${id + 1}`,
+              id: id + 1,
+              isOrg: true,
+            };
+          } else {
+            // 造子部门数据
+            for (let i = id; i < id + 2; i++) {
+              let o = {
+                department_name: `${pre}${id}__${id + i}`,
+                id: id + i,
+                isOrg: true,
+              };
+              node.push(o);
+            }
+          }
+          return node;
+        },
+        initPage() {
+          if (this.getQueryVariable("type")) {
+            this.type = this.getQueryVariable("type") || "add";
+          }
+          if (this.type === "add") {
+            this.baseForm = {
+              operation: "",
+              status: 1,
+              EHRcode: "",
+              storecode: "",
+              provinceValue: "",
+              cityValue: "",
+              areaValue: "",
+              address: "",
+              time: [
+                new Date(2016, 9, 10, 8, 30),
+                new Date(2016, 9, 10, 22, 30),
+              ],
+            };
+            this.form = { ...this.baseForm };
+          } else {
+            // 依据路由id 请求营运点数据 ...
+          }
+        },
+        getQueryVariable(variable) {
+          var query = window.location.search.substring(1);
+          var vars = query.split("&");
+          for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] == variable) {
+              return pair[1];
+            }
+          }
+          return false;
+        },
+        // 省市区相关
+        async getAreaOptions(v) {
+          return [
+            {
+              label: "南山",
+              value: "00121",
+            },
+            {
+              label: "宝安",
+              value: "00122",
+            },
+          ];
+        },
+        async getCityOptions(v) {
+          return [
+            {
+              label: "广州",
+              value: "0011",
+            },
+            {
+              label: "深圳",
+              value: "0012",
+            },
+          ];
+        },
+        async getProvinceOptions() {
+          return [
+            {
+              label: "广东省",
+              value: "001",
+            },
+            {
+              label: "广西省",
+              value: "002",
+            },
+          ];
+        },
+        async cityChange(v) {
+          if (v) {
+            this.areaOptions = await this.getAreaOptions(v);
+          } else {
+            this.form.areaValue = "";
+            this.areaOptions = [];
+          }
+        },
+        async provinceChange(v) {
+          if (v) {
+            this.cityOptions = await this.getCityOptions(v);
+          } else {
+            this.form.cityValue = "";
+            this.form.areaValue = "";
+            this.cityOptions = [];
+            this.areaOptions = [];
+          }
+        },
+      },
+    });
+  </script>
+</html>

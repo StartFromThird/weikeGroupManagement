@@ -1,0 +1,145 @@
+.operationPointWrap {
+  /* min-height: 100vh; */
+}
+
+.operationPointWrap .mainContent {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+}
+
+.operationPointWrap .mainContent .tableWrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  justify-content: space-between;
+}
+
+.operationPointWrap .operateRow {
+  padding: 8px 0;
+}
+
+.operationPointWrap .searchWrap {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.operationPointWrap .searchWrap .searchItemWrap {
+  display: flex;
+  flex: 1;
+}
+
+.operationPointWrap .searchWrap .searchItemWrap .searchItem {
+  margin-right: 20px;
+  min-width: 110px;
+}
+
+.operationPointWrap .btns {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.operationPointWrap .btns .el-button+.el-button {
+  margin-left: 20px;
+}
+
+.operationPointWrap .pagination-wrap {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 0;
+}
+
+.disableBtn {
+  cursor: not-allowed;
+}
+
+.pointerBtn {
+  cursor: pointer;
+}
+
+.pBtn.el-button {
+  color: #FFFFFF;
+  background-color: #00C587;
+  border-color: #00C587;
+}
+
+.wBtn.el-button {
+  background: rgba(230, 162, 60, 1);
+}
+
+/* 营运点编辑 */
+.operationPointUpdateWrap {
+  padding: 10px;
+}
+
+.operationPointUpdateWrap .selectMemberWrap {
+  display: flex;
+}
+.memberTree {
+  height: calc(100% - 28px);
+}
+.memberTree .orgTreeWrap {
+  height: 100%;
+  overflow-y: auto;
+}
+.operationPointUpdateWrap .selectMemberWrap .left {
+  min-width: 220px;
+  height: 360px;
+  margin-right: 30px;
+  border: 1px solid #ccc;
+}
+
+.operationPointUpdateWrap .selectMemberWrap .right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.operationPointUpdateWrap .selectMemberWrap .right .selectedMember {
+  width: 100%;
+  flex: 1;
+  box-sizing: border-box;
+  padding: 8px;
+  background: rgba(215, 215, 215, 1);
+}
+
+.operationPointUpdateWrap .selectMemberWrap .right .selectedMember .el-tag {
+  margin: 10px 4px;
+}
+
+.operationPointUpdateWrap .selectAddressWrap {
+  display: flex;
+  justify-content: space-between;
+}
+
+.operationPointUpdateWrap .selectAddressWrap .el-select {
+  width: 25%;
+}
+
+.operationPointUpdateWrap .btns {
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 20px 0;
+}
+
+.operationPointUpdateWrap .btns .el-button+.el-button {
+  margin-left: 30px;
+}
+
+.operationPointUpdateWrap .member-box {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+.operationPointUpdateWrap .member-box .member-item {
+  cursor: pointer;
+  padding: 10px 5px;
+  border-bottom: 1px solid #ccc;
+  line-height: 14px;
+}

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>营运点管理</title>
+    <link rel="stylesheet" href="../../static/libs/element/element.css" />
+    <link rel="stylesheet" href="../../static/admin/css/admin.css" />
+    <script src="../../static/libs/vue.js"></script>
+    <script src="../../static/libs/element/element.js"></script>
+    <script src="../../static/libs/Sortable.min.js"></script>
+    <script src="../../static/libs/vuedraggable.js"></script>
+    <script src="../../static/libs/moment.js"></script>
+    <!-- <script src="./static/jquery/jquery.js"></script> -->
+    <script src="../../static/libs/api.js"></script>
+    <link rel="stylesheet" href="../../static/operationPoint/operationPoint.css" />
+  </head>
+  <body>
+    <div
+      class="operationPointWrap"
+      id="operationPointPage"
+      v-cloak
+      style="height: calc(100vh)"
+    >
+      <div class="mainContent">
+        <div class="operateRow searchWrap">
+          <div class="searchItemWrap">
+            <div class="searchItem">
+              <el-input
+                placeholder="请输入营运点"
+                v-model="search.operation"
+                clearable
+                size="mini"
+              ></el-input>
+            </div>
+            <div class="searchItem">
+              <el-input
+                placeholder="请输入营运点成员"
+                v-model="search.operationMember"
+                clearable
+                size="mini"
+              ></el-input>
+            </div>
+            <div class="searchItem">
+              <el-input
+                placeholder="请输入EHRcode"
+                v-model="search.EHRcode"
+                clearable
+                size="mini"
+              ></el-input>
+            </div>
+            <div class="searchItem">
+              <el-input
+                placeholder="请输入storecode"
+                v-model="search.storecode"
+                clearable
+                size="mini"
+              ></el-input>
+            </div>
+            <div class="searchItem">
+              <el-input
+                placeholder="请输入营运点编号"
+                v-model="search.operationCode"
+                clearable
+                size="mini"
+              ></el-input>
+            </div>
+            <div class="btns">
+              <el-button
+                type="primary"
+                size="mini"
+                @click="getTableData"
+                >查询</el-button
+              >
+              <el-button
+                type="primary"
+                size="mini"
+                @click="handleReset"
+                >重置</el-button
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="operateRow">
+          <div class="btns">
+            <el-button
+              type="primary"
+              size="mini"
+              @click="handleAddRow"
+              >新增</el-button
+            >
+            <el-button
+            type="primary"
+              size="mini"
+              @click="handleImport"
+              >导入</el-button
+            >
+            <el-button type="text" size="mini" @click="handleDownload"
+              >点击下载导入模板</el-button
+            >
+          </div>
+        </div>
+        <div class="tableWrap">
+          <el-table :data="tableData" height="calc(100% - 56px)" style="width: 100%" size="mini">
+            <el-table-column type="index" width="50" label="编号">
+            </el-table-column>
+            <el-table-column
+              prop="operation"
+              label="营运点"
+              show-overflow-tooltip
+            >
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              label="营运点地址"
+              show-overflow-tooltip
+            >
+            </el-table-column>
+            <el-table-column prop="time" label="营运时间" show-overflow-tooltip>
+            </el-table-column>
+            <el-table-column
+              prop="member"
+              label="营运点成员"
+              show-overflow-tooltip
+            >
+            </el-table-column>
+            <el-table-column
+              prop="EHRcode"
+              label="EHRcode"
+              show-overflow-tooltip
+            >
+            </el-table-column>
+            <el-table-column
+              prop="storecode"
+              label="storecode"
+              show-overflow-tooltip
+            >
+            </el-table-column>
+            <el-table-column label="状态">
+              <template slot-scope="scope">
+                {{scope.row.status ? "正常": "关闭"}}
+                <!-- <el-switch v-model="scope.row.status"></el-switch> -->
+              </template>
+            </el-table-column>
+            <el-table-column fixed="right" label="操作">
+              <template slot-scope="scope">
+                <i
+                  class="el-icon-edit-outline pointerBtn"
+                  @click="handleEditRow(scope.$index, scope.row)"
+                ></i>
+                <!-- 营运点 状态为打开，营运点成员不为空，营运点已绑定组织架构  都不可被删除 -->
+                <el-popover
+                  placement="bottom"
+                  content="当前营运点不可删除"
+                  trigger="click"
+                  v-if="scope.row.member || scope.row.status || scope.row.bindOrg"
+                >
+                  <i
+                    slot="reference"
+                    class="el-icon-delete disableBtn"
+                    @click.native.prevent="handleDeleteRow(scope.$index, scope.row)"
+                  ></i>
+                </el-popover>
+                <!-- v-model="scorow.confirmVisible" -->
+                <el-popover
+                  placement="bottom"
+                  v-else
+                  @click.native.stop="handleShowDelConfirm(scope.$index, scope.row)"
+                  v-model="scope.row.confirmVisible"
+                >
+                  <p>是否确认删除当前营运点？</p>
+                  <div style="text-align: right; margin: 0">
+                    <el-button
+                      size="mini"
+                      type="text"
+                      @click.native.prevent="handleCancelDeleteRow(scope.$index, scope.row)"
+                      >取消</el-button
+                    >
+                    <el-button
+                      type="primary"
+                      size="mini"
+                      @click.native="handleDeleteRow(scope.$index, scope.row)"
+                      >确定</el-button
+                    >
+                  </div>
+                  <template slot="reference">
+                    <i class="el-icon-delete pointerBtn"></i>
+                  </template>
+                </el-popover>
+              </template>
+            </el-table-column>
+            <!-- 1.2.1版本 -->
+            <!-- <el-table-column fixed="right" label="同步结果" width="100">
+              <template slot-scope="scope">
+                <el-button
+                  class="pointerBtn wBtn"
+                  type="warning"
+                  @click.native.prevent="handleEditRowModel(scope.$index, scope.row)"
+                  size="small"
+                >
+                  同步差异
+                </el-button>
+              </template>
+            </el-table-column> -->
+          </el-table>
+          <div class="pagination-wrap">
+            <el-pagination
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+              :current-page="pageNo"
+              :page-sizes="pageSizes"
+              :page-size="pageSize"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total="totalNo"
+            >
+            </el-pagination>
+          </div>
+        </div>
+      </div>
+      <el-dialog :visible.sync="uploadDialogVisible" @close="closeUploadDialog">
+        <el-upload
+          class="upload-demo"
+          action="https://jsonplaceholder.typicode.com/posts/"
+          :on-change="handleFileChange"
+        >
+          <el-button size="mini" type="primary">点击上传</el-button>
+        </el-upload>
+        <p>上传规则：</p>
+        <p>1、只能上传xls/xlsx文件，且不超过2M</p>
+        <p>2、每次仅允许上传一个文件</p>
+      </el-dialog>
+    </div>
+  </body>
+
+  <script>
+    new Vue({
+      el: "#operationPointPage",
+      data() {
+        return {
+          search: {},
+          tableData: [],
+          pageSize: 10,
+          pageNo: 1,
+          pageSizes: [10, 15, 20],
+          totalNo: 0,
+          param: {},
+          uploadDialogVisible: false,
+        };
+      },
+      computed: {},
+      created() {
+        this.getTableData();
+      },
+      mounted() {},
+      watch: {},
+      methods: {
+        //   导入相关
+        handleImport() {
+          this.uploadDialogVisible = true;
+        },
+        handleFileChange(file, fileList) {},
+        closeUploadDialog() {
+          this.getTableData();
+        },
+        async handleDownload() {
+          // 文件地址 文件名
+          let url = "";
+          let name = "";
+          let response = await fetch(url);
+          // 内容转变成blob地址
+          let blob = await response.blob();
+          // 创建隐藏的可下载链接
+          let objectUrl = window.URL.createObjectURL(blob);
+          let a = document.createElement("a");
+          //地址
+          a.href = objectUrl;
+          //修改文件名
+          a.download = name;
+          // 触发点击
+          document.body.appendChild(a);
+          a.click();
+          //移除
+          setTimeout(() => document.body.removeChild(a), 1000);
+        },
+        // 模板
+        getTableData() {
+          let param = {
+            pageSize: this.pageSize,
+            pageNo: this.pageNo,
+            ...this.search,
+          };
+          console.log("列表查询参数===", param);
+          let tableData = [
+            {
+              id: '101',
+              operation: "科技园店",
+              address: "上海市普陀区金沙江路 1518 弄",
+              time: "9:00-18:00",
+              member: "AAA,BBB,CC",
+              EHRcode: "EHRcode",
+              storecode: "storecode",
+              status: true,
+              bindOrg: true,
+            },
+            {
+              id: '102',
+              operation: "深大店",
+              address: "上海市普陀区金沙江路 1518 弄",
+              time: "9:00-18:00",
+              member: "王小虎,AAA,BBB,CC",
+              EHRcode: "EHRcodeEHRcodeEHRcode",
+              storecode: "storecodestorecodestorecode",
+              status: false,
+              bindOrg: true,
+            },
+            {
+              id: '103',
+              operation: "可删除店",
+              address: "上海市普陀区金沙江路 1518 弄",
+              time: "9:00-18:00",
+              member: "",
+              EHRcode: "EHRcodeEHRcodeEHRcode",
+              storecode: "storecodestorecodestorecode",
+              status: false,
+              bindOrg: false,
+            },
+            {
+              id: '104',
+              operation: "可删除店2",
+              address: "上海市普陀区金沙江路 1518 弄",
+              time: "9:00-18:00",
+              member: "",
+              EHRcode: "EHRcodeEHRcodeEHRcode",
+              storecode: "storecodestorecodestorecode",
+              status: false,
+              bindOrg: false,
+            },
+          ];
+          // this.tableData = tableData.map((ele) => {
+          //   return {
+          //     ...ele,
+          //     confirmVisible: false,
+          //   };
+          // });
+          this.tableData = tableData.map((ele) => {
+            return {
+              ...ele,
+              confirmVisible: false,
+            };
+          });
+          this.totalNo = 22;
+        },
+        handleReset() {
+          this.search = {};
+          this.getTableData();
+        },
+        handleAddRow() {
+          location.href = `./update.html?type=add`;
+        },
+        handleShowDelConfirm(i, row) {
+          this.$set(row, "confirmVisible", true);
+        },
+        handleCancelDeleteRow(index, row) {
+          // row.confirmVisible = false;
+          this.$set(row, "confirmVisible", false);
+        },
+        async handleDeleteRow(index, row) {
+          // await row.id
+          row.confirmVisible = false;
+          this.getTableData();
+        },
+        handleEditRow(index, row) {
+          // 当前营运点不可删除;
+          location.href = `./update.html?type=edit&id=${row.id}`;
+        },
+        handleSizeChange(val) {
+          this.pageSize = val;
+          this.pageNo = 1;
+          this.getTableData();
+        },
+        handleCurrentChange(val) {
+          this.pageNo = val;
+          this.getTableData();
+        },
+      },
+    });
+  </script>
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>营运点架构管理</title>
+    <link rel="stylesheet" href="../../static/libs/element/element.css" />
+    <link rel="stylesheet" href="../../static/admin/css/admin.css" />
+    <script src="../../static/libs/vue.js"></script>
+    <script src="../../static/libs/element/element.js"></script>
+    <script src="../../static/libs/Sortable.min.js"></script>
+    <script src="../../static/libs/vuedraggable.js"></script>
+    <script src="../../static/libs/moment.js"></script>
+    <!-- <script src="./static/jquery/jquery.js"></script> -->
+    <script src="../../static/libs/api.js"></script>
+    <link
+      rel="stylesheet"
+      href="../../static/operationPoint/areaOperation.css"
+    />
+  </head>
+  <body>
+    <div id="areaOperationBind"></div>
+  </body>
+
+  <script>
+    new Vue({
+      el: "#areaOperationBind",
+      name: "areaOperationBind",
+      template: `  <div class="areaOperationPage bindPage" style="height: calc(100vh)">
+    <div class="operateRow searchWrap">
+      <div class="searchItemWrap">
+        <div class="searchItem">
+          <el-input
+            placeholder="请输入营运点"
+            v-model="search.operation"
+            clearable
+            size="mini"
+          ></el-input>
+        </div>
+        <div class="searchItem">
+          <el-input
+            placeholder="请输入营运点成员"
+            v-model="search.operationMember"
+            clearable
+            size="mini"
+          ></el-input>
+        </div>
+        <div class="searchItem">
+          <el-input
+            placeholder="请输入EHRcode"
+            v-model="search.EHRcode"
+            clearable
+            size="mini"
+          ></el-input>
+        </div>
+        <div class="searchItem">
+          <el-input
+            placeholder="请输入storecode"
+            v-model="search.storecode"
+            clearable
+            size="mini"
+          ></el-input>
+        </div>
+        <div class="searchItem">
+          <el-input
+            placeholder="请输入营运点编号"
+            v-model="search.operationCode"
+            clearable
+            size="mini"
+          ></el-input>
+        </div>
+      </div>
+      <div class="btns">
+        <el-button size="mini" type="primary" @click="getTableData">
+          查询
+        </el-button>
+        <el-button size="mini" type="primary" @click="handleReset">
+          重置
+        </el-button>
+      </div>
+    </div>
+    <div class="tableWrap">
+      <el-table
+        height="calc(100% - 56px)"
+        :data="tableData"
+        style="width: 100%"
+        ref="bindAreaTable"
+        @select-all="handleSelectionAllTableChange"
+        @select="handleSelectionTableChange"
+        size="mini"
+      >
+        <el-table-column type="selection" width="55"></el-table-column>
+        <el-table-column
+          prop="operation"
+          label="营运点"
+          show-overflow-tooltip
+        ></el-table-column>
+        <el-table-column
+          prop="orgList"
+          label="组织架构"
+          show-overflow-tooltip
+        ></el-table-column>
+        <!-- 下个版本删除 start -->
+        <el-table-column
+          prop="address"
+          label="营运点地址"
+          show-overflow-tooltip
+        ></el-table-column>
+        <el-table-column
+          prop="time"
+          label="营运时间"
+          show-overflow-tooltip
+        ></el-table-column>
+        <!-- 下个版本删除 end -->
+        <el-table-column
+          prop="member"
+          label="营运点成员"
+          show-overflow-tooltip
+        ></el-table-column>
+      </el-table>
+      <div class="pagination-wrap">
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentPageChange"
+          :current-page="pageNo"
+          :page-sizes="pageSizes"
+          :page-size="pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="totalNo"
+        ></el-pagination>
+      </div>
+    </div>
+    <div class="saveRow">
+      <span>已选择{{ selectedList.length }}个营运点</span>
+      <el-button type="primary" @click="save" class="saveBtn" size="mini">保 存</el-button>
+    </div>
+  </div>`,
+  props: {},
+  data() {
+    return {
+      headTypeArr: [],
+      search: {},
+      tableData: [],
+      pageSize: 10,
+      pageNo: 1,
+      pageSizes: [10, 15, 20],
+      totalNo: 0,
+      param: {},
+      selectedList: []
+    }
+  },
+  computed: {},
+  async created() {
+    this.getTableData()
+  },
+  mounted() {},
+  watch: {},
+  methods: {
+    save() {
+      console.log('selectedList===', this.selectedList)
+    },
+    selectBack() {
+      let tableData = [...this.tableData]
+      let selectedList = [...this.selectedList]
+      this.$nextTick(() => {
+        tableData.forEach((ele) => {
+          if (selectedList.includes(ele.id)) {
+            this.$refs.bindAreaTable.toggleRowSelection(ele, true)
+          } else {
+            this.$refs.bindAreaTable.toggleRowSelection(ele, false)
+          }
+        })
+      })
+    },
+    // 单选
+    handleSelectionTableChange(selection, curRow) {
+      // console.log("change===",selection, curRow);
+      let id = curRow.id
+      let selectedList = [...this.selectedList]
+      let i = selectedList.indexOf(curRow.id)
+      if (i === -1) {
+        selectedList.push(curRow.id)
+      } else {
+        selectedList.splice(i, 1)
+      }
+      this.selectedList = selectedList
+      console.log('list===', this.selectedList)
+    },
+    handleSelectionAllTableChange(selection) {
+      let tableData = [...this.tableData]
+      let selectedList = [...this.selectedList]
+      if (selection && selection.length) {
+        // 全选
+        tableData.forEach((ele) => {
+          selectedList.push(ele.id)
+        })
+        selectedList = this.removeDuplicate([...selectedList])
+      } else {
+        // 全不选
+        tableData.forEach((ele) => {
+          let i = selectedList.indexOf(ele.id)
+          if (i !== -1) {
+            selectedList.splice(i, 1)
+          }
+        })
+      }
+      this.selectedList = [...selectedList]
+      console.log('selectedListAll===', this.selectedList)
+    },
+    removeDuplicate(arr) {
+      return Array.from([...new Set(arr)])
+    },
+    async getTableData() {
+      let param = {
+        pageSize: this.pageSize,
+        pageNo: this.pageNo,
+        ...this.search
+      }
+      console.log('列表查询参数===', param)
+      // await ...
+      let tableData = []
+      // mock data start
+      let tableDataItem = {
+        operation: '科技园店',
+        address: '上海市普陀区金沙江路 1518 弄',
+        time: '9:00-18:00',
+        member: 'AAA,BBB,CC',
+        EHRcode: 'EHRcode',
+        storecode: 'storecode',
+        status: true,
+        bindOrg: true,
+        orgList: '百果园/大区A'
+      }
+      for (let i = 0; i < param.pageSize; i++) {
+        let o = {
+          ...tableDataItem,
+          id: `${param.pageNo}-${i}`,
+          operation: `${tableDataItem.operation}_${param.pageNo}-${i}`
+        }
+        tableData.push(JSON.parse(JSON.stringify(o)))
+      }
+      this.tableData = [...tableData]
+      this.totalNo = 22
+      // mock data end
+      this.selectBack()
+    },
+    // 重置
+    handleReset() {
+      this.search = {}
+      this.getTableData()
+    },
+    handleSizeChange(val) {
+      this.pageSize = val
+      this.pageNo = 1
+      this.getTableData()
+    },
+    handleCurrentPageChange(val) {
+      this.pageNo = val
+      this.getTableData()
+    }
+  },
+    });
+  </script>
+</html>

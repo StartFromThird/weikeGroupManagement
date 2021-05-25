@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>角色管理</title>
+    <link rel="stylesheet" href="../../static/libs/element/element.css" />
+    <link rel="stylesheet" href="../../static/admin/css/admin.css" />
+    <script src="../../static/libs/vue.js"></script>
+    <script src="../../static/libs/element/element.js"></script>
+    <script src="../../static/libs/Sortable.min.js"></script>
+    <script src="../../static/libs/vuedraggable.js"></script>
+    <script src="../../static/libs/moment.js"></script>
+    <!-- <script src="./static/jquery/jquery.js"></script> -->
+    <script src="../../static/libs/api.js"></script>
+    <!-- <script src="../../components/a.js"></script> -->
+    <script src="../../components/roleAuthority.js"></script>
+    <script src="../../components/roleManagement.js"></script>
+    <link rel="stylesheet" href="../../static/operationPoint/authority.css" />
+  </head>
+  <body>
+    <div id="authority"></div>
+  </body>
+
+  <script>
+    new Vue({
+      el: "#authority",
+      name: "authority",
+      template: `  <div class="authorityPage">
+    <div class="left">
+      <role-management
+        :defaultClassifyRole="classifyRole"
+        @updataClassifyRole="updataClassifyRole"
+        @handleClickRole="handleClickRole"
+      ></role-management>
+    </div>
+    <div class="right">
+      <div class="head">
+        <div class="roleInfo">
+          <p>角色：{{ roleDetail.roleName }}</p>
+          <p>描述：{{ roleDetail.desc }}</p>
+        </div>
+        <div class="btns">
+          <el-button type="primary" size="mini" @click="save">保存</el-button>
+        </div>
+      </div>
+      <div class="setAuthority">
+        <role-authority
+          ref="setAuthorityRef"
+          :defaultSetAuthority="roleDetail.authority"
+        ></role-authority>
+      </div>
+    </div>
+  </div>
+</template>`,
+      props: {},
+      data() {
+        return {
+          classifyRole: [],
+          roleDetail: {},
+          mockIndex: 0,
+        };
+      },
+      computed: {},
+      async created() {
+        await this.updataClassifyRole();
+      },
+      mounted() {},
+      watch: {},
+      methods: {
+        async save() {
+          console.log(
+            this.$refs.setAuthorityRef.$refs.authorityTree.getCheckedKeys()
+          );
+        },
+        async handleClickRole(role) {
+          // 查询角色信息
+          // await role.id
+          let a0 = {
+            roleName: "app运营",
+            desc:
+              "一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十",
+            id: "001",
+            authority: ["3", "10"],
+          };
+          let a1 = {
+            roleName: "app运营1",
+            desc: "一二三四五六七八九",
+            id: "002",
+            authority: ["2", "10"],
+          };
+          let res = [a0, a1];
+          this.mockIndex = this.mockIndex ? 0 : 1;
+          this.roleDetail = res[this.mockIndex];
+        },
+        async updataClassifyRole() {
+          await this.getClassifyRole();
+          if (
+            this.classifyRole &&
+            this.classifyRole.length &&
+            this.classifyRole[0].roles &&
+            this.classifyRole[0].roles.length
+          ) {
+            this.handleClickRole(this.classifyRole[0].roles[0]);
+          }
+        },
+        async getClassifyRole() {
+          let a1 = [
+            {
+              classifyName: "一二三四五六七八九十一二三四五六七八九十",
+              id: "1",
+              roles: [
+                {
+                  roleName: "app运营",
+                  id: "001",
+                },
+                {
+                  roleName: "pc运营",
+                  id: "002",
+                },
+                {
+                  roleName: "公众号运营",
+                  id: "003",
+                },
+              ],
+            },
+            {
+              classifyName: "销售",
+              id: "2",
+              roles: [
+                {
+                  roleName: "售前",
+                  id: "011",
+                },
+                {
+                  roleName: "售后",
+                  id: "012",
+                },
+                {
+                  roleName: "售前1",
+                  id: "014",
+                },
+                {
+                  roleName: "售后2",
+                  id: "015",
+                },
+                {
+                  roleName: "售前11",
+                  id: "016",
+                },
+                {
+                  roleName: "一二三四五六七八九十一二三四五六七八九十",
+                  id: "017",
+                },
+              ],
+            },
+            {
+              classifyName: "一二三四五六七八九十一二三四",
+              id: "3",
+              roles: [
+                {
+                  roleName: "app运营",
+                  id: "001",
+                },
+                {
+                  roleName: "pc运营",
+                  id: "002",
+                },
+                {
+                  roleName: "公众号运营",
+                  id: "003",
+                },
+              ],
+            },
+          ];
+          let a0 = [
+            {
+              classifyName: "一二三四五六七八九十一二三四五六七八九十",
+              id: "1",
+              roles: [
+                {
+                  roleName: "app运营",
+                  id: "001",
+                },
+                {
+                  roleName: "pc运营",
+                  id: "002",
+                },
+                {
+                  roleName: "公众号运营",
+                  id: "003",
+                },
+              ],
+            },
+            {
+              classifyName: "一二三四五六",
+              id: "2",
+              roles: [],
+            },
+          ];
+          let res = [a0, a1];
+          this.mockIndex = this.mockIndex ? 0 : 1;
+          this.classifyRole = res[this.mockIndex];
+        },
+      },
+    });
+  </script>
+</html>

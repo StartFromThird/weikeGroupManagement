@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <title>素材管理</title>
+    <link rel="stylesheet" href="./static/libs/element/element.css">
+    <link rel="stylesheet" href="./static/admin/admin.css">
+    <script src="./static/libs/vue.js"></script>
+    <script src="./static/libs/element/element.js"></script>
+    <script src="./static/libs/Sortable.min.js"></script>
+    <script src="./static/libs/vuedraggable.js"></script>
+    <script src="./static/libs/moment.js"></script>
+    <script src="./static/jquery/jquery.js"></script>
+    <script src="./static/libs/api.js"></script>
+</head>
+<body>
+<div id="ListIndex" v-cloak style="height: calc(100vh - 63px);">
+    <div>
+        <div class="btn-box">
+            <div class="display-flex">
+                <div class="btn-common refresh-btn">
+                    <i class="el-icon-refresh" @click="goRefresh"></i>
+                </div>
+                <el-button type="primary" @click="itemOpt('create')" icon="el-icon-plus" size="small">新增</el-button>
+            </div>
+            <div>
+                <el-input placeholder="请输入标题" suffix-icon="el-icon-search" v-model="searchKey">
+                </el-input>
+            </div>
+        </div>
+        <div>
+            <el-table ref="multipleTable" :data="listData" tooltip-effect="dark" style="width: 100%" border
+                      @selection-change="handleSelectionChange" fit="true">
+                <el-table-column type="selection">
+                </el-table-column>
+                <el-table-column label="id" width="80">
+                    <template slot-scope="scope">
+                        <div>[[ scope.row.id]]</div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="素材名称">
+                    <template slot-scope="scope">
+                        <div>[[ scope.row.source_name]]</div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="素材唯一id" :show-overflow-tooltip="true">
+                    <template slot-scope="scope">
+                        <div>[[ scope.row.media_id]]</div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="文件查看">
+                    <template slot-scope="scope">
+                        <el-image
+                         v-if="scope.row.source_type == '图片'"
+                        style="width: 100px; height: 100px"
+                        :src="scope.row.url"
+                        fit="scale-down"></el-image>
+                        <el-button v-else type="text"  @click="download(scope.row.url)" size="mini">下载</el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column label="素材类型">
+                    <template slot-scope="scope">
+                        <div>[[ scope.row.source_type]]</div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="上传时间">
+                    <template slot-scope="scope">
+                        <div>[[ scope.row.upload_time]]</div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="有效期">
+                    <template slot-scope="scope">
+                        <div>[[ scope.row.validity_time]]</div>
+                    </template>
+                </el-table-column>
+                <el-table-column fixed="right" label="操作">
+                    <template slot-scope="scope">
+<!--                        <el-button type="text"  @click="itemOpt('edit',scope.row.id)" size="mini">编辑</el-button>-->
+                        <el-button type="text" @click="itemOpt('del',scope.row.id)" size="mini">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </div>
+    </div>
+    <div class="display-flex" style="justify-content: space-between;margin: 30px 0;">
+        <div class="display-flex">
+            <el-button type="danger"  @click="itemOpt('del',null)"  icon="el-icon-delete" size="small">删除</el-button>
+        </div>
+        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
+                       :page-sizes="[10, 20, 30, 40]" :page-size="limit" layout="total, sizes, prev, pager, next, jumper"
+                       :total="totalPage">
+        </el-pagination>
+    </div>
+</div>
+</body>
+<script>
+    var ListIndex = new Vue({
+        el: "#ListIndex",
+        delimiters: ['[[', ']]'],
+        data() {
+            return {
+                listData: [],
+                multipleSelection: [],
+                searchKey: '',
+                sort: 'id',
+                order: 'desc',
+                offset: 0,
+                limit: 10,
+                totalPage: 0,
+                currentPage: 1,
+                rowDel: false,
+                allDel: false,
+                currentIndex: null,
+            }
+        },
+        created() {
+            this.getListData();
+        },
+        methods: {
+            download(url){
+                window.open(url)
+            },
+            //获取列表数据
+            getListData(){
+                let that = this;
+                Admin.api.ajax({
+                    url: 'cw_sources',
+                    loading: true,
+                    type: 'GET',
+                    data: {
+                        search: that.searchKey,
+                        offset: that.offset,
+                        limit: that.limit,
+                        order:that.sort+' '+that.order,
+                    }
+                }, function (ret, res) {
+                    that.listData = res.data;
+                    that.listData.forEach(i => {
+                        i.showFlag = false;
+                        i.rowDel = false;
+                    });
+                    that.totalPage = res.count;
+                    return false;
+                })
+            },
+            //选项卡切换(需要是使用)
+            tabOpt(tab, event) {
+                this.activeStatus = tab.name
+            },
+            //单行操作按钮
+            itemOpt(type, id) {
+                let that = this;
+                switch (type) {
+                    case 'create':
+                        location.href = "/cw_sources/add";
+                        break;
+                    case 'edit':
+                        location.href = "/cw_sources/update?cw_cw_sources_id=" +id;
+                        break;
+                    case 'del':
+                        let ids;
+                        if (id) {
+                            ids = id;
+                        } else {
+                            let idArr = []
+                            if (that.multipleSelection.length > 0) {
+                                that.multipleSelection.forEach(i => {
+                                    idArr.push(i.id)
+                                })
+                                ids = idArr.join(',')
+                            }
+                        }
+                        if (ids) {
+                            that.$confirm('此操作将删除选项, 是否继续?', '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+                                Admin.api.ajax({
+                                    url: '/cw_sources/delete/' + ids,
+                                    loading: true,
+                                    type: 'POST'
+                                }, function (ret, res) {
+                                    that.$notify({
+                                        title: '成功',
+                                        message: '删除成功',
+                                        type: 'success'
+                                    });
+                                    that.getListData();
+                                    return false;
+                                })
+                            }).catch(() => {
+                                this.$message({
+                                    type: 'info',
+                                    message: '已取消删除'
+                                });
+                            });
+                        }
+                        break;
+                    default:
+                }
+            },
+            //当前选项冒泡
+            popoverOpt(index) {
+                this.currentIndex = index;
+            },
+            //排序
+            sortOrder(sort, order) {
+                this.sort = sort;
+                this.order = order;
+                this.getListData();
+            },
+            //刷新按钮
+            goRefresh() {
+                this.getListData();
+            },
+            //处理已选选项
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            //修改单页数量
+            handleSizeChange(val) {
+                this.offset = 0
+                this.limit = val;
+                this.getListData()
+            },
+            //处理翻页
+            handleCurrentChange(val) {
+                this.offset = (val - 1) * this.limit;
+                this.getListData()
+            },
+        },
+        watch: {
+            //搜索词监听
+            searchKey(newVal, oldVal) {
+                if (newVal != oldVal) {
+                    this.offset = 0;
+                    this.limit = 10;
+                    this.getListData();
+                }
+            },
+        },
+    })
+</script>
+<style>
+    .searchWrap {
+        display: flex;
+        justify-content: space-between;
+    }
+    .searchItem {
+        max-width: 200px;
+    }
+</style>
+</html>
+

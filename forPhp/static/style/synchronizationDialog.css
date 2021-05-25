@@ -1,0 +1,57 @@
+.synchronization-btn {
+  font-size: 14px;
+}
+
+.synchronization-btn i {
+  color: #1773fa;
+}
+
+.synchronization-dialog-main-wrap {
+  position: relative;
+}
+
+.synchronization-dialog-main-wrap .btn-groups {
+  position: absolute;
+  right: 0px;
+  z-index: 1;
+}
+
+.synchronization-dialog-main-wrap .synchronization-list-wrap {
+  height: 60vh;
+  margin: 0 -20px;
+  overflow-y: auto;
+}
+
+.synchronization-dialog-main-wrap .synchronization-list-wrap .list-tip {
+  text-align: center;
+}
+
+.synchronization-dialog-main-wrap .list-item {
+  box-sizing: border-box;
+  padding: 12px 15px;
+  border-bottom: 1px solid #f5f7fa;
+}
+
+.synchronization-dialog-main-wrap .list-item .list-item-head {
+  font-size: 14px;
+  font-weight: 400;
+  color: #171717;
+  line-height: 18px;
+}
+
+.synchronization-dialog-main-wrap .list-item .list-item-main {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 400;
+  color: #999999;
+  line-height: 16px;
+}
+
+.synchronization-dialog-main-wrap .list-item .list-item-main-right {
+  display: flex;
+  min-width: 135px;
+  flex-shrink: 0;
+  flex-grow: 0;
+  justify-content: flex-end;
+}

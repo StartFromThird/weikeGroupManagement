@@ -1,0 +1,107 @@
+.authorityPage {
+  height: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+}
+
+.authorityPage .left {
+  min-width: 220px;
+  margin-right: 30px;
+}
+
+.authorityPage .right {
+  border: 1px solid #dcdfe6;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.authorityPage .right .head {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 8px;
+  border-bottom: 1px solid #dcdfe6;
+  flex-shrink: 1;
+}
+
+.authorityPage .right .head .roleInfo {
+  flex: 1;
+  margin-right: 20px;
+  line-height: 1.2;
+}
+
+.authorityPage .right .head .roleInfo p+p {
+  margin-top: 8px;
+}
+
+.authorityPage .right .setAuthority {
+  flex: 1;
+  box-sizing: border-box;
+  padding: 8px;
+  overflow: auto;
+}
+
+/* 左侧组件内css */
+.roleManagementWrap {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.roleManagementWrap .classifyMain {
+  flex: 1;
+  overflow: auto;
+  border: 1px solid #dcdfe6;
+  border-top: none;
+}
+
+.roleManagementWrap .head {
+  box-sizing: border-box;
+  padding-right: 10px;
+  font-size: 12px;
+  border-radius: 3px;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  background: #ffffff;
+  border: 1px solid #dcdfe6;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.roleManagementWrap .head .addBtn.el-button {
+  left: 10px;
+}
+
+.roleManagementWrap .classifyhead {
+  box-sizing: border-box;
+  padding: 2px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.roleManagementWrap .classifyhead .classifyName {
+  flex: 1;
+}
+
+.roleManagementWrap .roleItem {
+  display: flex;
+  overflow: hidden;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 34px 2px 30px;
+  box-sizing: border-box;
+}
+
+.roleManagementWrap .roleItem .roleName {
+  flex: 1;
+}

@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>营运点架构管理</title>
+    <link rel="stylesheet" href="../../static/libs/element/element.css" />
+    <!-- 主题引入 -->
+    <link rel="stylesheet" href="../../static/elementTheme/theme/index.css" />
+    <link rel="stylesheet" href="../../static/admin/css/admin.css" />
+    <script src="../../static/libs/vue.js"></script>
+    <script src="../../static/libs/element/element.js"></script>
+    <script src="../../static/libs/Sortable.min.js"></script>
+    <script src="../../static/libs/vuedraggable.js"></script>
+    <script src="../../static/libs/moment.js"></script>
+    <!-- <script src="./static/jquery/jquery.js"></script> -->
+    <script src="../../static/libs/api.js"></script>
+    <link rel="stylesheet" href="../../static/style/synchronizationDialog.css" />
+    <script src="../../components/synchronizationDialog.js"></script>
+    <link
+      rel="stylesheet"
+      href="../../static/operationPoint/areaOperation.css"
+    />
+  </head>
+  <body>
+    <style>
+    .left {
+      /* max-width: 400px; */
+    }
+    .el-tree>.el-tree-node{
+      min-width:100%;
+      display: inline-block;
+    }
+    .customTreeNode {
+      /* display: block;
+      background: #ccc; */
+    }
+    /* .customTreeNode .nodeLabel {
+      display: inline-block;
+      max-width: 120px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      vertical-align: text-bottom;
+    } */
+    </style>
+    <div id="areaOperation"></div>
+  </body>
+
+  <script>
+    new Vue({
+      el: "#areaOperation",
+      name: "areaOperation",
+      template: `  <div class="areaOperationPage" style="height: calc(100vh)">
+    <div class="headTypeWrap">
+      <el-radio-group v-model="headType" size="mini">
+        <el-radio-button
+          v-for="item in headTypeArr"
+          :label="item.value"
+          :key="item.value"
+          size="mini"
+        >
+          {{ item.label }}
+        </el-radio-button>
+      </el-radio-group>
+    </div>
+    <div class="mainWrap">
+      <div class="left">
+        <div class="searchInputWrap">
+          <el-input
+            placeholder="请输入节点名称进行搜索"
+            @clear="clearSearchAreaKey"
+            @keyup.enter.native="searchAreaByKey"
+            v-model.trim="keyword"
+            clearable
+            size="mini"
+          >
+          <el-button
+            size="mini"
+            slot="append"
+            icon="el-icon-search"
+            @click="searchAreaByKey"
+          ></el-button>
+          </el-input>
+        </div>
+        <div class="searchResultWrap">
+          <el-tree
+            class="searchTreeWrap"
+            v-show="dataShowType === 'tree'"
+            ref="areaTree"
+            :data="treeData"
+            default-expand-all
+            node-key="id"
+            :props="defaultProps"
+            :highlight-current="true"
+            :expand-on-click-node="false"
+          >
+            <div class="customTreeNode" slot-scope="{ node, data }">
+              <template
+                v-if="node.label && node.label.length > 14"
+              >
+                <el-tooltip
+                  effect="dark"
+                  :content="node.label"
+                  placement="top"
+                >
+                  <span class="nodeLabel" @click="handleNodeClick(data, node)">{{ node.label.slice(0, 14) + '...' }}</span>
+                </el-tooltip>
+              </template>
+              <template v-else>
+                <span class="nodeLabel" @click="handleNodeClick(data, node)">
+                  {{ node.label || '-'}}
+                </span>
+              </template>
+              <span>
+                <el-button
+                  type="text"
+                  size="mini"
+                  @click="() => editTreeNode(data, node)"
+                >
+                  <i class="el-icon-edit"></i>
+                </el-button>
+                <el-button
+                  type="text"
+                  size="mini"
+                  @click="() => appendTreeNode(data)"
+                >
+                  <i class="el-icon-circle-plus-outline"></i>
+                </el-button>
+                <el-button
+                  type="text"
+                  size="mini"
+                  @click="() => removeTreeNode(node, data)"
+                >
+                  <i class="el-icon-remove-outline"></i>
+                </el-button>
+              </span>
+            </div>
+          </el-tree>
+          <div class="searchList" v-show="dataShowType === 'list'">
+            <div
+              class="searchListItem"
+              v-for="item in searchListResult"
+              :key="item.id"
+              @click="selectSearchItem(item)"
+            >
+              <template
+                v-if="item.name && item.name.length > 14"
+              >
+                <el-tooltip
+                  effect="dark"
+                  :content="item.name"
+                  placement="top"
+                >
+                  <span>{{ item.name.slice(0, 14) + '...' }}</span>
+                </el-tooltip>
+              </template>
+              <template v-else>
+                <span>
+                  {{ item.name || '-'}}
+                </span>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="right mainContent">
+        <!--此次新增-->
+        <div class="synchronization-dialog-wrap">
+        <synchronization-dialog :synchronizationType="synchronizationType"></synchronization-dialog>
+        </div>
+        <div class="searchWrap">
+          <div class="searchItemWrap">
+            <div class="searchItem">
+              <el-input
+                placeholder="请输入营运点"
+                v-model="search.operation"
+                clearable
+                size="mini"
+              ></el-input>
+            </div>
+            <div class="searchItem">
+              <el-input
+                placeholder="请输入营运点成员"
+                v-model="search.operationMember"
+                clearable
+                size="mini"
+              ></el-input>
+            </div>
+            <div class="searchItem">
+              <el-input
+                placeholder="请输入EHRcode"
+                v-model="search.EHRcode"
+                clearable
+                size="mini"
+              ></el-input>
+            </div>
+            <div class="searchItem">
+              <el-input
+                placeholder="请输入storecode"
+                v-model="search.storecode"
+                clearable
+                size="mini"
+              ></el-input>
+            </div>
+            <div class="searchItem">
+              <el-input
+                placeholder="请输入营运点编号"
+                v-model="search.operationCode"
+                clearable
+                size="mini"
+              ></el-input>
+            </div>
+          </div>
+        </div>
+        <div class="operateRow spaceBetween">
+          <div class="btns">
+            <el-button size="mini" type="primary" @click="handleBindArea">
+              添加绑定
+            </el-button>
+          </div>
+          <div class="btns">
+            <el-button size="mini" type="primary" @click="getTableData">
+              查询
+            </el-button>
+            <el-button size="mini" type="primary" @click="handleReset">
+              重置
+            </el-button>
+          </div>
+        </div>
+        <div class="tableWrap">
+          <el-table
+            height="calc(100% - 56px)"
+            :data="tableData"
+            style="width: 100%"
+            size="mini"
+          >
+            <el-table-column
+              type="index"
+              width="50"
+              label="编号"
+            ></el-table-column>
+            <el-table-column
+              prop="operation"
+              label="营运点"
+              show-overflow-tooltip
+            ></el-table-column>
+            <el-table-column
+              prop="orgList"
+              label="组织架构"
+              show-overflow-tooltip
+            ></el-table-column>
+            <!-- 下个版本删除 start -->
+            <el-table-column
+              prop="address"
+              label="营运点地址"
+              show-overflow-tooltip
+            ></el-table-column>
+            <el-table-column
+              prop="time"
+              label="营运时间"
+              show-overflow-tooltip
+            ></el-table-column>
+            <!-- 下个版本删除 end -->
+            <el-table-column
+              prop="member"
+              label="营运点成员"
+              show-overflow-tooltip
+            ></el-table-column>
+            <el-table-column fixed="right" label="操作">
+              <template slot-scope="scope">
+                <el-button
+                  size="mini"
+                  type="danger"
+                  @click="handleUnbind(scope.$index, scope.row)"
+                >
+                  解绑
+                </el-button>
+                <!-- <el-button
+                  type="warning"
+                  @click="handleChange(scope.$index, scope.row)"
+                >
+                  变动
+                </el-button> -->
+              </template>
+            </el-table-column>
+          </el-table>
+          <div class="pagination-wrap">
+            <el-pagination
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentPageChange"
+              :current-page="pageNo"
+              :page-sizes="pageSizes"
+              :page-size="pageSize"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total="totalNo"
+            ></el-pagination>
+          </div>
+        </div>
+      </div>
+      <el-dialog
+        :title="dialogTitle"
+        :visible.sync="treeNodeDialogVisible"
+        :before-close="handleCloseDialog"
+      >
+        <el-input
+          v-model="dialogNodeName"
+          maxlength="30"
+          show-word-limit
+          :placeholder="dialogNodeNamePlaceholder"
+        ></el-input>
+        <span slot="footer" class="dialog-footer">
+          <el-button type="primary" @click="handClickDialogOk">确 定</el-button>
+        </span>
+      </el-dialog>
+    </div>
+  </div>`,
+      props: {},
+      data() {
+        return {
+          headType: "",
+          headTypeArr: [],
+          search: {},
+          tableData: [],
+          pageSize: 10,
+          pageNo: 1,
+          pageSizes: [10, 15, 20],
+          totalNo: 0,
+          param: {},
+          // 左侧搜索树相关
+          keyword: "",
+          treeData: [],
+          defaultProps: {
+            children: "children",
+            label: "name",
+          },
+          dataShowType: "tree",
+          searchListResult: [],
+          // 新增编辑弹窗
+          dialogTitle: "",
+          dialogType: "",
+          dialogCurrentData: {},
+          treeNodeDialogVisible: false,
+          dialogNodeNamePlaceholder: "",
+          dialogNodeName: "",
+          // 此次新增
+          // 同步类型
+          synchronizationType: 'areaOperation'
+        };
+      },
+      computed: {},
+      async created() {
+        await this.getHeadTypeArr();
+        this.treeData = await this.getTreeData(0);
+        // 初始化默认选中第一个
+        this.$nextTick(() => {
+          this.$refs.areaTree.setCurrentKey(this.treeData[0].id);
+        });
+        this.getTableData();
+      },
+      mounted() {},
+      watch: {},
+      methods: {
+        handClickDialogOk() {
+          // await 保存 + 刷新tree数据
+          this.treeNodeDialogVisible = false;
+        },
+        handleCloseDialog() {
+          this.treeNodeDialogVisible = false;
+          this.dialogCurrentData = {};
+          this.dialogNodeName = "";
+        },
+        async getTreeData(id) {
+          // 查列表
+          if (!id && this.keyword) {
+            return [
+              {
+                name: `关键词查区域关键词查区域关键词查区域关键词查区域关键词查区域1`,
+                id: 201,
+              },
+              {
+                name: `关键词查区域2`,
+                id: 301,
+              },
+            ];
+          }
+          // 查树下级节点
+          let node = [];
+          const pre = `特别长的区域特别长的区域区域__`;
+          if (id === 0) {
+            node[0] = {
+              name: `${pre}${id + 1}`,
+              id: id + 1,
+              children: [],
+            };
+          } else {
+            // 造子区域数据
+            for (let i = id; i < id + 2; i++) {
+              let o = {
+                name: `${pre}${id}__${id + i}`,
+                id: id + i,
+                children: [],
+              };
+              node.push(o);
+            }
+          }
+          console.log("tree数据=====", node);
+          return node;
+        },
+        async handleNodeClick(data, node) {
+          let key = node.key;
+          let child = await this.getTreeData(key);
+          if (child && child.length) {
+            this.$refs.areaTree.updateKeyChildren(key, child);
+          }
+        },
+        // 左侧树节点内部事件处理
+        editTreeNode(data, node) {
+          this.dialogType = "edit";
+          this.dialogTitle = "编辑子节点";
+          this.dialogNodeNamePlaceholder = "编辑节点名称";
+          this.dialogNodeName = data.name;
+          this.dialogCurrentData = { ...data };
+          this.$set(node.data, 'name', '修改后')
+          // this.treeNodeDialogVisible = true;
+        },
+        appendTreeNode(data) {
+          this.dialogType = "add";
+          this.dialogTitle = "新增子节点";
+          this.dialogNodeNamePlaceholder = "新增节点名称";
+          this.dialogCurrentData = { ...data };
+          this.treeNodeDialogVisible = true;
+        },
+        removeTreeNode(node, data) {},
+        // 左侧树搜索
+        async searchAreaByKey() {
+          if (this.keyword) {
+            this.dataShowType = "list";
+            let list = await this.getTreeData();
+            this.searchListResult = [...list];
+          } else {
+            this.dataShowType = "tree";
+            this.treeData = await this.getTreeData(0);
+          }
+        },
+        selectSearchItem(item) {
+          this.keyword = item.name;
+          this.dataShowType = "tree";
+          // await 区域反查tree
+          this.treeData = [
+            {
+              name: `反向查树1`,
+              id: 201,
+              children: [
+                {
+                  name: `反向查树2`,
+                  id: 202,
+                },
+                {
+                  name: `反向查树3`,
+                  id: 203,
+                },
+              ],
+            },
+          ];
+        },
+        async clearSearchAreaKey() {
+          this.keyword = "";
+          this.dataShowType = "tree";
+          // this.treeData = await this.getTreeData(0)
+        },
+        // 解绑
+        handleUnbind(i, row) {
+          this.$confirm("是否解除绑定的营运点?", "", {
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            type: "warning",
+          })
+            .then(() => {
+              this.$message({
+                type: "success",
+                message: "解绑成功!",
+              });
+              this.getTableData();
+            })
+            .catch(() => {
+              this.$message({
+                type: "info",
+                message: "已取消解绑",
+              });
+            });
+        },
+        // 变动
+        handleChange(i, row) {},
+        // 顶部类型
+        async getHeadTypeArr() {
+          // await ...
+          this.headTypeArr = [
+            {
+              label: "企业微信",
+              value: "1",
+            },
+            {
+              label: "EHR",
+              value: "2",
+            },
+            {
+              label: "EPR",
+              value: "3",
+            },
+          ];
+          this.headType = this.headTypeArr[0].value;
+        },
+        async getTableData() {
+          let param = {
+            pageSize: this.pageSize,
+            pageNo: this.pageNo,
+            type: this.headType,
+            ...this.search,
+          };
+          console.log("列表查询参数===", param);
+          // await ...
+          let tableData = [
+            {
+              operation: "科技园店",
+              address: "上海市普陀区金沙江路 1518 弄",
+              time: "9:00-18:00",
+              member: "AAA,BBB,CC",
+              EHRcode: "EHRcode",
+              storecode: "storecode",
+              status: true,
+              bindOrg: true,
+              orgList: "百果园/大区A",
+            },
+            {
+              operation: "深大店",
+              address: "上海市普陀区金沙江路 1518 弄",
+              time: "9:00-18:00",
+              member: "王小虎,AAA,BBB,CC",
+              EHRcode: "EHRcodeEHRcodeEHRcode",
+              storecode: "storecodestorecodestorecode",
+              status: false,
+              bindOrg: true,
+              orgList: "百果园/大区A/片区B",
+            },
+            {
+              operation: "可删除店",
+              address: "上海市普陀区金沙江路 1518 弄",
+              time: "9:00-18:00",
+              member: "",
+              EHRcode: "EHRcodeEHRcodeEHRcode",
+              storecode: "storecodestorecodestorecode",
+              status: false,
+              bindOrg: false,
+              orgList: "百果园/大区A/片区B",
+            },
+          ];
+          this.tableData = [
+            ...tableData,
+            ...tableData,
+            ...tableData,
+            ...tableData,
+            ...tableData,
+          ];
+          this.totalNo = 22;
+        },
+        // 加绑定
+        handleBindArea() {
+          let node = this.$refs.areaTree.getCurrentNode();
+          console.log("解绑==", node.id, node);
+          location.href = `./bind.html?id=${node.id}`;
+        },
+        // 重置
+        handleReset() {
+          this.search = {};
+          this.getTableData();
+        },
+        handleSizeChange(val) {
+          this.pageSize = val;
+          this.pageNo = 1;
+          this.getTableData();
+        },
+        handleCurrentPageChange(val) {
+          this.pageNo = val;
+          this.getTableData();
+        },
+      },
+    });
+  </script>
+</html>
