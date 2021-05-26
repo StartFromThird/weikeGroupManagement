@@ -77,7 +77,7 @@ Vue.component("role-management", {
             type="text"
             size="mini"
             class="addBtn"
-            @click="editRole(role)"
+            @click="editRole(role, classify)"
           >
             <i class="el-icon-edit"></i>
           </el-button>
@@ -172,13 +172,17 @@ Vue.component("role-management", {
       this.isDialogInput = false;
       this.dialogVisible = true;
     },
-    appendRole(classify) {},
-    editRole(role) {
-      this.dialogTitle = "编辑角色";
-      this.isDialogInput = true;
-      this.dialogInputPlaceholder = "编辑角色名称";
-      this.dialogInputValue = role.name;
-      this.dialogVisible = true;
+    appendRole(classify) {
+      console.log(classify);
+      location.href = `./updateRole.html?type=add&classifyId=${classify.id}&classifyName=${classify.classifyName}`;
+    },
+    editRole(role, classify) {
+      // this.dialogTitle = "编辑角色";
+      // this.isDialogInput = true;
+      // this.dialogInputPlaceholder = "编辑角色名称";
+      // this.dialogInputValue = role.name;
+      // this.dialogVisible = true;
+      location.href = `./updateRole.html?type=edit&classifyId=${classify.id}&classifyName=${classify.classifyName}&roleId=${role.id}`;
     },
     removeRole(role) {
       this.dialogTxt = true;

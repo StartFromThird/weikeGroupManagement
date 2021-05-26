@@ -1,0 +1,153 @@
+<template>
+  <div class="update-role-page">
+    <el-form
+      label-position="right"
+      label-width="80px"
+      ref="form"
+      size="mini"
+      :model="form"
+      :rules="rules"
+    >
+      <el-row :gutter="40">
+        <el-col :md="12">
+          <el-form-item label="角色分类" prop="classifyName">
+            <div>{{ decodeURICompoent(form.classifyName) }}</div>
+          </el-form-item>
+          <el-form-item label="角色名称" prop="name">
+            <el-input
+              v-model.trim="form.name"
+              show-word-limit
+              maxlength="30"
+            ></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :md="12">
+          <el-form-item label="角色描述" prop="description">
+            <el-input
+              v-model.trim="form.description"
+              type="textarea"
+              show-word-limit
+              maxlength="100"
+              :autosize="{ minRows: 4, maxRows: 6 }"
+              placeholder="请输入内容"
+            ></el-input>
+          </el-form-item>
+        </el-col>
+      </el-row>
+    </el-form>
+    <div class="set-role-authority">
+      <role-authority
+        ref="setRoleAuthorityRef"
+        :defaultSetAuthority="authority"
+      ></role-authority>
+    </div>
+    <div class="bottom-group">
+      <el-button size="mini" type="primary" @click="back">返回</el-button>
+      <el-button size="mini" type="primary" @click="save">保存</el-button>
+    </div>
+  </div>
+</template>
+
+<script>
+import roleAuthority from './roleAuthority'
+export default {
+  props: {},
+  data() {
+    return {
+      type: 'add',
+      form: {},
+      baseForm: {},
+      roleDetail: {},
+      rules: {
+        name: [
+          { required: true, message: '请输入角色名称', trigger: 'blur' },
+          {
+            min: 0,
+            max: 30,
+            message: '长度不超过 30 个字',
+            trigger: 'blur'
+          }
+        ]
+      },
+      authority: []
+    }
+  },
+  computed: {},
+  created() {
+    this.initPage()
+  },
+  mounted() {},
+  watch: {},
+  methods: {
+    async initPage() {
+      this.baseForm.classifyName = this.getQueryVariable('classifyName') || '-'
+      if (this.getQueryVariable('type')) {
+        this.type = this.getQueryVariable('type') || 'add'
+      }
+      if (this.type === 'add') {
+        this.baseForm = {
+          name: '',
+          description: '',
+          classifyName: this.getQueryVariable('classifyName') || '-'
+        }
+        this.form = { ...this.baseForm }
+        this.authority = []
+      } else if (this.type === 'edit') {
+        await this.getRoleDetail()
+      }
+    },
+    async getRoleDetail() {
+      let roleId = this.getQueryVariable('roleId')
+      // mock roleId 
+      this.baseForm = {
+        name: 'Lorem ipsum dolor',
+        description: 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. ',
+        classifyName: this.getQueryVariable('classifyName') || '-'
+      }
+      this.authority = ["5", "6"];
+      this.form = { ...this.baseForm };
+    },
+    save () {
+      console.log(this.form);
+      console.log(this.$refs.setRoleAuthorityRef.$refs.authorityTree.getCheckedKeys());
+    },
+    back () {
+
+    },
+    getQueryVariable(variable) {
+      var query = decodeURI(window.location.search.substring(1));
+      let href = decodeURI(window.location.href);
+      console.log("query===",query)
+      console.log("href===", href)
+      if (!query && href.split('?').length > 1) {
+        query = href.substring(href.indexOf('?') + 1)
+      }
+      var vars = query.split('&')
+      for (var i = 0; i < vars.length; i++) {
+        var pair = vars[i].split('=')
+        if (pair[0] == variable) {
+          return pair[1]
+        }
+      }
+      return false
+    }
+  },
+  components: {
+    roleAuthority
+  }
+}
+</script>
+
+<style scoped lang="scss">
+.update-role-page {
+  padding: 20px;
+  box-sizing: border-box;
+  .set-role-authority {
+    min-height: calc(100vh - 380px);
+  } 
+  .bottom-group {
+    display: flex;
+    justify-content: center;
+  }
+}
+</style>
