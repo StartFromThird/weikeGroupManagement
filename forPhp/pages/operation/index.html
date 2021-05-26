@@ -13,6 +13,10 @@
     <!-- <script src="./static/jquery/jquery.js"></script> -->
     <script src="../../static/libs/api.js"></script>
     <link rel="stylesheet" href="../../static/operationPoint/operationPoint.css" />
+    <!-- 主题引入 -->
+    <link rel="stylesheet" href="../../static/elementTheme/theme/index.css" />
+    <link rel="stylesheet" href="../../static/style/synchronizationDialog.css" />
+    <script src="../../components/synchronizationDialog.js"></script>
   </head>
   <body>
     <div
@@ -64,19 +68,17 @@
                 size="mini"
               ></el-input>
             </div>
-            <div class="btns">
-              <el-button
-                type="primary"
+            <div class="searchItem">
+              <span class="searchItemLabel">同步差异:</span>
+              <el-select
+                v-model="search.diffStatus"
+                placeholder="请选择"
+                clearable
                 size="mini"
-                @click="getTableData"
-                >查询</el-button
               >
-              <el-button
-                type="primary"
-                size="mini"
-                @click="handleReset"
-                >重置</el-button
-              >
+                <el-option label="是" value="1"></el-option>
+                <el-option label="否" value="2"></el-option>
+              </el-select>
             </div>
           </div>
         </div>
@@ -97,6 +99,24 @@
             >
             <el-button type="text" size="mini" @click="handleDownload"
               >点击下载导入模板</el-button
+            >
+            <synchronization-dialog
+              style="margin-left: 20px;"
+              :synchronizationType="synchronizationType"
+            ></synchronization-dialog>
+          </div>
+          <div class="btns">
+            <el-button
+              type="primary"
+              size="mini"
+              @click="getTableData"
+              >查询</el-button
+            >
+            <el-button
+              type="primary"
+              size="mini"
+              @click="handleReset"
+              >重置</el-button
             >
           </div>
         </div>
@@ -245,6 +265,7 @@
           totalNo: 0,
           param: {},
           uploadDialogVisible: false,
+          synchronizationType: 'operation'
         };
       },
       computed: {},

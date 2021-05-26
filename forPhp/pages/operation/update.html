@@ -50,10 +50,10 @@
               :inactive-value="0"
             ></el-switch>
           </el-form-item>
-          <el-form-item label="EHRcode">
+          <el-form-item label="EHRcode" prop="EHRcode">
             <el-input v-model.trim="form.EHRcode"></el-input>
           </el-form-item>
-          <el-form-item label="storecode">
+          <el-form-item label="门店编码" prop="storecode">
             <el-input v-model.trim="form.storecode"></el-input>
           </el-form-item>
         </el-col>
@@ -116,6 +116,16 @@
             ></el-time-picker>
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row class="tag-wrap">
+        <el-form-item label="所在组织架构:" v-if="type === 'edit'">
+          <template v-if="form.belongList && form.belongList.length">
+            <el-tag v-for="item in form.belongList" :key="item.id" size="mini">
+              {{ item.name }}
+            </el-tag>
+          </template>
+          <span v-else>-</span>
+        </el-form-item>
       </el-row>
       <el-row>
         <el-col>
@@ -216,8 +226,11 @@
                 trigger: "blur",
               },
             ],
-            time: [
-              { required: true, message: "请输入营运时间", trigger: "change" },
+            EHRcode: [
+              { required: true, message: "请输入EHRcode", trigger: "change" },
+            ],
+            storecode: [
+              { required: true, message: "请输入门店编码", trigger: "change" },
             ],
           },
           selectedMembers: [],
@@ -434,10 +447,39 @@
                 new Date(2016, 9, 10, 8, 30),
                 new Date(2016, 9, 10, 22, 30),
               ],
+              belongList: []
             };
             this.form = { ...this.baseForm };
           } else {
             // 依据路由id 请求营运点数据 ...
+            this.form = {
+              operation: "111",
+              status: 1,
+              EHRcode: "222",
+              storecode: "333",
+              provinceValue: "",
+              cityValue: "",
+              areaValue: "",
+              address: "",
+              time: [
+                new Date(2016, 9, 10, 8, 30),
+                new Date(2016, 9, 10, 22, 30),
+              ],
+              belongList: [
+                {
+                  name: "百果园集团/大区A/片区A",
+                  id: "111",
+                },
+                {
+                  name: "百果园集团/大区A/片区B",
+                  id: "112",
+                },
+                {
+                  name: "百果园集团/大区A/片区C",
+                  id: "123",
+                },
+              ]
+            }
           }
         },
         getQueryVariable(variable) {
