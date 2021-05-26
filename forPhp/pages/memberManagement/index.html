@@ -50,7 +50,7 @@
       justify-content: space-between;
     }
 
-    .memberManagementPage .mainContent .tableWrap /deep/.el-table .diff-row {
+    .memberManagementPage .mainContent .tableWrap .el-table .diff-row {
       background: oldlace;
     }
 
@@ -226,7 +226,6 @@
       methods: {
         // table背景颜色区分
         tableRowClassName({ row, rowIndex }) {
-          console.log("diff===", row.diffStatus, row.diffStatus === "2");
           if (row.diffStatus === "2") {
             return "diff-row";
           }

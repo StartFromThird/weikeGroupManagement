@@ -82,7 +82,9 @@
 .wBtn.el-button {
   background: rgba(230, 162, 60, 1);
 }
-
+.operationPointWrap .mainContent .tableWrap .el-table .diff-row {
+  background: oldlace;
+}
 /* 营运点编辑 */
 .operationPointUpdateWrap {
   padding: 20px;

@@ -121,7 +121,13 @@
           </div>
         </div>
         <div class="tableWrap">
-          <el-table :data="tableData" height="calc(100% - 56px)" style="width: 100%" size="mini">
+          <el-table 
+            :data="tableData" 
+            height="calc(100% - 56px)" 
+            style="width: 100%" 
+            size="mini"
+            :row-class-name="tableRowClassName"
+          >
             <el-table-column type="index" width="50" label="编号">
             </el-table-column>
             <el-table-column
@@ -303,6 +309,11 @@
           //移除
           setTimeout(() => document.body.removeChild(a), 1000);
         },
+        tableRowClassName({ row, rowIndex }) {
+          if (row.diffStatus === "2") {
+            return "diff-row";
+          }
+        },
         // 模板
         getTableData() {
           let param = {
@@ -322,6 +333,7 @@
               storecode: "storecode",
               status: true,
               bindOrg: true,
+              diffStatus: '2'
             },
             {
               id: '102',
@@ -333,6 +345,7 @@
               storecode: "storecodestorecodestorecode",
               status: false,
               bindOrg: true,
+              diffStatus: '2'
             },
             {
               id: '103',
@@ -344,6 +357,7 @@
               storecode: "storecodestorecodestorecode",
               status: false,
               bindOrg: false,
+              diffStatus: '1'
             },
             {
               id: '104',
