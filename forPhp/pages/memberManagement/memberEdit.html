@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>成员编辑</title>
+    <link rel="stylesheet" href="../../static/libs/element/element.css" />
+    <link rel="stylesheet" href="../../static/admin/css/admin.css" />
+    <script src="../../static/libs/vue.js"></script>
+    <script src="../../static/libs/element/element.js"></script>
+    <script src="../../static/libs/Sortable.min.js"></script>
+    <script src="../../static/libs/vuedraggable.js"></script>
+    <script src="../../static/libs/moment.js"></script>
+    <!-- <script src="./static/jquery/jquery.js"></script> -->
+    <script src="../../static/libs/api.js"></script>
+    <!-- 主题引入 -->
+    <link rel="stylesheet" href="../../static/elementTheme/theme/index.css" />
+    <link
+      rel="stylesheet"
+      href="../../static/style/synchronizationDialog.css"
+    />
+    <script src="../../components/synchronizationDialog.js"></script>
+  </head>
+  <style>
+    .memberUpdate {
+      padding: 20px;
+    }
+
+    .memberUpdate .head {
+      text-align: center;
+      font-weight: 500;
+      font-style: normal;
+      font-size: 20px;
+      padding-bottom: 30px;
+    }
+
+    .memberUpdate .info .el-input {
+      max-width: 400px;
+    }
+
+    .memberUpdate .info .el-tag + .el-tag {
+      margin-left: 10px;
+    }
+
+    .memberUpdate .bottom-group {
+      margin-top: 40px;
+      display: flex;
+      justify-content: center;
+    }
+  </style>
+  <body>
+    <div class="memberUpdate" id="memberEdit">
+      <div class="head">成员信息</div>
+      <div class="info">
+        <el-form
+          ref="memberForm"
+          label-width="100px"
+          label-position="right"
+          :model="info"
+          :rules="rules"
+          size="mini"
+        >
+          <el-form-item label="成员编号:">
+            <el-input
+              v-model="info.id"
+              placeholder="请输入"
+              clearable
+              disabled
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="姓名:" prop="name">
+            <el-input
+              v-model="info.name"
+              placeholder="请输入"
+              clearable
+              show-word-limit
+              maxlength="10"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="职位:">
+            <el-input
+              v-model="info.address"
+              placeholder="请输入"
+              clearable
+              disabled
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="节点:">
+            <el-input
+              v-model="info.orgList"
+              placeholder="请输入"
+              clearable
+              disabled
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="手机号码:">
+            <el-input
+              v-model="info.mobile"
+              placeholder="请输入"
+              clearable
+              disabled
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="邮箱:">
+            <el-input
+              v-model="info.eMail"
+              placeholder="请输入"
+              clearable
+              disabled
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="状态:">
+            <el-select v-model="info.status" placeholder="请选择" size="mini">
+              <el-option label="在职" :value="true"></el-option>
+              <el-option label="离职" :value="false"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="所在组织架构:">
+            <el-tag v-for="item in info.belongList" :key="item.id" size="mini">
+              {{ item.name }}
+            </el-tag>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div class="bottom-group">
+        <el-button size="mini" type="primary" @click="back">返回</el-button>
+        <el-button size="mini" type="primary" @click="save">保存</el-button>
+      </div>
+    </div>
+  </body>
+
+  <script>
+    new Vue({
+      el: "#memberEdit",
+      name: "memberEdit",
+      props: {},
+      data() {
+        return {
+          info: {},
+          rules: {
+            name: [
+              { required: true, message: "请输入姓名", trigger: "blur" },
+              {
+                min: 0,
+                max: 10,
+                message: "长度不超过 10 个字",
+                trigger: "blur",
+              },
+            ],
+          },
+        };
+      },
+      computed: {},
+      created() {
+        let id = this.getQueryVariable("id");
+        this.getMemberDetail(id);
+      },
+      mounted() {},
+      watch: {},
+      methods: {
+        back() {},
+        save() {
+          this.$refs["memberForm"].validate((valid) => {
+            if (valid) {
+              console.log(this.info);
+            } else {
+              console.log("校验失败");
+              return false;
+            }
+          });
+        },
+        getMemberDetail(id) {
+          console.log(id);
+          this.info = {
+            id: "001",
+            name: "科技园店2",
+            address: "上海市普陀区金沙江路 1518 弄",
+            orgList: "百果园集团/百果园集团EHR/百果园/百果科技/需求规划部",
+            mobile: "19999999999",
+            eMail: "abc@163.com",
+            status: true,
+            bindOrg: true,
+            diffStatus: "2",
+            belongList: [
+              {
+                name: "百果园集团/大区A/片区A",
+                id: "111",
+              },
+              {
+                name: "百果园集团/大区A/片区B",
+                id: "112",
+              },
+              {
+                name: "百果园集团/大区A/片区C",
+                id: "123",
+              },
+            ],
+          };
+        },
+        getQueryVariable(variable) {
+          var query = decodeURI(window.location.search.substring(1));
+          let href = decodeURI(window.location.href);
+          if (!query && href.split("?").length > 1) {
+            query = href.substring(href.indexOf("?") + 1);
+          }
+          var vars = query.split("&");
+          for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] == variable) {
+              return pair[1];
+            }
+          }
+          return false;
+        },
+      },
+    });
+  </script>
+</html>
