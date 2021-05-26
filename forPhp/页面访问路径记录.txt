@@ -1,0 +1,10 @@
+成员管理：/memberManagement/index.html
+成员信息：/memberManagement/memberEdit.html?id=001
+
+营运点管理：/operation/index.html
+营运点新增编辑：/operation/update.html?type=edit
+
+组织架构营运点管理: /areaOperation/index.html
+
+角色管理：/authority/index.html  （没有原页面，主要修改左侧组件点击事件）
+角色新增编辑：/updateRole.html?type=edit&classifyId=2
