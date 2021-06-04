@@ -18,6 +18,7 @@ Vue.component("synchronization-dialog", {
     modal-append-to-body
     append-to-body
     lock-scroll
+    title="同步内容"
     :destroy-on-close="true"
     @open="dialogOpen"
     @closed="dialogClosed"

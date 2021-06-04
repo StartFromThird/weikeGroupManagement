@@ -5,6 +5,9 @@
 .synchronization-btn i {
   color: #1773fa;
 }
+.synchronization-dialog .el-dialog__body {
+  padding-top: 0;
+}
 
 .synchronization-dialog-main-wrap {
   position: relative;
