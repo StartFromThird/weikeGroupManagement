@@ -101,7 +101,9 @@
   padding: 2px 34px 2px 30px;
   box-sizing: border-box;
 }
-
+.roleManagementWrap .roleItem.active-role-item {
+  background-color: #F5F7FA;
+}
 .roleManagementWrap .roleItem .roleName {
   flex: 1;
 }

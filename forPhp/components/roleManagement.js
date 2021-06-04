@@ -57,7 +57,7 @@ Vue.component("role-management", {
           </el-button>
         </div>
       </div>
-      <div class="roleItem" v-for="role in classify.roles" :key="role.id">
+      <div class="roleItem" v-for="role in classify.roles" :key="role.id" :class="[activeRoleId === role.id ? 'active-role-item' : '']">
         <div class="roleName" @click="handleClickRole(role)">
           <template v-if="role.roleName && role.roleName.length > 14">
             <el-tooltip
@@ -132,6 +132,7 @@ Vue.component("role-management", {
       isDialogInput: false,
       dialogTxt: "",
       dialogInputMaxLength: "30",
+      activeRoleId: ""
     };
   },
   computed: {
@@ -144,6 +145,7 @@ Vue.component("role-management", {
   watch: {},
   methods: {
     handleClickRole(role) {
+      this.activeRoleId = role.id;
       this.$emit("handleClickRole", role);
     },
     appendClassify() {
