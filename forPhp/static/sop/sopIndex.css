@@ -1,0 +1,66 @@
+.main-content.sop-index-page {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+.main-content.sop-index-page .w100 {
+  width: 100%;
+}
+
+.main-content.sop-index-page .color-warning {
+  color: #ff3b34;
+}
+
+.main-content.sop-index-page .color-primary {
+  color: #1773fa;
+}
+
+.main-content.sop-index-page .flex-r-betwween {
+  display: flex;
+  justify-content: space-between;
+}
+
+.main-content.sop-index-page .search-wrap {
+  padding: 20px 0;
+}
+
+.main-content.sop-index-page .table-header-cell-style {
+  background: #f2f6fc;
+}
+
+.main-content.sop-index-page .search-wrap .left {
+  display: flex;
+  align-items: center;
+}
+
+.main-content.sop-index-page .search-wrap .add-info {
+  width: 17px;
+  height: 17px;
+  margin-left: 8px;
+}
+
+.main-content.sop-index-page .search-wrap .add-info img {
+  width: 100%;
+  height: 100%;
+}
+
+.main-content.sop-index-page .search-wrap .el-form-item--mini.el-form-item {
+  margin-bottom: 12px;
+}
+
+.main-content.sop-index-page .table-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  justify-content: space-between;
+}
+
+.main-content.sop-index-page .pagination-wrap {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 0;
+}

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SOP列表</title>
+    <link rel="stylesheet" href="../../static/libs/element/element.css" />
+    <link rel="stylesheet" href="../../static/admin/css/admin.css" />
+    <script src="../../static/libs/vue.js"></script>
+    <script src="../../static/libs/element/element.js"></script>
+    <link rel="stylesheet" href="../../static/sop/sopIndex.css" />
+    <!-- 主题引入 -->
+    <link rel="stylesheet" href="../../static/elementTheme/theme/index.css" />
+  </head>
+  <body>
+    <div id="sopIndex"></div>
+  </body>
+
+  <script>
+    const template = `<div class="sop-index-page main-content" style="min-height: 100vh;">
+    <div class="search-wrap">
+      <div class="search-items-wrap">
+        <el-form size="mini" label-position="left" label-width="84px">
+          <el-row :gutter="18">
+            <el-col :sm="24" :md="12" :lg="12">
+              <el-form-item label="创建人：">
+                <el-input
+                  placeholder="请选择创建人"
+                  v-model="search.author"
+                  clearable
+                ></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :sm="24" :md="12" :lg="12">
+              <el-form-item label="所属类型：">
+                <el-select
+                  class="w100"
+                  v-model="search.type"
+                  placeholder="消息类型"
+                  clearable
+                >
+                  <template v-for="(item, index) in typeOptions">
+                    <el-option
+                      :label="item"
+                      value="shanghai"
+                      :key="index + item"
+                    ></el-option>
+                  </template>
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :sm="24" :md="12" :lg="12">
+              <el-form-item label="创建时间：">
+                <el-date-picker
+                  class="w100"
+                  v-model="search.createdT"
+                  type="datetimerange"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                ></el-date-picker>
+              </el-form-item>
+            </el-col>
+            <el-col :sm="24" :md="12" :lg="12">
+              <el-form-item label="发送时间：">
+                <el-date-picker
+                  class="w100"
+                  v-model="search.sentT"
+                  type="datetimerange"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                ></el-date-picker>
+              </el-form-item>
+            </el-col>
+            <el-col :sm="24" :md="12" :lg="12">
+              <el-form-item label="SOP名称：">
+                <el-input
+                  placeholder="请输入搜索的SOP名称"
+                  v-model="search.name"
+                  clearable
+                  maxlength="30"
+                  show-word-limit
+                ></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :sm="15" :md="8" :lg="8">
+              <el-form-item label="文本内容：">
+                <el-input
+                  placeholder="请输入搜索的消息内容"
+                  v-model="search.content"
+                  clearable
+                  maxlength="15"
+                  show-word-limit
+                ></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :sm="8" :md="4" :lg="4">
+              <el-form-item label="附件类型：">
+                <el-select
+                  v-model="search.enclosure_type"
+                  placeholder="请选择附件类型"
+                  clearable
+                  style="min-width: 80px;"
+                >
+                  <template v-for="(item, index) in typeOptions">
+                    <el-option
+                      :label="item"
+                      value="shanghai"
+                      :key="index + item"
+                    ></el-option>
+                  </template>
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+      </div>
+      <div class="btns-wrap flex-r-betwween">
+        <div class="left">
+          <el-button type="success" size="mini" @click="handleAdd">
+            + 新建企业群发SOP
+          </el-button>
+          <el-popover
+            placement="right"
+            title="简要说明！"
+            width="240"
+            trigger="hover"
+            content="创建企业群发SOP，业务KPI可创建实验组选择创建并配置和对照组产生的数据比对！"
+          >
+            <div slot="reference" class="add-info">
+              <img src="../../static/image/info.png" />
+            </div>
+          </el-popover>
+        </div>
+        <div class="right search-btns">
+          <el-button size="mini">重置</el-button>
+          <el-button size="mini" type="primary">查询</el-button>
+        </div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <el-table
+        height="calc(100% - 56px)"
+        :data="tableData"
+        style="width: 100%"
+        :header-cell-style="{ background: '#F2F6FC' }"
+        size="mini"
+        border
+        tooltip-effect="light"
+      >
+        <el-table-column
+          prop="name"
+          label="SOP名称"
+          width="145"
+          show-overflow-tooltip
+        ></el-table-column>
+        <el-table-column
+          prop="author"
+          label="创建人"
+          width="94"
+          show-overflow-tooltip
+        ></el-table-column>
+        <el-table-column
+          prop="typeN"
+          label="所属类型"
+          show-overflow-tooltip
+        ></el-table-column>
+        <el-table-column
+          prop="createdT"
+          label="创建时间"
+          show-overflow-tooltip
+        ></el-table-column>
+        <el-table-column
+          prop="sentT"
+          label="发送时间"
+          show-overflow-tooltip
+        ></el-table-column>
+        <el-table-column width="228" label="消息内容" show-overflow-tooltip>
+          <template slot-scope="scope">
+            <div class="color-primary">{{ scope.row.content }}</div>
+          </template>
+        </el-table-column>
+        <el-table-column fixed="right" label="操作" width="100">
+          <template slot-scope="scope">
+            <el-button
+              size="mini"
+              type="text"
+              @click="handleDetail(scope.$index, scope.row)"
+              v-if="scope.row.isActive"
+            >
+              结果查看
+            </el-button>
+            <template v-else>
+              <el-button
+                size="mini"
+                type="text"
+                @click="handleEdit(scope.$index, scope.row)"
+              >
+                编辑
+              </el-button>
+              <el-button
+                size="mini"
+                type="text"
+                class="color-warning"
+                @click="handleDel(scope.$index, scope.row)"
+              >
+                删除
+              </el-button>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div class="pagination-wrap">
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentPageChange"
+          :current-page="pageNo"
+          :page-sizes="pageSizes"
+          :page-size="pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="totalNo"
+        ></el-pagination>
+      </div>
+    </div>
+  </div>
+    `;
+    new Vue({
+      template,
+      el: "#sopIndex",
+      name: "sopIndex",
+      props: {},
+      data() {
+        return {
+          search: {
+            author: "",
+            type: "",
+            name: "",
+            content: "",
+          },
+          info1:
+            "简要说明：在这里创建企业群发SOP，可进行多个业务KPI创建选择并配置，即可查看自定义指标产生的数据比对",
+          typeOptions: [
+            "全部企业群发消息类型",
+            "群发消息给客户",
+            "群发消息到企业的客户群",
+          ],
+          tableData: [],
+          pageSize: 10,
+          pageNo: 1,
+          pageSizes: [10, 15, 20],
+          totalNo: 0,
+          param: {},
+        };
+      },
+      computed: {},
+      created() {
+        this.getTableData();
+      },
+      mounted() {},
+      watch: {},
+      methods: {
+        handleDel(i, r) {
+          this.$confirm("此操作将永久删除该SOP, 是否继续?", "提示", {
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            type: "warning",
+          })
+            .then(() => {
+              // 请求回调里写
+              this.$message({
+                type: "success",
+                message: "删除成功!",
+              });
+              this.getTableData();
+            })
+            .catch(() => {
+              this.$message({
+                type: "info",
+                message: "已取消删除",
+              });
+            });
+        },
+        handleDetail(i, r) {
+          // this.$router.push({
+          //   path: "/sopEdit",
+          //   query: {
+          //     type: "detail",
+          //     id: r.id,
+          //   },
+          // });
+          location.href = `./sopEdit.html?type=detail&id=${r.id}`;
+        },
+        handleEdit(i, r) {
+          // this.$router.push({
+          //   path: "/sopEdit",
+          //   query: {
+          //     type: "edit",
+          //     id: r.id,
+          //   },
+          // });
+          location.href = `./sopEdit.html?type=edit&id=${r.id}`;
+        },
+        handleAdd() {
+          // this.$router.push({
+          //   path: "/sopEdit",
+          //   query: {
+          //     type: "add",
+          //   },
+          // });
+          location.href = `./sopEdit.html?type=add`;
+        },
+        async getTableData() {
+          let param = {
+            pageSize: this.pageSize,
+            pageNo: this.pageNo,
+            ...this.search,
+          };
+          console.log("列表查询参数===", param);
+          // await ...
+          let tableData = [];
+          // mock data start
+          let tableDataItem = {
+            name: "一二三四五六七八九十",
+            author: "一二三四五六",
+            typeN: "群发消息给客户",
+            createdT: "2021-05-20 13:20:13",
+            sentT: "2021-05-20 13:20:13",
+            content: "【图片】【视频】【小程序】【网页】",
+            isActive: false,
+          };
+          for (let i = 0; i < param.pageSize; i++) {
+            let o = {
+              ...tableDataItem,
+              isActive: i % 2 === 0,
+              id: `${param.pageNo}-${i}`,
+            };
+            tableData.push(JSON.parse(JSON.stringify(o)));
+          }
+          this.tableData = [...tableData];
+          this.totalNo = 22;
+          // mock data end
+        },
+        // 重置
+        handleReset() {
+          this.search = {};
+          this.getTableData();
+        },
+        handleSizeChange(val) {
+          this.pageSize = val;
+          this.pageNo = 1;
+          this.getTableData();
+        },
+        handleCurrentPageChange(val) {
+          this.pageNo = val;
+          this.getTableData();
+        },
+      },
+    });
+  </script>
+</html>
