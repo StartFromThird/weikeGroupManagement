@@ -16,6 +16,8 @@
     <script src="../../components/addRoleDialog.js"></script>
     <link rel="stylesheet" href="../../static/style/addTagDialog.css" />
     <script src="../../components/addTagDialog.js"></script>
+    <link rel="stylesheet" href="../../static/style/addMemberDialog.css" />
+    <script src="../../components/addMemberDialog.js"></script>
   </head>
   <body>
     <div id="sopEdit"></div>
@@ -152,7 +154,6 @@
           >
             <el-form-item
               label="选择需要接收的客户"
-              prop="option_tag_F"
               class="txtRedLabel"
             >
               <add-tag-dialog
@@ -174,27 +175,23 @@
           <el-col :sm="24" :md="12" :lg="12">
             <el-form-item
               label="选择需要发送的企微成员（至少选择一个条件）"
-              prop="option_department_role_F"
               class="txtRedLabel"
             >
               <div class="flex-r-space-between">
-                <el-input
-                  class="w48"
-                  v-model="info.option_department_F"
-                  placeholder="企微成员（发送人）"
-                  suffix-icon="el-icon-caret-bottom"
-                  readonly
-                ></el-input>
-                <el-input
-                  class="w48"
-                  v-model="info.option_role_F"
-                  placeholder="角色"
-                  suffix-icon="el-icon-caret-bottom"
-                  readonly
-                  @focus="handleClickRole"
-                ></el-input>
-              </div>
-              <div class="flex-r-space-between">
+                <add-member-dialog 
+                  ref="addMemberDialogRef"
+                  :writeBackSelectedMemberOrg="writeBackSelectedMemberOrg"
+                  @confirm="confirmChooseMember"
+                  >
+                  <el-input
+                    class="w48"
+                    v-model="info.option_department_F"
+                    placeholder="企微成员（发送人）"
+                    suffix-icon="el-icon-caret-bottom"
+                    readonly
+                    @focus="handleClickMember"
+                  ></el-input>
+                </add-member-dialog>
                 <add-role-dialog
                   ref="addRoleDialogRef"
                   title="选择要发送的角色"
@@ -214,9 +211,9 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <div class="under-tip" v-if="roleStr || tagStr">
+        <div class="under-tip" v-if="roleStr || tagStr || memberOrgStr">
           <span class="grey-txt" style="margin-bottom: 20px">
-            将发送消息给大区 A，赏燕君，国进…且满足“{{ roleStr }}”等 xx
+            将发送消息给{{ memberOrgStr }}…且满足“{{ roleStr }}”等 {{writeBackSelectedMemberOrg.length}}
             位企微成员所添加的满足&nbsp;“{{ tagStr }}”&nbsp;等标签的客户。
           </span>
         </div>
@@ -356,7 +353,7 @@
               </div>
             </el-tab-pane>
           </el-tabs>
-          <div class="add-tab-right">
+          <div class="add-tab-right" v-show="info.chat_type === 'SINGLE'">
             <el-button type="primary" @click="addContentTryGroup" size="mini">
               + 新建内容对照组
             </el-button>
@@ -431,10 +428,10 @@
             </el-button>
           </el-popover>
           <!-- 客户触达比例展示 -->
-          <div class="step-title touch-rate-title">
+          <div class="step-title touch-rate-title" v-show="info.chat_type === 'SINGLE'">
             <div class="step-text">配置客户触达比例</div>
           </div>
-          <div class="touch-rate-wrap">
+          <div class="touch-rate-wrap" v-show="info.chat_type === 'SINGLE'">
             <div class="touch-rate-row flex-r-space-between">
               <div class="touch-rate-row-left">客户数量</div>
               <div class="touch-rate-row-right">
@@ -776,6 +773,9 @@
           // 标签
           tagStr: "",
           writeBackChooseTag: [],
+          // 选人
+          memberOrgStr: "",
+          writeBackSelectedMemberOrg: [],
           rules: {
             name: [
               {
@@ -1080,7 +1080,7 @@
         },
         confirmChooseTag(r) {
           let labelKey = "name";
-          this.tagStr = r.map((ele) => ele[`${labelKey}`]).join(",");
+          this.tagStr = r.map((ele) => ele[`${labelKey}`]).join("，") || "";
           this.writeBackChooseTag = r;
           this.$refs.addTagDialogRef.dialogVisible = false;
           console.log("已选择标签=====", r, this.tagStr);
@@ -1090,10 +1090,28 @@
           this.$refs.addRoleDialogRef.dialogVisible = true;
         },
         confirmChooseRole(r) {
-          this.roleStr = r.map((ele) => ele.role).join(",");
+          this.roleStr = r.map((ele) => ele.role).join("，") || "";
           this.writeBackChooseRole = r;
           this.$refs.addRoleDialogRef.dialogVisible = false;
           console.log("已选择角色=====", r, this.roleStr);
+        },
+        // 选人确定
+        handleClickMember() {
+          this.$refs.addMemberDialogRef.dialogVisible = true;
+        },
+        confirmChooseMember(m) {
+          let confirmMemberOrg = JSON.parse(JSON.stringify(m)).map((ele) => {
+            return {
+              ...ele,
+              name: ele.member_name || ele.department_name,
+            };
+          });
+          this.writeBackSelectedMemberOrg = JSON.parse(
+            JSON.stringify(confirmMemberOrg)
+          );
+          this.memberOrgStr =
+            confirmMemberOrg.map((ele) => ele.name).join("，") || "";
+          this.$refs.addMemberDialogRef.dialogVisible = false;
         },
         handleRemoveTab(targetName) {
           let baseLen = this.group_list.length;
@@ -1269,6 +1287,10 @@
             ...JSON.parse(JSON.stringify(this.base_group_list_item)),
             name: "未触达对照组",
           };
+          this.info = {
+            chat_type: "SINGLE",
+            receive_type: 1,
+          }
           // 角色回显
           this.writeBackChooseRole = [
             {
@@ -1295,6 +1317,36 @@
           ];
           this.tagStr =
             this.writeBackChooseTag.map((ele) => ele.name).join("，") || "";
+          // 人组织回显
+          let tableData = [
+            {
+              parent_name: "父节点_0",
+              roles: [17, 18],
+              department_name: "部门节点__1",
+              id: 1,
+              isOrg: true,
+              isLeaf: false,
+            },
+            {
+              member_name: "成员节点__3__7",
+              id: 7,
+              isOrg: false,
+              isLeaf: true,
+              department_name: "成员节点__3__7",
+            },
+          ];
+          this.writeBackSelectedMemberOrg = this.formatTableData(tableData);
+          this.memberOrgStr =
+            this.writeBackSelectedMemberOrg.map((ele) => ele.name).join("，") ||
+            "";
+        },
+        formatTableData(tableData) {
+          return JSON.parse(JSON.stringify(tableData)).map((ele) => {
+            return {
+              ...ele,
+              name: ele.member_name || ele.department_name,
+            };
+          });
         },
         cancelSaveSOP() {
           this.$confirm("当前编辑的内容未保存，确定退出吗？", "提示", {

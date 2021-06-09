@@ -70,6 +70,7 @@ Vue.component("select-member-org-tab", {
                 <span class="tag-item-left-txt">{{ item.isOrg ? item.department_name : item.member_name }}</span>
               </el-tooltip>
             </div>
+            <!-- v-if="tag.isOrg" 现在要求都显示上级 -->
             <div style="max-width: 30%;
               overflow: hidden;
               text-overflow: ellipsis;
@@ -78,7 +79,6 @@ Vue.component("select-member-org-tab", {
                 effect="dark"
                 :content="item.parent_name"
                 placement="top"
-                v-if="item.isOrg"
               >
                 <span class="tag-item-parent-name">{{ item.parent_name }}</span>
               </el-tooltip>
@@ -107,12 +107,12 @@ Vue.component("select-member-org-tab", {
                 <span class="tag-item-left-txt">{{ tag.isOrg ? tag.department_name : tag.member_name }}</span>
               </el-tooltip>
             </div>
-            <div v-if="tag.isOrg" class="tag-item-parent-name">
+            <!-- v-if="tag.isOrg" 现在要求都显示上级 -->
+            <div class="tag-item-parent-name">
               <el-tooltip
                 effect="dark"
                 :content="tag.parent_name"
                 placement="top"
-                v-if="tag.isOrg"
               >
                 <span>{{ tag.parent_name }}</span>
               </el-tooltip>
@@ -319,6 +319,7 @@ Vue.component("select-member-org-tab", {
             id: 101,
             isOrg: false,
             isLeaf: true,
+            parent_name: "人也要显示父级",
           },
           {
             member_name: `关键词查询__2`,
@@ -326,6 +327,7 @@ Vue.component("select-member-org-tab", {
             id: 102,
             isOrg: false,
             isLeaf: true,
+            parent_name: "父级",
           },
           {
             member_name: `关键词查询很长很长很长很长很长很长很长很长很长很长__3`,
@@ -354,6 +356,7 @@ Vue.component("select-member-org-tab", {
           id: id + i,
           isOrg: false,
           isLeaf: true,
+          parent_name: "父节点",
         };
         o.department_name = o.member_name;
         node.push(o);
@@ -407,6 +410,7 @@ Vue.component("select-member-org-tab", {
 
 Vue.component("add-member-dialog", {
   template: `<div>
+  <slot>
   <el-button
     class="add-member-btn"
     plain
@@ -415,6 +419,7 @@ Vue.component("add-member-dialog", {
   >
     添加成员
   </el-button>
+  </slot>
   <el-dialog
     :visible.sync="dialogVisible"
     modal-append-to-body

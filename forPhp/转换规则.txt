@@ -1,0 +1,16 @@
+转换规则：
+1、componentName, route, 文件名保持一致 
+const template = ``
+    new Vue({
+      template,
+      el: "#sopEdit",
+      name: "sopEdit",
+    });
+2、图片:<img src="../../static/image/info.png" />
+3、router: 
+push   `./sopEdit.html?type=edit&id=${r.id}`;
+route.query   getQueryVariable("type")
+4、html中的``
+5、组件: Vue.component("add", {})
+<link rel="stylesheet" href="../../static/style/add.css" />
+<script src="../../components/add.js"></script>
