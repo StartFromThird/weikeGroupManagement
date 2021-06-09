@@ -1,0 +1,98 @@
+.add-role-dialog {
+  width: 70vw;
+  height: 70vh;
+  margin-top: 15vh;
+  min-width: 670px;
+}
+
+.add-role-dialog.el-dialog .el-dialog__body {
+  padding: 0 20px 15px 20px;
+}
+
+.add-role-dialog .select-main-wrap {
+  height: calc(70vh - 127px);
+  overflow: hidden;
+}
+
+.add-role-dialog .select-main-wrap .filter-header {
+  padding-bottom: 14px;
+}
+
+.add-role-dialog .select-main-wrap .filter-header .el-input {
+  width: 240px;
+  margin-right: 10px;
+}
+
+.add-role-dialog .select-main-wrap .selectWrap {
+  height: calc(100% - 42px);
+  overflow: hidden;
+  display: flex;
+}
+
+.add-role-dialog .select-main-wrap .selectWrap .left {
+  min-width: 400px;
+  height: 100%;
+  max-height: 100%;
+  max-width: 60%;
+  border-right: 2px solid #f5f7fa;
+  overflow: auto;
+}
+
+.add-role-dialog .select-main-wrap .selectWrap .left .custom-tree-node img {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-left: 8px;
+}
+
+.add-role-dialog .select-main-wrap .selectWrap .right {
+  max-height: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  box-sizing: border-box;
+  padding-left: 8px;
+}
+
+.add-role-dialog .select-main-wrap .selectWrap .right .tag-item {
+  height: 24px;
+  padding: 0 5px;
+  line-height: 24px;
+  background-color: #f0f2f5;
+  border-radius: 4px;
+  border-color: #d1e3fe;
+  box-sizing: border-box;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+.add-role-dialog .select-main-wrap .selectWrap .right .tag-item .tag-item-content {
+  width: calc(100% - 20px);
+}
+
+.add-role-dialog .select-main-wrap .selectWrap .right .tag-item .tag-item-content-left {
+  width: fit-content;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.add-role-dialog .select-main-wrap .selectWrap .right .tag-item .el-icon-close {
+  margin-left: 8px;
+}
+
+.add-role-dialog .select-main-wrap .selectWrap .right .tag-item span {
+  color: #171717;
+  font-size: 14px;
+}
+
+.add-role-dialog .select-main-wrap .selectWrap .right .tag-item i {
+  cursor: pointer;
+}
+
+.add-role-dialog .select-main-wrap .selectWrap .right .tag-item + .tag-item {
+  margin-top: 12px;
+}

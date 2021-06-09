@@ -1,0 +1,69 @@
+html,
+body,
+div,
+dl,
+dt,
+ul,
+li,
+h1,
+h2,
+h3,
+h5,
+h4,
+h6,
+input,
+form,
+a,
+p {
+  margin: 0;
+  padding: 0;
+}
+
+ol,
+ul,
+li {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+  display: block;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+html {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+body {
+  width: 100%;
+  min-height: 100%;
+}
+
+img {
+  border: none;
+  display: block;
+}
+
+.clearfloat {
+  zoom: 1;
+}
+
+.clearfloat:after {
+  display: block;
+  clear: both;
+  content: " ";
+  visibility: hidden;
+  height: 0;
+}
+.overflow-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

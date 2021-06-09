@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>新建/编辑企业群发SOP</title>
+    <link rel="stylesheet" href="../../static/libs/element/element.css" />
+    <link rel="stylesheet" href="../../static/style/base.css" />
+    <script src="../../static/libs/vue.js"></script>
+    <script src="../../static/libs/element/element.js"></script>
+    <link rel="stylesheet" href="../../static/sop/sopEdit.css" />
+    <!-- 主题引入 -->
+    <link rel="stylesheet" href="../../static/elementTheme/theme/index.css" />
+    <script src="../../util/common.js"></script>
+    <script src="../../util/emoji.js"></script>
+    <link rel="stylesheet" href="../../static/style/addRoleDialog.css" />
+    <script src="../../components/addRoleDialog.js"></script>
+    <link rel="stylesheet" href="../../static/style/addTagDialog.css" />
+    <script src="../../components/addTagDialog.js"></script>
+  </head>
+  <body>
+    <div id="sopEdit"></div>
+  </body>
+
+  <script>
+    const template = `<div class="sop-edit-page-wrap">
+  <div class="sop-edit-page-wrap-head">
+    <el-page-header @back="goBack" :content="pageTitle"></el-page-header>
+  </div>
+  <div class="sop-edit-page-wrap-main">
+    <el-form
+      label-position="top"
+      label-width="80px"
+      :model="info"
+      :rules="rules"
+      ref="sopForm"
+      size="mini"
+    >
+      <!-- 一 -->
+      <div class="step">
+        <div class="step-title">
+          <div class="step-text">第 ① 步：填写企业群发SOP名称</div>
+          <el-popover
+            placement="right"
+            title="简要说明！"
+            width="240"
+            trigger="hover"
+            content="定义：针对和实验组同一条件的客户群体触达不同的内容 如：实验组的客户群体是榴莲控，则针对榴莲控发送不同文案的内容"
+          >
+            <img
+              class="step-tip"
+              slot="reference"
+              src="../../static/image/info.png"
+            />
+          </el-popover>
+        </div>
+        <el-row :gutter="60">
+          <el-col :sm="24" :md="12" :lg="12">
+            <el-form-item label="企业群发SOP名称" prop="name">
+              <el-input
+                v-model="info.name"
+                placeholder="请输入企业群发SOP名称"
+                maxlength="30"
+                clearable
+              ></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :sm="24" :md="12" :lg="12">
+            <el-form-item label="活动结束时间" prop="end_time">
+              <el-date-picker
+                class="w100"
+                v-model="info.end_time"
+                type="datetime"
+                placeholder="选择日期时间"
+                clearable
+              ></el-date-picker>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </div>
+      <div class="step-divider"></div>
+      <!-- 二 -->
+      <div class="step">
+        <div class="step-title">
+          <div class="step-text">第 ② 步：选择发送的时间</div>
+        </div>
+        <el-row :gutter="60">
+          <el-col :sm="24" :md="12" :lg="12">
+            <el-form-item label="发送时间" prop="send_time">
+              <el-date-picker
+                class="w100"
+                v-model="info.send_time"
+                type="datetime"
+                placeholder="选择日期时间"
+                clearable
+                value-format="yyyy-MM-dd HH:mm:ss"
+              ></el-date-picker>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <div class="under-tip" v-if="info.send_time">
+          <span class="grey-txt">该消息将于</span>
+          <span class="black-txt">{{ info.send_time }}</span>
+          <span class="grey-txt">发给企微成员任务,由企微成员进行发送</span>
+        </div>
+      </div>
+      <div class="step-divider"></div>
+      <!-- 三 -->
+      <div class="step">
+        <div class="step-title">
+          <div class="step-text">第 ③ 步：选择企业群发类型</div>
+        </div>
+        <el-row :gutter="60">
+          <el-col
+            :sm="12"
+            :md="12"
+            :lg="12"
+            class="chat-type-option-wrap flex-r-space-between"
+          >
+            <div
+              class="chat-type-option"
+              v-for="item in chatTypeOptions"
+              :key="item.value"
+              :class="[
+                item.value == info.chat_type ? 'chat-type-option-active' : ''
+              ]"
+              @click="handleClickChatType(item)"
+            >
+              <div class="chat-type-option-title">{{ item.title }}</div>
+              <div class="chat-type-option-desc">{{ item.desc }}</div>
+            </div>
+          </el-col>
+        </el-row>
+        <el-row :gutter="60">
+          <el-col :sm="24" :md="12" :lg="12">
+            <el-form-item label="选择发送范围" prop="receive_type">
+              <el-radio-group v-model="info.receive_type">
+                <template v-for="item in receiveTypeOptions">
+                  <el-radio :label="item.value" :key="item.value">
+                    {{ item.label }}
+                  </el-radio>
+                </template>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="60" v-show="info.receive_type == 1">
+          <el-col
+            :sm="24"
+            :md="12"
+            :lg="12"
+            v-show="info.chat_type === 'SINGLE'"
+          >
+            <el-form-item
+              label="选择需要接收的客户"
+              prop="option_tag_F"
+              class="txtRedLabel"
+            >
+              <add-tag-dialog
+                ref="addTagDialogRef"
+                title="选择需要接收的客户（中心化人群包标签）"
+                :writeBackChoose="writeBackChooseTag"
+                @confirmChoose="confirmChooseTag"
+              >
+                <el-input
+                  v-model="info.option_tag_F"
+                  placeholder="人群包"
+                  suffix-icon="el-icon-caret-bottom"
+                  readonly
+                  @focus="handleClickTag"
+                ></el-input>
+              </add-tag-dialog>
+            </el-form-item>
+          </el-col>
+          <el-col :sm="24" :md="12" :lg="12">
+            <el-form-item
+              label="选择需要发送的企微成员（至少选择一个条件）"
+              prop="option_department_role_F"
+              class="txtRedLabel"
+            >
+              <div class="flex-r-space-between">
+                <el-input
+                  class="w48"
+                  v-model="info.option_department_F"
+                  placeholder="企微成员（发送人）"
+                  suffix-icon="el-icon-caret-bottom"
+                  readonly
+                ></el-input>
+                <el-input
+                  class="w48"
+                  v-model="info.option_role_F"
+                  placeholder="角色"
+                  suffix-icon="el-icon-caret-bottom"
+                  readonly
+                  @focus="handleClickRole"
+                ></el-input>
+              </div>
+              <div class="flex-r-space-between">
+                <add-role-dialog
+                  ref="addRoleDialogRef"
+                  title="选择要发送的角色"
+                  :writeBackChoose="writeBackChooseRole"
+                  @confirmChoose="confirmChooseRole"
+                >
+                  <el-input
+                    class="w48"
+                    v-model="info.option_role_F"
+                    placeholder="角色"
+                    suffix-icon="el-icon-caret-bottom"
+                    readonly
+                    @focus="handleClickRole"
+                  ></el-input>
+                </add-role-dialog>
+              </div>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <div class="under-tip" v-if="roleStr || tagStr">
+          <span class="grey-txt" style="margin-bottom: 20px">
+            将发送消息给大区 A，赏燕君，国进…且满足“{{ roleStr }}”等 xx
+            位企微成员所添加的满足&nbsp;“{{ tagStr }}”&nbsp;等标签的客户。
+          </span>
+        </div>
+        <div class="step-divider"></div>
+      </div>
+      <!-- 四 -->
+      <div class="step">
+        <div class="step-title">
+          <div class="step-text">第 ④ 步：配置内容</div>
+        </div>
+        <div class="group-list-wrap">
+          <!-- tab 及新增 -->
+          <el-tabs
+            v-model="editableTabsValue"
+            type="card"
+            closable
+            @tab-remove="handleRemoveTab"
+          >
+            <el-tab-pane
+              v-for="(item, index) in group_list"
+              :key="index"
+              :label="item.name + (item.type == 3 ? index : '')"
+              :name="index + ''"
+            >
+              <div style="outline: 1px solid #f00">
+                <!-- 文本 emoji 输入 -->
+                <div class="text-emoji-content-wrap">
+                  <el-input
+                    :id="'editContent' + index"
+                    type="textarea"
+                    v-model="item.content"
+                    placeholder="请输入内容"
+                    maxlength="4000"
+                    :autosize="{ minRows: 10 }"
+                    show-word-limit
+                  ></el-input>
+                  <el-popover
+                    v-model="item.emojiPopoverVisible"
+                    placement="top-start"
+                    width="400"
+                    trigger="manual"
+                  >
+                    <div class="emoji-popover-wrap">
+                      <div class="emoji-popover-head">
+                        <div
+                          class="popover-head-close"
+                          @click="addEmojiPopover(item)"
+                        >
+                          <i class="el-icon-close"></i>
+                        </div>
+                      </div>
+                      <el-tabs v-model="emojiTab">
+                        <el-tab-pane
+                          v-for="(emojiGroup, emojiIndex) in emojiList"
+                          :key="emojiIndex"
+                          :label="emojiGroup.name"
+                          :name="emojiGroup.label"
+                          style="height: 200px; overflow: auto"
+                        >
+                          <div class="emoji-box">
+                            <div
+                              v-for="(subItem, subIndex) in emojiGroup.value"
+                              :key="subIndex"
+                              @click="insertText(subItem, index, item)"
+                            >
+                              <span>{{ subItem }}</span>
+                            </div>
+                          </div>
+                        </el-tab-pane>
+                      </el-tabs>
+                    </div>
+                    <div
+                      class="emoji-btn"
+                      @click="addEmojiPopover(item)"
+                      slot="reference"
+                    >
+                      <img
+                        src="../../static/image/sop/emoji@2x.png"
+                        alt="表情包"
+                      />
+                    </div>
+                  </el-popover>
+                </div>
+                <br />
+                <!-- 附件列表 -->
+                <div class="sop-other-content-wrap">
+                  <div
+                    class="other_content_item"
+                    v-for="(
+                     contentItem, contentIndex
+                   ) in item.other_content_list"
+                    :key="contentIndex"
+                  >
+                    <!-- 视频缩略图 url、其他 upload_url -->
+                    <el-image
+                      style="width: 44px; height: 44px"
+                      :src="
+                       contentItem.type == 4
+                         ? contentItem.url
+                         : contentItem.upload_url
+                     "
+                      :preview-src-list="[contentItem.upload_url]"
+                    >
+                      <div slot="error" class="image-err-slot">
+                        <i class="el-icon-picture-outline"></i>
+                      </div>
+                    </el-image>
+                    <div class="middle-txt">
+                      <div class="title overflow-ellipsis">
+                        {{ contentItem.title || '-' }}
+                      </div>
+                      <div
+                        class="desc overflow-ellipsis"
+                        v-if="[3, 2].includes(contentItem.type)"
+                      >
+                        {{ contentItem.description || '-' }}
+                      </div>
+                    </div>
+                    <div class="right-operate">
+                      <div class="right-operate-btn right-operate-success">
+                        <i class="el-icon-success"></i>
+                      </div>
+                      <div
+                        class="right-operate-btn right-operate-del"
+                        @click="
+                         delOtherContentList(
+                           item.other_content_list,
+                           contentIndex
+                         )
+                       "
+                      >
+                        <i class="el-icon-delete-solid"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </el-tab-pane>
+          </el-tabs>
+          <div class="add-tab-right">
+            <el-button type="primary" @click="addContentTryGroup" size="mini">
+              + 新建内容对照组
+            </el-button>
+            <el-popover
+              placement="right"
+              title="简要说明！"
+              width="240"
+              trigger="hover"
+              content="建议日期时间+活动描述 例如：0501- 榴莲促销活动"
+            >
+              <img
+                class="step-tip"
+                slot="reference"
+                src="../../static/image/info.png"
+              />
+            </el-popover>
+          </div>
+          <!-- 上传附件 -->
+          <el-popover
+            v-model="addOtherContentVisible"
+            placement="top"
+            width="400"
+            trigger="manual"
+          >
+            <div class="add-other-content-wrap">
+              <div class="add-other-content-header">
+                <span>选择添加附件类型</span>
+                <i
+                  class="el-icon-close"
+                  @click="addOtherContentVisible = false"
+                >
+                </i>
+              </div>
+              <div class="add-other-content-main">
+                <div class="add-other-content-item">
+                  <img
+                    src="../../static/image/sop/otherContent1@2x.png"
+                    alt="图片"
+                  />
+                  <span>图片</span>
+                </div>
+                <div class="add-other-content-item">
+                  <img
+                    src="../../static/image/sop/otherContent2@2x.png"
+                    alt="视频"
+                  />
+                  <span>视频</span>
+                </div>
+                <div class="add-other-content-item" @click="addWebPage">
+                  <img
+                    src="../../static/image/sop/otherContent3@2x.png"
+                    alt="网页"
+                  />
+                  <span>网页</span>
+                </div>
+                <div class="add-other-content-item" @click="addWechatApp">
+                  <img
+                    src="../../static/image/sop/otherContent4@2x.png"
+                    alt="小程序"
+                  />
+                  <span>小程序</span>
+                </div>
+              </div>
+            </div>
+            <el-button
+              @click="addOtherContent"
+              slot="reference"
+              type="primary"
+              style="width: 100%"
+            >
+              + 添加图片/视频/网页/小程序
+            </el-button>
+          </el-popover>
+          <!-- 客户触达比例展示 -->
+          <div class="step-title touch-rate-title">
+            <div class="step-text">配置客户触达比例</div>
+          </div>
+          <div class="touch-rate-wrap">
+            <div class="touch-rate-row flex-r-space-between">
+              <div class="touch-rate-row-left">客户数量</div>
+              <div class="touch-rate-row-right">
+                实验组触达比例 + 所有内容对照组触达比例 ≤ 100%
+              </div>
+            </div>
+            <div
+              class="touch-rate-row flex-r-space-between"
+              v-for="(item, index) in [...group_list, noActionGroupItem]"
+              :key="index"
+            >
+              <div class="touch-rate-row-left">
+                <div>{{ item.name + (item.type == 3 ? index : '') }}</div>
+                <el-popover
+                  v-if="index === group_list.length"
+                  placement="right"
+                  title="简要说明！"
+                  width="240"
+                  trigger="hover"
+                  content="定义：由和实验组同一条件的客户群体中未触达部分自动生成"
+                >
+                  <img
+                    slot="reference"
+                    class="step-tip"
+                    src="../../static/image/info.png"
+                  />
+                </el-popover>
+              </div>
+              <div class="touch-rate-row-right">
+                <el-input-number
+                  size="mini"
+                  :disabled="index === group_list.length"
+                  style="width: 68px"
+                  v-model="item.touch_rate"
+                  @change="(c, o) => handleInputTouchRateChange(c, o, item, index)"
+                  @focus="handleFocusRateChange(item, index)"
+                  @blur="e => handleBlurRateChange(e, item, index)"
+                  :controls="false"
+                  :min="0"
+                  :max="100"
+                  :step="1"
+                  step-strictly
+                ></el-input-number>
+                <span>% 触达比例</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="step-divider"></div>
+      <!-- 五 -->
+      <div class="step">
+        <el-row :gutter="60">
+          <el-col
+            :sm="24"
+            :md="12"
+            :lg="12"
+            class="step-title flex-r-space-between"
+          >
+            <div class="flex">
+              <div class="step-text">第 ⑤ 步：设置业务KPI</div>
+              <img
+                slot="reference"
+                class="step-tip"
+                src="../../static/image/info.png"
+              />
+            </div>
+            <el-switch
+              v-model="info.kpi_status"
+              :active-value="1"
+              :inactive-value="0"
+            ></el-switch>
+          </el-col>
+        </el-row>
+        <el-row :gutter="60">
+          <el-col :sm="24" :md="12" :lg="12">
+            <el-form-item label="指标类型：" prop="kpi_type" class="flex">
+              <el-input
+                v-model="info.kpi_type"
+                placeholder="请输入指标类型"
+                clearable
+              ></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="60">
+          <el-col :sm="24" :md="12" :lg="12">
+            <el-form-item label="时间周期：" prop="kpi_cycle_type" class="flex">
+              <el-radio-group v-model="info.kpi_cycle_type">
+                <template v-for="item in kpiCycleTypeOptions">
+                  <el-radio :label="item.value" :key="item.value">
+                    {{ item.label }}
+                  </el-radio>
+                </template>
+              </el-radio-group>
+              <div>
+                <template v-if="info.kpi_cycle_type === '2'">
+                  <el-input-number
+                    v-model="info.kpi_cycle"
+                    :controls="false"
+                    :min="1"
+                    :step="1"
+                  ></el-input-number>
+                  <span>天</span>
+                  <span v-if="info.kpi_cycle">
+                    ， 相对发送时间后 {{ info.kpi_cycle }} 天
+                  </span>
+                </template>
+                <template v-if="info.kpi_cycle_type === '1'">
+                  <el-date-picker
+                    v-model="info.kpi_cycle"
+                    type="datetime"
+                    placeholder="选择日期时间"
+                    clearable
+                  ></el-date-picker>
+                </template>
+              </div>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </div>
+    </el-form>
+    <div class="bottom-btns-group">
+      <el-button size="mini" @click="cancelSaveSOP">取消</el-button>
+      <el-button type="primary" size="mini" @click="saveSOP">
+        保存群发SOP
+      </el-button>
+    </div>
+    <!-- 网页附件 -->
+    <el-dialog
+      title="添加网页消息"
+      :visible.sync="webPageDialogVisible"
+      custom-class="sop-add-other-content-dialog"
+      width="400px"
+    >
+      <el-form
+        :model="webPageForm"
+        :rules="webPageRules"
+        ref="webPageForm"
+        label-width="100px"
+        label-position="top"
+      >
+        <el-form-item label="网页标题：" prop="title">
+          <el-input
+            v-model="webPageForm.title"
+            type="textarea"
+            placeholder="请输入标题（最长128个字节）"
+            maxlength="128"
+            :autosize="{ minRows: 2 }"
+            show-word-limit
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="网页封面：" prop="upload_url">
+          <el-upload
+            action="http://jsonplaceholder.typicode.com/posts/"
+            :multiple="false"
+            accept="image/jpg, image/jpeg, image/bmp, image/gif, image/png"
+            :show-file-list="false"
+            :on-success="
+                  (response, file, fileList) =>
+                    handleImgUploadSuccess(
+                      response,
+                      file,
+                      fileList,
+                      'webPageForm'
+                    )
+                "
+            :on-error="
+                  (err, file, fileList) =>
+                    handleImgUploadErr(err, file, fileList, 'webPageForm')
+                "
+            :before-upload="beforeImgUpload"
+          >
+            <!-- <div slot="file" slot-scope="{ file }"></div> -->
+            <!-- :preview-src-list="[webPageForm.upload_url]" -->
+            <el-image
+              style="width: 100px; height: 100px"
+              v-if="webPageForm.upload_url"
+              fit="fill"
+              :src="webPageForm.upload_url"
+            ></el-image>
+            <div class="uploader" slot="trigger" v-if="!webPageForm.upload_url">
+              <i class="el-icon-plus uploader-icon"></i>
+              <span>点击上传</span>
+            </div>
+          </el-upload>
+        </el-form-item>
+        <el-form-item label="网页描述：" prop="description">
+          <el-input
+            v-model="webPageForm.description"
+            type="textarea"
+            placeholder="请输入描述（最多512个字节）"
+            maxlength="512"
+            :autosize="{ minRows: 2 }"
+            show-word-limit
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="网页链接：" prop="url">
+          <el-input
+            v-model="webPageForm.url"
+            type="textarea"
+            placeholder="请输入链接（最长2048个字节）"
+            maxlength="2048"
+            :autosize="{ minRows: 2 }"
+            show-word-limit
+          ></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="cancelAddWebPage">取 消</el-button>
+        <el-button type="primary" @click="confirmAddWebPage">确 认</el-button>
+      </span>
+    </el-dialog>
+    <!-- 小程序附件 -->
+    <el-dialog
+      title="添加小程序消息"
+      :visible.sync="wechatAppDialogVisible"
+      custom-class="sop-add-other-content-dialog"
+      width="400px"
+    >
+      <el-form
+        :model="wechatAppForm"
+        :rules="wechatAppRules"
+        ref="wechatAppForm"
+        label-width="100px"
+        label-position="top"
+      >
+        <el-form-item label="小程序标题：" prop="title">
+          <el-input
+            v-model="wechatAppForm.title"
+            type="textarea"
+            placeholder="请输入标题（最多64个字节）"
+            maxlength="64"
+            :autosize="{ minRows: 2 }"
+            show-word-limit
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="小程序封面：" prop="upload_url">
+          <el-upload
+            action="http://jsonplaceholder.typicode.com/posts/"
+            :multiple="false"
+            accept="image/jpg, image/jpeg, image/bmp, image/gif, image/png"
+            :show-file-list="false"
+            :on-success="
+                  (response, file, fileList) =>
+                    handleImgUploadSuccess(
+                      response,
+                      file,
+                      fileList,
+                      'wechatAppForm'
+                    )
+                "
+            :on-error="
+                  (err, file, fileList) =>
+                    handleImgUploadErr(err, file, fileList, 'wechatAppForm')
+                "
+            :before-upload="beforeImgUpload"
+          >
+            <!-- :preview-src-list="[wechatAppForm.upload_url]" -->
+            <el-image
+              style="width: 100px; height: 100px"
+              v-if="wechatAppForm.upload_url"
+              fit="fill"
+              :src="wechatAppForm.upload_url"
+            ></el-image>
+            <div class="uploader" v-else>
+              <i class="el-icon-plus uploader-icon"></i>
+              <span class="action-txt">点击上传</span>
+              <span class="tip">封面图建议尺寸为520*416</span>
+            </div>
+          </el-upload>
+        </el-form-item>
+        <el-form-item label="小程序Appid：" prop="appid">
+          <el-input
+            v-model="wechatAppForm.appid"
+            type="textarea"
+            placeholder="请输入小程序Appid"
+            :autosize="{ minRows: 2 }"
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="小程序Page路径：" prop="url">
+          <el-input
+            v-model="wechatAppForm.url"
+            type="textarea"
+            placeholder="请输入小程序Page路径"
+            :autosize="{ minRows: 2 }"
+          ></el-input>
+        </el-form-item>
+      </el-form>
+      <span @click="changeAddWechatAppType(1)">选择添加的小程序</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="cancelWechatApp">取 消</el-button>
+        <el-button type="primary" @click="confirmWechatApp">确 认</el-button>
+      </span>
+    </el-dialog>
+  </div>
+</div>
+`;
+    new Vue({
+      template: template,
+      el: "#sopEdit",
+      name: "sopEdit",
+      props: {},
+      data() {
+        return {
+          curInputIndex: null,
+          pageTitle: "新建企业群发SOP",
+          info: {},
+          baseInfo: {
+            name: "",
+            send_time: "",
+            end_time: "",
+            chat_type: "SINGLE",
+            // 提出来
+            receive_type: 1,
+            // KPI
+            kpi_status: 1,
+            kpi_cycle_type: "1",
+          },
+          base_group_list_item: {
+            name: "",
+            // 是否有筛选条件，0-全部，1有条件
+            receive_type: 0,
+            // 1-实验组,2-客户对照组,3-内容对照组,4-触达对照组,
+            type: "1",
+            // 触达比例
+            touch_rate: "0",
+            // 文本
+            content: "",
+            // 附件
+            other_content_list: [],
+          },
+          noActionGroupItem: {},
+          group_list: [],
+          editableTabsValue: "",
+          // 角色
+          roleStr: "",
+          writeBackChooseRole: [],
+          // 标签
+          tagStr: "",
+          writeBackChooseTag: [],
+          rules: {
+            name: [
+              {
+                required: true,
+                message: "请输入企业群发SOP名称",
+                trigger: "blur",
+              },
+              {
+                min: 0,
+                max: 30,
+                message: "长度不超过 30 个字",
+                trigger: "blur",
+              },
+            ],
+            end_time: [
+              {
+                required: true,
+                message: "请选择活动结束时间",
+                trigger: "blur",
+              },
+            ],
+            send_time: [
+              { required: true, message: "请选择发送时间", trigger: "blur" },
+            ],
+            receive_type: [
+              { required: true, message: "请选择发送范围", trigger: "blur" },
+            ],
+            option_tag_F: [
+              {
+                required: true,
+                message: "请选择需要接收的客户",
+                trigger: "blur",
+              },
+            ],
+            option_department_role_F: [
+              {
+                required: true,
+                message: "请选择需要发送的企微成员（至少选择一个条件）",
+                trigger: "blur",
+              },
+            ],
+          },
+          receiveTypeOptions: [
+            {
+              label: "按条件筛选客户",
+              value: 1,
+            },
+            {
+              label: "全部",
+              value: 0,
+            },
+          ],
+          kpiCycleTypeOptions: [
+            {
+              label: "绝对时间",
+              value: "1",
+            },
+            {
+              label: "相对时间",
+              value: "2",
+            },
+          ],
+          chatTypeOptions: [
+            {
+              title: "群发消息给客户",
+              desc: "企业统一选择要发送的客户，由添加客户的成员确认后发送给客户，消息内容仅管理员和负责人可创建",
+              value: "SINGLE",
+            },
+            {
+              title: "群发消息到企业的客户群",
+              desc: "管理员或负责人统一创建内容，群主收到通知后，可选择他管理的客户群并群发",
+              value: "GROUP",
+            },
+          ],
+          // emoji
+          emojiList,
+          emojiTab: "face",
+          timer: null,
+          // 附件
+          addOtherContentVisible: false,
+          // 附件 网页
+          webPageDialogVisible: false,
+          webPageForm: {},
+          baseWebPageForm: {
+            type: 3,
+            title: "",
+            description: "",
+            url: "",
+            upload_url: "",
+          },
+          webPageRules: {
+            title: [
+              { required: true, message: "请输入网页标题", trigger: "blur" },
+              {
+                min: 0,
+                max: 128,
+                message: "长度不超过 128 个字",
+                trigger: "blur",
+              },
+            ],
+            description: [
+              { required: true, message: "请输入网页描述", trigger: "blur" },
+              {
+                min: 0,
+                max: 512,
+                message: "长度不超过 512 个字",
+                trigger: "blur",
+              },
+            ],
+            url: [
+              { required: true, message: "请输入网页链接", trigger: "blur" },
+              {
+                min: 0,
+                max: 2048,
+                message: "长度不超过 2048 个字",
+                trigger: "blur",
+              },
+            ],
+          },
+          // 附件 小程序
+          wechatAppDialogVisible: false,
+          wechatAppForm: {},
+          baseWechatAppForm: {
+            type: 2,
+            title: "",
+            description: "",
+            url: "",
+            upload_url: "",
+          },
+          wechatAppRules: {
+            title: [
+              { required: true, message: "请输入小程序标题", trigger: "blur" },
+              {
+                min: 0,
+                max: 64,
+                message: "长度不超过 64 个字",
+                trigger: "blur",
+              },
+            ],
+            upload_url: [
+              {
+                required: true,
+                message: "请上传小程序封面",
+                trigger: "change",
+              },
+            ],
+            appid: [
+              { required: true, message: "请输入小程序Appid", trigger: "blur" },
+            ],
+            url: [
+              {
+                required: true,
+                message: "请输入小程序Page路径",
+                trigger: "blur",
+              },
+            ],
+          },
+        };
+      },
+      created() {
+        // let type = this.$route.query && this.$route.query.type;
+        let type = getQueryVariable("type");
+        console.log("created========", type);
+        if (type === "add") {
+          this.initAddPage();
+        } else if (type === "edit") {
+          this.initEditPage();
+        }
+        window.aaa = this;
+      },
+      mounted() {},
+      watch: {},
+      methods: {
+        // 附件添加和关闭
+        addOtherContent() {
+          let i = parseInt(this.editableTabsValue);
+          if (
+            this.group_list[i].other_content_list &&
+            this.group_list[i].other_content_list.length &&
+            this.group_list[i].other_content_list.length > 8
+          ) {
+            this.$message({
+              message: "添加附件不可超过9个",
+              type: "warning",
+            });
+            return;
+          }
+          this.addOtherContentVisible = !this.addOtherContentVisible;
+        },
+        delOtherContentList(list, index) {
+          list.splice(index, 1);
+        },
+        handlePictureCardPreview(file) {},
+        handleDownload(file) {},
+        handleRemove(file) {},
+        httpRequest(file) {
+          console.log("http=====", file);
+        },
+        handleImgUploadSuccess(response, file, fileList, type) {
+          console.log("上传成功=======", type, this[`${type}`]);
+          if (this[`${type}`]) {
+            this[`${type}`]["upload_url"] =
+              "https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100";
+          }
+        },
+        handleImgUploadErr(err, file, fileList, type) {
+          console.log("上传失败=======");
+        },
+        beforeImgUpload(file) {
+          const isIMAGE = /\.(gif|jpg|jpeg|png|bpm|BPM|GIF|JPG|PNG|JPEG)$/.test(
+            file.name
+          );
+          const isLt2M = file.size / 1024 / 1024 < 2;
+          if (!isIMAGE) {
+            this.$message.error(
+              "上传文件只能是 jpg，jpeg，bmp，gif，png 图片格式!"
+            );
+          }
+          if (!isLt2M) {
+            this.$message.error("上传文件大小不能超过 2MB!");
+          }
+          console.log(isIMAGE, file.type, isLt2M);
+          return isIMAGE && isLt2M;
+        },
+        // 附件加小程序
+        changeAddWechatAppType(type) {
+          this.addWechatAppType = type;
+        },
+        addWechatApp() {
+          this.wechatAppForm = { ...this.baseWechatAppForm };
+          this.wechatAppDialogVisible = true;
+        },
+        cancelWechatApp() {
+          this.wechatAppDialogVisible = false;
+        },
+        confirmWechatApp() {
+          this.$refs["wechatAppForm"].validate((valid) => {
+            if (!valid) {
+              return false;
+            }
+            let i = parseInt(this.editableTabsValue);
+            if (!this.group_list[i].other_content_list) {
+              this.group_list[i].other_content_list = [];
+            }
+            this.group_list[i].other_content_list.push(
+              JSON.parse(JSON.stringify(this.webPageForm))
+            );
+            this.wechatAppDialogVisible = false;
+          });
+        },
+        // 附件加网页
+        cancelAddWebPage() {
+          this.webPageDialogVisible = false;
+        },
+        confirmAddWebPage() {
+          this.$refs["webPageForm"].validate((valid) => {
+            if (!valid) {
+              return false;
+            }
+            let i = parseInt(this.editableTabsValue);
+            if (!this.group_list[i].other_content_list) {
+              this.group_list[i].other_content_list = [];
+            }
+            this.group_list[i].other_content_list.push(
+              JSON.parse(JSON.stringify(this.webPageForm))
+            );
+            this.webPageDialogVisible = false;
+          });
+        },
+        addWebPage() {
+          this.webPageForm = { ...this.baseWebPageForm };
+          this.webPageDialogVisible = true;
+        },
+        // 文本表情包
+        insertText(value, index, item) {
+          let position = document.getElementById(`editContent${index}`);
+          let pos = getPositionForTextArea(position);
+          console.log("pos======", pos, "ps", position);
+          let y = position.value;
+          let frontString = y.substring(0, pos);
+          let afterString = y.substring(pos, item.content.length);
+          item.content = frontString + value + afterString;
+          if (this.timer) {
+            clearTimeout(this.timer);
+          }
+          this.timer = setTimeout(() => {
+            // 插入表情等表情/手势,聚焦;
+            this.$nextTick(() => {
+              position.focus();
+              position.selectionStart = position.selectionEnd =
+                pos + value.length;
+            });
+          }, 0);
+        },
+        addEmojiPopover(item) {
+          item.emojiPopoverVisible = !item.emojiPopoverVisible;
+        },
+        // 人群包 标签选择
+        handleClickTag() {
+          console.log("tag==");
+          this.$refs.addTagDialogRef.dialogVisible = true;
+        },
+        confirmChooseTag(r) {
+          let labelKey = "name";
+          this.tagStr = r.map((ele) => ele[`${labelKey}`]).join(",");
+          this.writeBackChooseTag = r;
+          this.$refs.addTagDialogRef.dialogVisible = false;
+          console.log("已选择标签=====", r, this.tagStr);
+        },
+        // 角色选择
+        handleClickRole() {
+          this.$refs.addRoleDialogRef.dialogVisible = true;
+        },
+        confirmChooseRole(r) {
+          this.roleStr = r.map((ele) => ele.role).join(",");
+          this.writeBackChooseRole = r;
+          this.$refs.addRoleDialogRef.dialogVisible = false;
+          console.log("已选择角色=====", r, this.roleStr);
+        },
+        handleRemoveTab(targetName) {
+          let baseLen = this.group_list.length;
+          let i = parseInt(targetName);
+          this.group_list.splice(i, 1);
+          if (i == baseLen - 1) {
+            this.editableTabsValue = i - 1;
+          } else {
+            this.editableTabsValue = targetName;
+          }
+        },
+        handleInputTouchRateChange(c, o, item, index) {
+          console.log("Input===", c, o, item, index);
+        },
+        handleFocusRateChange(item, i) {
+          this.curInputIndex = i;
+        },
+        handleBlurRateChange(e, item, index) {
+          let sum = 100;
+          this.group_list.map((ele) => {
+            if (ele.touch_rate) {
+              sum = sum - parseInt(ele.touch_rate);
+            }
+          });
+          if (sum >= 0) {
+            this.noActionGroupItem.touch_rate = sum;
+          } else {
+            let t = this.group_list[this.curInputIndex].touch_rate;
+            item.touch_rate = t + sum;
+            this.noActionGroupItem.touch_rate = 0;
+          }
+        },
+        handleClickChatType(item) {
+          this.info.chat_type = item.value;
+        },
+        addContentTryGroup() {
+          let arrT3 = this.group_list.filter((ele) => ele.type == 3) || [];
+          if (arrT3 && arrT3.length && arrT3.length >= 2) {
+            this.$message({
+              message: "最多只可加两条内容对照组",
+              type: "warning",
+            });
+            return;
+          }
+          let len = this.group_list.length;
+          let add_group_list_item = {
+            ...JSON.parse(JSON.stringify(this.base_group_list_item)),
+            name: `内容对照组`,
+            type: "3",
+          };
+          this.group_list.push(add_group_list_item);
+          this.editableTabsValue = `${len}`;
+        },
+        initAddPage() {
+          this.info = { ...this.baseInfo };
+          let base_group_list_item = {
+            ...JSON.parse(JSON.stringify(this.base_group_list_item)),
+            name: "实验组",
+            type: "1",
+          };
+          this.group_list = [base_group_list_item];
+          this.editableTabsValue = `${0}`;
+          this.noActionGroupItem = {
+            ...JSON.parse(JSON.stringify(this.base_group_list_item)),
+            name: "未触达对照组",
+          };
+        },
+        initEditPage() {
+          let id = getQueryVariable("id");
+          console.log("编辑查询id", id);
+          let group_list = [
+            {
+              name: "实验组",
+              receive_type: 0,
+              type: "1",
+              touch_rate: "10",
+              option_department_sq: "2,3,5",
+              option_department_qw: "2,3,5",
+              option_role: "5,6,9",
+              option_tag: [2, 3, 5],
+              option_tag_name: {
+                2: "人群包1",
+                3: "人群包2",
+                5: "人群包3",
+              },
+              content: "文本内容",
+              other_content_list: [
+                {
+                  type: 1,
+                  upload_url:
+                    "https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100",
+                  title: "图片地址",
+                  description: "",
+                  url: "",
+                },
+                {
+                  type: 2,
+                  upload_url: "小程序封面图",
+                  title: "小程序标题",
+                  description: "小程序appid",
+                  url: "小程序页面",
+                },
+                {
+                  type: 3,
+                  title: "11111111111111111111",
+                  description:
+                    ':preview-src-list="[webPageForm.upload_url]":preview-src-list="[webPageForm.upload_url]":preview-src-list="[webPageForm.upload_url]"',
+                  url: ':preview-src-list="[webPageForm.upload_url]":preview-src-list="[webPageForm.upload_url]":preview-src-list="[webPageForm.upload_url]":preview-src-list="[webPageForm.upload_url]"',
+                  upload_url:
+                    "https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100",
+                },
+                {
+                  type: 4,
+                  upload_url: "",
+                  title: "视频链接",
+                  description: "",
+                  url: "",
+                },
+              ],
+            },
+            {
+              name: "不触达对照组",
+              receive_type: 0,
+              type: "4",
+              touch_rate: "10",
+              touch_num: "200",
+              option_department_sq: "2,3,5",
+              option_department_qw: "2,3,5",
+              option_role: "5,6,9",
+              option_tag: [2, 3, 5],
+              option_tag_name: {
+                2: "人群包1",
+                3: "人群包2",
+                5: "人群包3",
+              },
+              content: "文本内容",
+              other_content_list: [
+                {
+                  type: 1,
+                  upload_url: "图片地址",
+                  title: "",
+                  description: "",
+                  url: "",
+                },
+                {
+                  type: 2,
+                  upload_url: "小程序封面图",
+                  title: "小程序标题",
+                  description: "小程序appid",
+                  url: "小程序页面",
+                },
+                {
+                  type: 3,
+                  upload_url: "封面图",
+                  title: "网页标题",
+                  description: "描述",
+                  url: "网页链接",
+                },
+                {
+                  type: 4,
+                  upload_url: "视频链接",
+                  title: "",
+                  description: "",
+                  url: "",
+                },
+              ],
+            },
+          ];
+          this.group_list = group_list.filter(
+            (group_item) => group_item.type !== "4"
+          );
+          this.noActionGroupItem = {
+            ...JSON.parse(JSON.stringify(this.base_group_list_item)),
+            name: "未触达对照组",
+          };
+          // 角色回显
+          this.writeBackChooseRole = [
+            {
+              id: 15,
+              role: "11123",
+            },
+            {
+              id: 116,
+              role: "1161161161123",
+            },
+          ];
+          this.roleStr =
+            this.writeBackChooseRole.map((ele) => ele.role).join("，") || "";
+          // 标签回显
+          this.writeBackChooseTag = [
+            {
+              id: "5fffeb25fabb1a000c419a641-0",
+              name: "1-0tidb实时的画像场景包实时的画像场景包实时的画像a1",
+            },
+            {
+              id: "60827cda44c0e0000d9902d82-1",
+              name: "2-1人群包c001",
+            },
+          ];
+          this.tagStr =
+            this.writeBackChooseTag.map((ele) => ele.name).join("，") || "";
+        },
+        cancelSaveSOP() {
+          this.$confirm("当前编辑的内容未保存，确定退出吗？", "提示", {
+            confirmButtonText: "确认",
+            cancelButtonText: "取消",
+            type: "warning",
+          })
+            .then(() => {
+              this.goBack();
+            })
+            .catch(() => {
+              // this.$message({
+              //   type: 'info',
+              //   message: '已取消删除'
+              // });
+            });
+        },
+        saveSOP() {
+          this.$message({
+            message: "恭喜你，新建群发SOP成功！",
+            type: "success",
+          });
+        },
+        goBack() {
+          window.history.go(-1);
+        },
+      },
+    });
+  </script>
+</html>
