@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>测试页面</title>
+    <link rel="stylesheet" href="../../static/libs/element/element.css" />
+    <link rel="stylesheet" href="../../static/style/base.css" />
+    <script src="../../static/libs/vue.js"></script>
+    <script src="../../static/libs/http-vue-loader.js"></script>
+    <script src="../../static/libs/element/element.js"></script>
+    <script src="../../static/libs/vueRouter.js"></script>
+    <link rel="stylesheet" href="../../static/sop/sopIndex.css" />
+    <!-- 主题引入 -->
+    <link rel="stylesheet" href="../../static/elementTheme/theme/index.css" />
+  </head>
+  <body>
+    <div id="indexApp">
+      <div style="display: flex">
+        <div>
+          <div>左侧是导航</div>
+          <el-button @click="routeTo('foo')">/foo</el-button>
+        </div>
+        <div>
+        <h1>根组件</h1>
+        测试组件传值: {{test}}
+      <el-button @click="testProps">传值更新</el-button>
+      <mu-ban :test="test" @call-p="callParent"></mu-ban>
+      <router-view></router-view>
+      </div>
+      </div>
+    </div>
+    <script>
+      // 路由待抽出
+      const Foo = { template: "<div>foo</div>" };
+      const Bar = { template: "<div>bar</div>" };
+      const routes = [
+        { path: "/foo", component: Foo },
+        { path: "/bar", component: httpVueLoader("../../components/muban.vue") },
+      ];
+      const router = new VueRouter({
+        routes,
+      });
+      new Vue({
+        router,
+        components: {
+          "mu-ban": httpVueLoader("../../components/muban.vue"),
+        },
+        el: "#indexApp",
+        name: "indexApp",
+        props: {},
+        
+        data() {
+          return {
+            test: 0,
+          };
+        },
+        created() {},
+        methods: {
+          routeTo(path) {
+            this.$router.push({
+              'path': path
+            })
+          },
+          testProps() {
+            this.test++;
+          },
+          callParent(e) {
+            console.log("get emit", e);
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

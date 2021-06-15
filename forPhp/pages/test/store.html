@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>test</title>
+    <link rel="stylesheet" href="../../static/libs/element/element.css" />
+    <link rel="stylesheet" href="../../static/admin/css/admin.css" />
+    <script src="../../static/libs/vue.js"></script>
+    <script src="../../static/libs/vuex.js"></script>
+    <script src="../../static/libs/element/element.js"></script>
+    <script src="../../static/libs/Sortable.min.js"></script>
+    <script src="../../static/libs/vuedraggable.js"></script>
+    <script src="../../static/libs/moment.js"></script>
+    <!-- <script src="./static/jquery/jquery.js"></script> -->
+    <script src="../../static/libs/api.js"></script>
+    <!-- 主题引入 -->
+    <link rel="stylesheet" href="../../static/elementTheme/theme/index.css" />
+    <link rel="stylesheet" href="../../static/style/synchronizationDialog.css" />
+    <script src="../../components/synchronizationDialog.js"></script>
+    <script src="../../store/index.js"></script>
+  </head>
+  <style>
+
+  </style>
+  <body>
+    <div id="memberEdit">
+      {{store.state.count}}
+      <button @click="handleClick">add</button>
+    </div>
+    
+  </body>
+
+  <script>
+    new Vue({
+      el: "#memberEdit",
+      name: "memberEdit",
+      props: {},
+      data() {
+        return {
+          store: store
+        };
+      },
+      computed: {},
+      created() {
+        console.log(store.state.count);
+      },
+      mounted() {},
+      watch: {},
+      methods: {
+        handleClick() {
+          store.commit('increment')
+          store.dispatch('increment',10)
+        }
+
+      }});
+  </script>
+</html>
