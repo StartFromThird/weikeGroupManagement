@@ -39,7 +39,7 @@
         >
           <div class="s-menu flex-between">
             <div class="s-menu-left">
-              {{ menu.name }}
+              {{ (menu.name.length > 9 ? menu.name.slice(0, 8) + '...' : menu.name) || '-' }}
             </div>
             <div class="s-menu-right">
               <i
@@ -81,7 +81,7 @@ module.exports = {
               {
                 id: 1,
                 type: "HUMAN",
-                name: "企微系统",
+                name: "企微系统企微系统企微系统",
                 icon: "xx",
               },
               {
@@ -198,6 +198,11 @@ module.exports = {
   },
 };
 </script>
+<style>
+/* .el-menu-item {
+  padding: 20px;
+} */
+</style>
 <style scoped>
 .flex-between {
   display: flex;
@@ -212,5 +217,6 @@ module.exports = {
 }
 .s-menu {
   margin-right: -15px;
+  /* margin-left: -15px; */
 }
 </style>

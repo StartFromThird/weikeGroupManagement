@@ -191,77 +191,7 @@ module.exports = {
 };
 </script>
 <style>
-.table-row-tag-list-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  max-width: 100%;
-  overflow: auto;
-}
-.table-row-tag-item {
-  border: 1px solid rgba(23, 115, 250, 0.8);
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  border-radius: 2px;
-  width: fit-content;
-  margin-right: 8px;
-  margin-bottom: 8px;
-  /* overflow: hidden; */
-}
-
-.table-row-tag-item .tag-txt {
-  font-size: 12px;
-  font-weight: 400;
-  text-align: left;
-  color: #ffffff;
-  line-height: 20px;
-}
-.table-row-tag-item .left {
-  padding: 0 4px;
-  background: #fff;
-  white-space: nowrap;
-}
-.table-row-tag-item .right {
-  display: flex;
-  align-items: center;
-  padding: 0 8px;
-  height: calc(100% + 2px);
-  flex-wrap: nowrap;
-  white-space: nowrap;
-}
-.table-row-tag-item .right .right-num {
-  width: 18px;
-  height: 18px;
-  line-height: 18px;
-  text-align: center;
-  background: #fff;
-  border-radius: 50%;
-  font-size: 11px;
-  font-weight: 600;
-  margin-left: 4px;
-}
-/* 总部蓝色，服务端橙色 HQ=总部标签,SERVICE=服务标签*/
-.table-row-tag-item-HQ .left,
-.table-row-tag-item-HQ .right .right-num {
-  color: rgba(23, 115, 250, 0.8);
-}
-.table-row-tag-item-HQ {
-  border-color: rgba(23, 115, 250, 0.8);
-}
-.table-row-tag-item-HQ .right {
-  background: rgba(23, 115, 250, 0.8);
-}
-.table-row-tag-item-SERVICE .left,
-.table-row-tag-item-SERVICE .right .right-num {
-  color: rgba(255, 111, 0, 0.8);
-}
-.table-row-tag-item-SERVICE {
-  border-color: rgba(255, 111, 0, 0.8);
-}
-.table-row-tag-item-SERVICE .right {
-  background: rgba(255, 111, 0, 0.8);
-}
+@import url("../../static/tag/tagItemList.css");
 </style>
 <style scoped>
 .page.free-tag-list {

@@ -1,11 +1,68 @@
 <template>
 <div class="page free-tag-edit">
-    <div class="page-head">
+    <div class="page-head bg-grey">
       <span class="page-head-txt">批量编辑</span>
     </div>
     <div class="page-main">
-      <div class="table-wrap">
-批量编辑内容
+      <div class="page-main-content-wrap">
+        <el-form 
+          label-position="top" 
+          :model="info" 
+          :rules="rules" 
+          ref="editForm" 
+          size="mini">
+          <el-form-item label="标签动作" prop="action">
+            <div class="tag-action-item-wrap">
+              <div
+                v-for="item in tagActionOptions" 
+                :key="item.value"
+                @click="handleClickAction(item)"
+                :class="[(item.value === info.action) ? 'tag-action-item-active' : 'tag-action-item']">
+                <div class="img">
+                  <img :src="`../../static/image/tag/${item.img}${(item.value === info.action) ? '-active': ''}.png`" />
+                </div>
+                <div class="right">
+                  <div>{{item.r1}}</div>
+                  <div>{{item.r2}}</div>
+                </div>
+              </div>
+            </div>
+          </el-form-item>
+          <el-form-item label="选择标签" prop="tags">
+            此处应有组件
+            <span>温馨提示：最多可选择10个标签</span>
+          </el-form-item>
+          <el-form-item prop="subject">
+            <div class="choose-tag" slot="label">
+              <span>选择主体</span>
+              <el-popover placement="right" trigger="hover">
+                <div>
+                  一次批量操作只能针对同一个主体下的客户标记或移除标签。
+                </div>
+                <img
+                  class="tip"
+                  slot="reference"
+                  src="../../static/image/common/info.png"
+                />
+              </el-popover>
+            </div>
+            <el-select 
+              v-model="info.subject" 
+              placeholder="请选择">
+              <el-option
+                v-for="item in subOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="选择客户" prop="custom">
+            <div>
+              此处应有显示
+            </div>
+          </el-form-item>
+        </el-form>
       </div>
     </div>
 </template>
@@ -14,92 +71,64 @@ module.exports = {
   name: "free-tag-list",
   data() {
     return {
-     
+      tagActionOptions: [
+        {
+          value: "add",
+          img: "add",
+          r1: "标记标签",
+          r2: "给客户批量标记标签",
+        },
+        {
+          value: "del",
+          img: "del",
+          r1: "移除标签",
+          r2: "给客户批量移除标签",
+        },
+      ],
+      info: {
+        action: "",
+        tags: [],
+      },
+      rules: {
+        action: [
+          {
+            required: true,
+            message: "标签动作不可为空，请选择",
+            trigger: "blur",
+          },
+        ],
+        tags: [],
+        subject: [
+          {
+            required: true,
+            message: "选择主体不可为空，请选择",
+            trigger: "blur",
+          },
+        ],
+        custom: [],
+      },
+      subOptions: [],
     };
   },
   created() {
+    this.handleClickAction(this.tagActionOptions[0]);
     this.getTableData();
+    this.getSubOptions();
   },
   methods: {
     getTableData() {},
+    handleClickAction(item) {
+      this.$set(this.info, "action", item && item.value);
+    },
+    getSubOptions() {},
   },
 };
 </script>
 <style>
-@import url("../../static/tag/freeTagEdit.css");
-.table-row-tag-list-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  max-width: 100%;
-  overflow: auto;
-}
-.table-row-tag-item {
-  border: 1px solid rgba(23, 115, 250, 0.8);
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  border-radius: 2px;
-  width: fit-content;
-  margin-right: 8px;
-  margin-bottom: 8px;
-  /* overflow: hidden; */
-}
-
-.table-row-tag-item .tag-txt {
-  font-size: 12px;
-  font-weight: 400;
-  text-align: left;
-  color: #ffffff;
-  line-height: 20px;
-}
-.table-row-tag-item .left {
-  padding: 0 4px;
-  background: #fff;
-  white-space: nowrap;
-}
-.table-row-tag-item .right {
-  display: flex;
-  align-items: center;
-  padding: 0 8px;
-  height: calc(100% + 2px);
-  flex-wrap: nowrap;
-  white-space: nowrap;
-}
-.table-row-tag-item .right .right-num {
-  width: 18px;
-  height: 18px;
-  line-height: 18px;
-  text-align: center;
-  background: #fff;
-  border-radius: 50%;
-  font-size: 11px;
-  font-weight: 600;
-  margin-left: 4px;
-}
-/* 总部蓝色，服务端橙色 HQ=总部标签,SERVICE=服务标签*/
-.table-row-tag-item-HQ .left,
-.table-row-tag-item-HQ .right .right-num {
-  color: rgba(23, 115, 250, 0.8);
-}
-.table-row-tag-item-HQ {
-  border-color: rgba(23, 115, 250, 0.8);
-}
-.table-row-tag-item-HQ .right {
-  background: rgba(23, 115, 250, 0.8);
-}
-.table-row-tag-item-SERVICE .left,
-.table-row-tag-item-SERVICE .right .right-num {
-  color: rgba(255, 111, 0, 0.8);
-}
-.table-row-tag-item-SERVICE {
-  border-color: rgba(255, 111, 0, 0.8);
-}
-.table-row-tag-item-SERVICE .right {
-  background: rgba(255, 111, 0, 0.8);
-}
+@import url("../../static/tag/tagItemList.css");
 </style>
 <style scoped>
+@import url("../../static/tag/freeTagEdit.css");
 .page.free-tag-list {
   height: 100%;
   width: 100%;

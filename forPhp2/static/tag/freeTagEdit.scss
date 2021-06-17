@@ -1,5 +1,79 @@
-.free-tag-edit {
-  .table-wrap {
-    color: #f00;
+.page.free-tag-edit {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  overflow: hidden;
+
+  .page-head {
+    display: flex;
+    align-items: center;
+    height: 58px;
+
+    .page-head-txt {
+      font-size: 20px;
+      font-family: PingFangSC, PingFangSC-Medium;
+      font-weight: 500;
+      text-align: left;
+      color: rgba(0, 0, 0, 0.85);
+      line-height: 28px;
+      padding-left: 24px;
+      box-sizing: border-box;
+    }
   }
+
+  .page-main {
+    flex: 1;
+    box-sizing: border-box;
+    overflow-y: auto;
+  }
+
+  .page-main-content-wrap {
+    padding: 24px;
+
+    .tag-action-item-wrap {
+      display: flex;
+
+      .tag-action-item-active,
+      .tag-action-item {
+        height: 80px;
+        width: 212px;
+        box-sizing: border-box;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        border-radius: 2px;
+        margin-right: 16px;
+
+        .img {
+          width: 33px;
+          height: 33px;
+          margin-right: 18px;
+
+          img {
+            width: 100%;
+            height: 100%;
+          }
+        }
+      }
+    }
+
+    .tag-action-item-active {
+      border-color: #1773FA;
+    }
+    .choose-tag {
+      display: inline-flex;
+      align-items: center;
+      .tip {
+        display: block;
+        width: 18px;
+        height: 18px;
+        margin-left: 8px;
+      }
+    }
+
+  }
+
 }

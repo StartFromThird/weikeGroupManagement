@@ -1,3 +1,81 @@
-.free-tag-edit .table-wrap {
-  color: #f00;
+.page.free-tag-edit {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  overflow: hidden;
+}
+
+.page.free-tag-edit .page-head {
+  display: flex;
+  align-items: center;
+  height: 58px;
+}
+
+.page.free-tag-edit .page-head .page-head-txt {
+  font-size: 20px;
+  font-family: PingFangSC, PingFangSC-Medium;
+  font-weight: 500;
+  text-align: left;
+  color: rgba(0, 0, 0, 0.85);
+  line-height: 28px;
+  padding-left: 24px;
+  box-sizing: border-box;
+}
+
+.page.free-tag-edit .page-main {
+  flex: 1;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.page.free-tag-edit .page-main-content-wrap {
+  padding: 24px;
+}
+
+.page.free-tag-edit .page-main-content-wrap .tag-action-item-wrap {
+  display: flex;
+}
+
+.page.free-tag-edit .page-main-content-wrap .tag-action-item-wrap .tag-action-item-active,
+.page.free-tag-edit .page-main-content-wrap .tag-action-item-wrap .tag-action-item {
+  height: 80px;
+  width: 212px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 2px;
+  margin-right: 16px;
+}
+
+.page.free-tag-edit .page-main-content-wrap .tag-action-item-wrap .tag-action-item-active .img,
+.page.free-tag-edit .page-main-content-wrap .tag-action-item-wrap .tag-action-item .img {
+  width: 33px;
+  height: 33px;
+  margin-right: 18px;
+}
+
+.page.free-tag-edit .page-main-content-wrap .tag-action-item-wrap .tag-action-item-active .img img,
+.page.free-tag-edit .page-main-content-wrap .tag-action-item-wrap .tag-action-item .img img {
+  width: 100%;
+  height: 100%;
+}
+
+.page.free-tag-edit .page-main-content-wrap .tag-action-item-active {
+  border-color: #1773FA;
+}
+
+.page.free-tag-edit .page-main-content-wrap .choose-tag {
+  display: inline-flex;
+  align-items: center;
+}
+
+.page.free-tag-edit .page-main-content-wrap .choose-tag .tip {
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin-left: 8px;
 }
