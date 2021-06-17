@@ -1,0 +1,159 @@
+<template>
+<div class="page free-tag-edit">
+    <div class="page-head">
+      <span class="page-head-txt">批量编辑</span>
+    </div>
+    <div class="page-main">
+      <div class="table-wrap">
+批量编辑内容
+      </div>
+    </div>
+</template>
+<script>
+module.exports = {
+  name: "free-tag-list",
+  data() {
+    return {
+     
+    };
+  },
+  created() {
+    this.getTableData();
+  },
+  methods: {
+    getTableData() {},
+  },
+};
+</script>
+<style>
+@import url("../../static/tag/freeTagEdit.css");
+.table-row-tag-list-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  max-width: 100%;
+  overflow: auto;
+}
+.table-row-tag-item {
+  border: 1px solid rgba(23, 115, 250, 0.8);
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  border-radius: 2px;
+  width: fit-content;
+  margin-right: 8px;
+  margin-bottom: 8px;
+  /* overflow: hidden; */
+}
+
+.table-row-tag-item .tag-txt {
+  font-size: 12px;
+  font-weight: 400;
+  text-align: left;
+  color: #ffffff;
+  line-height: 20px;
+}
+.table-row-tag-item .left {
+  padding: 0 4px;
+  background: #fff;
+  white-space: nowrap;
+}
+.table-row-tag-item .right {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  height: calc(100% + 2px);
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+.table-row-tag-item .right .right-num {
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+  text-align: center;
+  background: #fff;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 4px;
+}
+/* 总部蓝色，服务端橙色 HQ=总部标签,SERVICE=服务标签*/
+.table-row-tag-item-HQ .left,
+.table-row-tag-item-HQ .right .right-num {
+  color: rgba(23, 115, 250, 0.8);
+}
+.table-row-tag-item-HQ {
+  border-color: rgba(23, 115, 250, 0.8);
+}
+.table-row-tag-item-HQ .right {
+  background: rgba(23, 115, 250, 0.8);
+}
+.table-row-tag-item-SERVICE .left,
+.table-row-tag-item-SERVICE .right .right-num {
+  color: rgba(255, 111, 0, 0.8);
+}
+.table-row-tag-item-SERVICE {
+  border-color: rgba(255, 111, 0, 0.8);
+}
+.table-row-tag-item-SERVICE .right {
+  background: rgba(255, 111, 0, 0.8);
+}
+</style>
+<style scoped>
+.page.free-tag-list {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  overflow: hidden;
+}
+.free-tag-list .page-head {
+  display: flex;
+  align-items: center;
+  height: 58px;
+}
+.free-tag-list .page-head .page-head-txt {
+  font-size: 20px;
+  font-family: PingFangSC, PingFangSC-Medium;
+  font-weight: 500;
+  text-align: left;
+  color: rgba(0, 0, 0, 0.85);
+  line-height: 28px;
+  padding-left: 24px;
+  box-sizing: border-box;
+}
+.free-tag-list .page-main {
+  flex: 1;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+.free-tag-list .page-main .table-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #fff;
+  height: 100%;
+}
+.free-tag-list .page-main .table-wrap .table-head {
+  /* height: 64px; */
+  align-items: center;
+  padding: 20px 24px;
+}
+.free-tag-list .page-main .table-wrap .table-head .table-head-txt {
+  font-size: 16px;
+  font-weight: 500;
+  text-align: left;
+  color: #000000;
+  line-height: 24px;
+}
+.free-tag-list .page-main .table-wrap .table-main {
+  flex: 1;
+  padding: 0 24px;
+}
+
+.free-tag-list .table-pagination-wrap {
+  padding: 8px 24px 24px;
+}
+</style>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>批量编辑</title>
+    <link rel="stylesheet" href="./static/libs/element/element.css" />
+    <link rel="stylesheet" href="./static/style/base.css" />
+    <script src="./static/libs/vue-dev.js"></script>
+    <script src="./static/libs/http-vue-loader.js"></script>
+    <script src="./static/libs/element/element.js"></script>
+    <script src="./static/libs/vueRouter.js"></script>
+    <link rel="stylesheet" href="./static/elementTheme/theme/index.css" />
+  </head>
+  <body>
+    <div id="freeTagEdit" class="p-24 bg-grey h-100vh">
+      <free-tag-edit />
+    </div>
+    <script>
+      new Vue({
+        components: {
+          freeTagEdit: httpVueLoader("./views/tag/freeTagEdit.vue"),
+        },
+        el: "#freeTagEdit",
+        name: "freeTagEdit",
+      });
+    </script>
+  </body>
+</html>
