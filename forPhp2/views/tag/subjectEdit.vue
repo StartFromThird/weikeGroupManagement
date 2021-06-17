@@ -4,7 +4,11 @@
       <span class="page-head-txt">编辑配置主体</span>
       <el-popover placement="right" trigger="hover">
         <div>
-          首次新建并按照步骤配置主体配置需保存，保存后不可编辑修改，仅可新增字段！
+          {{
+            isQW && pageType === "add"
+              ? "只可编辑配置主体相关名称需保存，保存后不可编辑修改！"
+              : "首次新建并按照步骤配置主体配置需保存，保存后不可编辑修改，仅可新增字段！"
+          }}
         </div>
         <img
           class="tip"
@@ -120,7 +124,13 @@
               src="../../static/image/common/qywx@2x.png"
               alt="企微"
             />
-            <div class="txt">{{ `${info.sub_type === 'HUMAN' ? info.headTxt + '@' : ''}${info.sub_name}` }}</div>
+            <div class="txt">
+              {{
+                `${info.sub_type === "HUMAN" ? info.headTxt + "@" : ""}${
+                  info.sub_name
+                }`
+              }}
+            </div>
           </div>
           <div class="edit-info-row">
             <div class="edit-info-txt" v-if="type === 'HUMAN'">
@@ -217,7 +227,10 @@
               <el-table-column label="操作" width="180">
                 <template slot-scope="scope">
                   <div class="operate-box flex-row-between">
-                    <div class="operate-box-item" v-if=" info.sub_plat_type == 'BUSINESS'">
+                    <div
+                      class="operate-box-item"
+                      v-if="info.sub_plat_type == 'BUSINESS'"
+                    >
                       <el-button
                         class="fw400"
                         v-if="scope.row.status === '1'"
@@ -582,6 +595,10 @@ module.exports = {
         if (this.isQW) {
           // 调后台接口
           console.log("调后台接口====", this.info);
+          // this.info.id = "2";
+          // setTimeout(() => {
+          //   this.afterConfirm();        
+          // }, 3000);
         } else {
           let checkTableRes = this.checkTableValue();
           if (checkTableRes) {
@@ -606,6 +623,14 @@ module.exports = {
           return;
         });
       }
+      
+    },
+    // 保存主体数据后
+    afterConfirm() {
+      let href = `.#/subjectListDetail?id=${this.info.id}&type=${
+        this.$route.query && this.$route.query.type
+      }`;
+      location.href = href;
     },
     // table方法
     addKeyItem() {
@@ -763,12 +788,18 @@ module.exports = {
         .then(() => {
           this.info.sub_plat_type = v;
           this.info.sub_plat_type_last = v;
+          this.info.sub_name = "";
+          this.info.sub_en_name = "";
+          this.info.remark = "";
+          this.info.appid = "";
+          this.info.app_secret = "";
           let curO = this.platformOption.filter((ele) => {
             return ele.value === v;
           });
 
           if (curO[0] && curO[0].is_qw) {
             this.isQW = true;
+            this.tableData = [];
             return;
           } else {
             this.isQW = false;
@@ -781,7 +812,6 @@ module.exports = {
         });
     },
     getPlatformOption() {
-      console.log("查平台渠道===");
       this.platformOption = [
         {
           label: "企微系统",
@@ -805,7 +835,6 @@ module.exports = {
       }
     },
     initPage() {
-      console.log('init====');
       this.getWidth();
       if (this.type === "HUMAN") {
         this.getPlatformOption();
@@ -838,6 +867,7 @@ module.exports = {
     },
   },
   components: {},
+  name: "subjectEdit",
 };
 </script>
 <style scoped>

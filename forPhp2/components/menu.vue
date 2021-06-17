@@ -39,7 +39,7 @@
         >
           <div class="s-menu flex-between">
             <div class="s-menu-left">
-              {{ (menu.name.length > 9 ? menu.name.slice(0, 8) + '...' : menu.name) || '-' }}
+              {{ (menu.name.length > 8 ? menu.name.slice(0, 7) + '...' : menu.name) || '-' }}
             </div>
             <div class="s-menu-right">
               <i
@@ -196,6 +196,11 @@ module.exports = {
       }
     },
   },
+  computed: {
+    menuChange() {
+
+    }
+  }
 };
 </script>
 <style>
