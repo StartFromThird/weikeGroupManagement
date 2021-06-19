@@ -17,7 +17,7 @@ module.exports = {
     };
   },
   components: {
-    "main-menu": httpVueLoader("./components/menu.vue"),
+    "main-menu": httpVueLoader("./components/tagLayout/menu.vue"),
   },
 };
 </script>

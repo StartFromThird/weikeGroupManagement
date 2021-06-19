@@ -131,6 +131,9 @@ img {
 .p-24 {
   padding: 24px;
 }
+.m-l-8 {
+  margin-left: 8px;
+}
 .bg-grey {
   background: rgba(0, 0, 0, 0.04);
 }

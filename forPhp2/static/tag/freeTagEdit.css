@@ -34,6 +34,14 @@
   padding: 24px;
 }
 
+.page.free-tag-edit .page-main-content-wrap .choose-tag-tip {
+  font-size: 14px;
+  font-weight: 400;
+  text-align: left;
+  color: rgba(0, 0, 0, 0.45);
+  line-height: 22px;
+}
+
 .page.free-tag-edit .page-main-content-wrap .tag-action-item-wrap {
   display: flex;
 }
@@ -49,6 +57,7 @@
   border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: 2px;
   margin-right: 16px;
+  cursor: pointer;
 }
 
 .page.free-tag-edit .page-main-content-wrap .tag-action-item-wrap .tag-action-item-active .img,
@@ -64,8 +73,25 @@
   height: 100%;
 }
 
-.page.free-tag-edit .page-main-content-wrap .tag-action-item-active {
+.page.free-tag-edit .page-main-content-wrap .tag-action-item-wrap .tag-action-item-active {
   border-color: #1773FA;
+}
+
+.page.free-tag-edit .page-main-content-wrap .tag-action-item-wrap .right .r1,
+.page.free-tag-edit .page-main-content-wrap .tag-action-item-wrap .right .r2 {
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.page.free-tag-edit .page-main-content-wrap .tag-action-item-wrap .right .r1 {
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 4px;
+}
+
+.page.free-tag-edit .page-main-content-wrap .tag-action-item-wrap .right .r2 {
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.45);
 }
 
 .page.free-tag-edit .page-main-content-wrap .choose-tag {

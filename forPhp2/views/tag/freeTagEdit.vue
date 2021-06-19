@@ -5,64 +5,79 @@
     </div>
     <div class="page-main">
       <div class="page-main-content-wrap">
-        <el-form 
-          label-position="top" 
-          :model="info" 
-          :rules="rules" 
-          ref="editForm" 
-          size="mini">
-          <el-form-item label="标签动作" prop="action">
-            <div class="tag-action-item-wrap">
-              <div
-                v-for="item in tagActionOptions" 
-                :key="item.value"
-                @click="handleClickAction(item)"
-                :class="[(item.value === info.action) ? 'tag-action-item-active' : 'tag-action-item']">
-                <div class="img">
-                  <img :src="`../../static/image/tag/${item.img}${(item.value === info.action) ? '-active': ''}.png`" />
+        <el-row>
+          <el-col :sm="24" :md="12" :lg="12">
+            <el-form 
+              label-position="top" 
+              :model="info" 
+              :rules="rules" 
+              ref="freeTagEditForm" 
+              size="mini">
+              <el-form-item label="标签动作" prop="action">
+                <div class="tag-action-item-wrap">
+                  <div
+                    v-for="item in tagActionOptions" 
+                    :key="item.value"
+                    @click="handleClickAction(item)"
+                    :class="[(item.value === info.action) ? 'tag-action-item-active' : 'tag-action-item']">
+                    <div class="img">
+                      <img :src="`../../static/image/tag/${item.img}${(item.value === info.action) ? '-active': ''}.png`" />
+                    </div>
+                    <div class="right">
+                      <div class="r1">{{item.r1}}</div>
+                      <div class="r2">{{item.r2}}</div>
+                    </div>
+                  </div>
                 </div>
-                <div class="right">
-                  <div>{{item.r1}}</div>
-                  <div>{{item.r2}}</div>
+              </el-form-item>
+              <el-form-item label="选择标签" prop="fakeRequire">
+                此处应有组件
+                <div class="choose-tag-tip">温馨提示：最多可选择10个标签</div>
+              </el-form-item>
+              <el-form-item prop="subject">
+                <div class="choose-tag" slot="label">
+                  <span>选择主体</span>
+                  <el-popover placement="right" trigger="hover">
+                    <div>
+                      一次批量操作只能针对同一个主体下的客户标记或移除标签。
+                    </div>
+                    <img
+                      draggable="false"
+                      class="tip"
+                      slot="reference"
+                      src="../../static/image/common/info.png"
+                    />
+                  </el-popover>
                 </div>
+                <el-select 
+                  style="width: 100%;"
+                  v-model="info.subject" 
+                  placeholder="请选择"
+                  @change="subjectChange">
+                  <el-option
+                    v-for="item in subOptions"
+                    :key="item.id"
+                    :label="item.name"
+                    :value="item.id">
+                  </el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="选择客户" prop="fakeRequire">
+                <div style="width: 100%;">
+                  <choose-customer
+                    ref="tagChooseCustomer"
+                    :subject="`${info.subject}`"
+                    @updateselectd="updateselectd">
+                  </choose-customer>  
+                </div>
+              </el-form-item>
+              <div class="flex-row-end mt-20">
+                <el-button size="mini" @click="confirmGoBack">取消</el-button>
+                <el-button size="mini" type="primary" @click="save">提交</el-button>
               </div>
-            </div>
-          </el-form-item>
-          <el-form-item label="选择标签" prop="tags">
-            此处应有组件
-            <span>温馨提示：最多可选择10个标签</span>
-          </el-form-item>
-          <el-form-item prop="subject">
-            <div class="choose-tag" slot="label">
-              <span>选择主体</span>
-              <el-popover placement="right" trigger="hover">
-                <div>
-                  一次批量操作只能针对同一个主体下的客户标记或移除标签。
-                </div>
-                <img
-                  class="tip"
-                  slot="reference"
-                  src="../../static/image/common/info.png"
-                />
-              </el-popover>
-            </div>
-            <el-select 
-              v-model="info.subject" 
-              placeholder="请选择">
-              <el-option
-                v-for="item in subOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="选择客户" prop="custom">
-            <div>
-              此处应有显示
-            </div>
-          </el-form-item>
-        </el-form>
+            </el-form>
+          </el-col>
+        </el-row>
       </div>
     </div>
 </template>
@@ -70,6 +85,20 @@
 module.exports = {
   name: "free-tag-list",
   data() {
+    const validatePassCustoms = (rule, value, callback) => {
+      if (!value || (value && !value.length)) {
+        callback(new Error("选择客户不可为空，请选择"));
+      } else {
+        callback();
+      }
+    };
+    const validatePassTags = (rule, value, callback) => {
+      if (!value || (value && !value.length)) {
+        callback(new Error("选择标签不可为空，请选择"));
+      } else {
+        callback();
+      }
+    };
     return {
       tagActionOptions: [
         {
@@ -88,6 +117,10 @@ module.exports = {
       info: {
         action: "",
         tags: [],
+        custom: [],
+        subject: '',
+        lastSubject: '',
+        fakeRequire: true,
       },
       rules: {
         action: [
@@ -97,7 +130,20 @@ module.exports = {
             trigger: "blur",
           },
         ],
-        tags: [],
+        tags: [
+          {
+            required: true,
+            validator: validatePassTags,
+            trigger: "change",
+          },
+        ],
+        fakeRequire: [
+          {
+            required: true,
+            // validator: validatePassCustoms,
+            trigger: "",
+          },
+        ],
         subject: [
           {
             required: true,
@@ -105,84 +151,120 @@ module.exports = {
             trigger: "blur",
           },
         ],
-        custom: [],
       },
       subOptions: [],
     };
   },
   created() {
     this.handleClickAction(this.tagActionOptions[0]);
-    this.getTableData();
     this.getSubOptions();
   },
   methods: {
-    getTableData() {},
+    confirmGoBack() {},
+    subjectChange(v) {
+      this.info.subject = this.info.lastSubject
+      this.$confirm("切换主体，当前选中内容将失去！", "温馨提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+      .then(() => {
+        this.info.subject = v
+        this.info.lastSubject = v
+        let t = this.$refs.tagChooseCustomer;
+        if (t) {
+          t.reset()
+        }
+      })
+      .catch(() => {
+        console.log("取消切换=====");
+      });
+
+    },
+    save() {
+      this.$refs["freeTagEditForm"].validate((valid) => {
+        console.log("save===", valid);
+        if (valid) {
+          if (
+            !this.info.custom ||
+            (this.info.custom && !this.info.custom.length)
+          ) {
+            this.$message.error("选择客户不可为空，请选择");
+            return;
+          }
+        }
+      });
+    },
     handleClickAction(item) {
       this.$set(this.info, "action", item && item.value);
     },
-    getSubOptions() {},
+    getSubOptions() {
+      this.subOptions = [
+        {
+          id: 1,
+          type: "HUMAN",
+          name: "企业微信@百果园224",
+        },
+        {
+          id: 2,
+          type: "HUMAN",
+          name: "企业微信@百果园339",
+        },
+        {
+          id: 3,
+          type: "HUMAN",
+          name: "百果园336",
+        },
+        {
+          id: 5,
+          type: "HUMAN",
+          name: "业务系统@测试",
+        },
+        {
+          id: 7,
+          type: "HUMAN",
+          name: "业务系统@测试2",
+        },
+        {
+          id: 9,
+          type: "HUMAN",
+          name: "业务系统@测试3",
+        },
+        {
+          id: 11,
+          type: "HUMAN",
+          name: "业务系统@ddd",
+        },
+        {
+          id: 12,
+          type: "HUMAN",
+          name: "企业微信@百果园",
+        },
+      ];
+      this.$set(
+        this.info,
+        "subject",
+        this.subOptions[0] && this.subOptions[0].id
+      );
+      this.$set(
+        this.info,
+        "lastSubject",
+        this.subOptions[0] && this.subOptions[0].id
+      );
+    },
+    updateselectd(arr) {
+      this.$set(this.info, "custom", JSON.parse(JSON.stringify(arr)));
+      console.log("=====", this.info.custom);
+    },
+  },
+  components: {
+    "choose-customer": httpVueLoader("./components/chooseCustomer.vue"),
   },
 };
 </script>
 <style>
-@import url("../../static/tag/tagItemList.css");
+/* @import url("../../static/tag/tagItemList.css"); */
 </style>
 <style scoped>
 @import url("../../static/tag/freeTagEdit.css");
-.page.free-tag-list {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  background: #fff;
-  overflow: hidden;
-}
-.free-tag-list .page-head {
-  display: flex;
-  align-items: center;
-  height: 58px;
-}
-.free-tag-list .page-head .page-head-txt {
-  font-size: 20px;
-  font-family: PingFangSC, PingFangSC-Medium;
-  font-weight: 500;
-  text-align: left;
-  color: rgba(0, 0, 0, 0.85);
-  line-height: 28px;
-  padding-left: 24px;
-  box-sizing: border-box;
-}
-.free-tag-list .page-main {
-  flex: 1;
-  box-sizing: border-box;
-  overflow-y: auto;
-}
-.free-tag-list .page-main .table-wrap {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: #fff;
-  height: 100%;
-}
-.free-tag-list .page-main .table-wrap .table-head {
-  /* height: 64px; */
-  align-items: center;
-  padding: 20px 24px;
-}
-.free-tag-list .page-main .table-wrap .table-head .table-head-txt {
-  font-size: 16px;
-  font-weight: 500;
-  text-align: left;
-  color: #000000;
-  line-height: 24px;
-}
-.free-tag-list .page-main .table-wrap .table-main {
-  flex: 1;
-  padding: 0 24px;
-}
-
-.free-tag-list .table-pagination-wrap {
-  padding: 8px 24px 24px;
-}
 </style>
