@@ -193,6 +193,9 @@ module.exports = {
       if (to.query) {
         this.active = `${to.query.id}` || null;
         this.activeC = to.query.type;
+        if (to.query.refresh) {
+          this.initMenu();
+        }
       }
     },
   },

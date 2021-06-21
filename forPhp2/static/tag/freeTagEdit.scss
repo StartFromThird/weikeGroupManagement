@@ -107,4 +107,20 @@
 
   }
 
+  .select-tag-wrap {
+    position: relative;
+    .el-cascader__tags {
+      .el-tag {
+        display: none;
+      }
+
+      .right-close {
+        background: none;
+        color: #fff;
+        font-size: 16px;
+        line-height: 16px;
+        cursor: pointer;
+      }
+    }
+  }
 }

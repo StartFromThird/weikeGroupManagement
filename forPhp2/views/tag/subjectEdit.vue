@@ -203,6 +203,7 @@
                   <template v-if="scope.row.type === 'SELECT'">
                     <!-- <el-select v-if="scope.row.not_edit !== 1" -->
                     <el-select
+                      v-if="scope.row.not_edit !== 1"
                       style="width: 100%"
                       size="mini"
                       v-model="scope.row.options"
@@ -215,6 +216,18 @@
                       :class="[scope.row.not_edit === 1 ? 'not_edit' : '']"
                     >
                     </el-select>
+                    <div class="value-tag-wrap"
+                      v-if="scope.row.not_edit === 1">
+                      <el-tag
+                        v-for="tag in scope.row.options"
+                        size="mini"
+                        type="info"
+                        :key="tag"
+                        effect="plain"
+                      >
+                        {{ tag }}
+                      </el-tag>
+                    </div>
                   </template>
                   <el-input
                     v-else
@@ -597,7 +610,7 @@ module.exports = {
           console.log("调后台接口====", this.info);
           // this.info.id = "2";
           // setTimeout(() => {
-          //   this.afterConfirm();        
+          //   this.afterConfirm();
           // }, 3000);
         } else {
           let checkTableRes = this.checkTableValue();
@@ -623,7 +636,6 @@ module.exports = {
           return;
         });
       }
-      
     },
     // 保存主体数据后
     afterConfirm() {
@@ -713,7 +725,12 @@ module.exports = {
             status: "0",
             is_sys: "1",
             weigh: 3,
-            options: ["一二三四五六七八九", "b", "a", "一二三"],
+            options: [
+              "一二三四五六七八九一二三四五六七八九一二三四五六七八九",
+              "b",
+              "a",
+              "一二三",
+            ],
             not_edit: 1,
           },
         ],
@@ -871,8 +888,17 @@ module.exports = {
 };
 </script>
 <style scoped>
-.edit-table-wrap .el-select.not_edit .el-tag {
-  background: #fff;
+.edit-table-wrap .el-select .el-select__tags {
+  overflow-x: auto;
+}
+.value-tag-wrap {
+  overflow-x: auto;
+  border: 1px solid #e4e7ed;
+  background: #f5f7fa;
+  border-radius: 2px;
+}
+.value-tag-wrap .el-tag {
+  margin: 2px 0 2px 6px;
 }
 </style>
 <style scoped>

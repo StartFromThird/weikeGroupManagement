@@ -105,3 +105,19 @@
   height: 18px;
   margin-left: 8px;
 }
+
+.page.free-tag-edit .select-tag-wrap {
+  position: relative;
+}
+
+.page.free-tag-edit .select-tag-wrap .el-cascader__tags .el-tag {
+  display: none;
+}
+
+.page.free-tag-edit .select-tag-wrap .el-cascader__tags .right-close {
+  background: none;
+  color: #fff;
+  font-size: 16px;
+  line-height: 16px;
+  cursor: pointer;
+}
