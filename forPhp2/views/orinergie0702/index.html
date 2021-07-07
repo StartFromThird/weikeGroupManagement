@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no"
+    />
+    <script>
+      const WIDTH = 750; //设计稿尺寸
+      const setView = () => {
+        document.querySelector('html').style.fontSize =
+          (100 * screen.width) / WIDTH + "px";
+      };
+      window.onorientationchange = setView;
+      setView();
+    </script>
+    <title>线上名片</title>
+    <style>
+      body {
+        margin: 0;
+        height: 100vh;
+        width: 100vw;
+        box-sizing: border-box;
+        padding: 0.3rem;
+        background: url("../../static/orinergie/img/codeBg.png") no-repeat
+          center center;
+        background-size: cover;
+      }
+      .page-wrap {
+        min-height: calc(100vh - 0.6rem);
+        width: calc(100vw - 0.6rem);
+        margin: 0vh auto;
+        box-sizing: border-box;
+        overflow: hidden;
+        background-color: rgba(255, 255, 255, 0.9);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.58rem 0;
+      }
+      .page-wrap .code-head {
+        width: 3.2rem;
+        font-size: 0;
+      }
+      .page-wrap .code-head img,
+      .page-wrap .code-main img {
+        width: 100%;
+      }
+      .page-wrap .code-main {
+        width: 5.12rem;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        font-size: 0;
+      }
+      .page-wrap .code-foot {
+        height: 2.54rem;
+        font-size: 0;
+      }
+      .page-wrap .code-foot img {
+        width: 1.96rem;
+        height: 1.96rem;
+        display: block;
+        margin: 0 auto 0.2rem;
+        outline: 0.08rem solid #fff;
+      }
+      .page-wrap .code-foot .code-foot-text {
+        font-size: 12px;
+        font-family: PingFangSC-Regular, PingFang SC;
+        font-weight: 400;
+        color: #231916;
+        list-style: 0.34rem;
+      }
+      @media screen and (max-width: 380px) and (max-height: 800px){
+        .page-wrap {
+          padding: 0.3rem 0;
+        }
+        .page-wrap .code-head {
+          width: 3rem;
+        }
+        .page-wrap .code-main {
+          width: 5rem;
+        }
+        .page-wrap .code-foot img {
+          width: 1.8rem;
+          height: 1.8rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-wrap">
+      <div class="code-head">
+        <img draggable="false" src="../../static/orinergie/img/codeHead.svg" />
+      </div>
+      <div class="code-main">
+        <img draggable="false" src="../../static/orinergie/img/codeMain.png" />
+      </div>
+      <div class="code-foot" id="img" style="text-align: center">
+        <img
+          draggable="false"
+          src="https://wework.qpic.cn/wwpic/932334_ebMBUROXRgyN4zy_1625123336/0"
+        />
+        <span class="code-foot-text">扫 码 关 注 专 属 顾 问</span>
+      </div>
+    </div>
+    <script>
+      document.body.addEventListener(
+        "touchmove",
+        function (e) {
+          e.preventDefault(); // 阻止默认的处理方式(阻止下拉滑动的效果)
+        },
+        { passive: false }
+      );
+    </script>
+  </body>
+</html>
