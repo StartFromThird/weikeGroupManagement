@@ -453,9 +453,10 @@ module.exports = {
             <div style="margin-left: 30px;">您即将给 ${this.info.custom.length} 个客户${this.info.action === 'add' ? '标记' : '移除'}以下标签：</div>
           </div>`
           let tags = ''
-          this.info.tags.forEach(tag => {
+          let formatArr = [...this.info.tags].slice(0, 3);
+          formatArr.forEach(tag => {
             tags += `
-            <div class="table-row-tag-item table-row-tag-item-${tag.group_tag_type}>
+            <div class="table-row-tag-item table-row-tag-item-${tag.group_tag_type}">
               <div class="left tag-txt">${tag.group_name}</div>
               <div class="right">
                 <div class="right-txt tag-txt">${tag.tag_name}</div>
