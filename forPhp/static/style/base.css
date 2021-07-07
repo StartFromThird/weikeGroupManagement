@@ -96,3 +96,6 @@ img {
 ::-webkit-scrollbar-corner {
   background: #f6f6f6;
 }
+.el-button span {
+  font-weight: 400;
+}

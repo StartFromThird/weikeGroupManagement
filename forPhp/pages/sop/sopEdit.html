@@ -5,7 +5,8 @@
     <title>新建/编辑企业群发SOP</title>
     <link rel="stylesheet" href="../../static/libs/element/element.css" />
     <link rel="stylesheet" href="../../static/style/base.css" />
-    <script src="../../static/libs/vue.js"></script>
+    <script src="../../static/libs/vue-dev.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="../../static/libs/element/element.js"></script>
     <link rel="stylesheet" href="../../static/sop/sopEdit.css" />
     <!-- 主题引入 -->
@@ -94,7 +95,10 @@
                 type="datetime"
                 placeholder="选择日期时间"
                 clearable
+                format="yyyy-MM-dd HH:mm:ss"
                 value-format="yyyy-MM-dd HH:mm:ss"
+                @change="sendTimeChange"
+                :picker-options="sendTimePickerOptions"
               ></el-date-picker>
             </el-form-item>
           </el-col>
@@ -211,12 +215,18 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <div class="under-tip" v-if="roleStr || tagStr || memberOrgStr">
+        <div class="under-tip" v-if="info && (info.option_role_F || info.option_tag_F || info.option_department_F)">
           <span class="grey-txt" style="margin-bottom: 20px">
-            将发送消息给{{ memberOrgStr }}…且满足“{{ roleStr }}”等 {{writeBackSelectedMemberOrg.length}}
-            位企微成员所添加的满足&nbsp;“{{ tagStr }}”&nbsp;等标签的客户。
+            将发送消息给{{ info.option_department_F }}且满足“{{ info.option_role_F }}”等 {{writeBackSelectedMemberOrg.length}}
+            位企微成员所添加的满足&nbsp;“{{ info.option_tag_F }}”&nbsp;等标签的客户。
           </span>
         </div>
+        <!-- <div class="under-tip" v-if="roleStr || tagStr || memberOrgStr)">
+          <span class="grey-txt" style="margin-bottom: 20px">
+            将发送消息给{{ memberOrgStr }}...且满足“{{ roleStr }}”等 {{writeBackSelectedMemberOrg.length}}
+            位企微成员所添加的满足&nbsp;“{{ tagStr }}”&nbsp;等标签的客户。
+          </span>
+        </div> -->
         <div class="step-divider"></div>
       </div>
       <!-- 四 -->
@@ -238,64 +248,54 @@
               :label="item.name + (item.type == 3 ? index : '')"
               :name="index + ''"
             >
-              <div style="outline: 1px solid #f00">
+              <div>
                 <!-- 文本 emoji 输入 -->
+                {{getByteLen(item.content)}}
                 <div class="text-emoji-content-wrap">
                   <el-input
                     :id="'editContent' + index"
                     type="textarea"
                     v-model="item.content"
                     placeholder="请输入内容"
-                    maxlength="4000"
+                    maxlength="2000"
                     :autosize="{ minRows: 10 }"
                     show-word-limit
                   ></el-input>
-                  <el-popover
-                    v-model="item.emojiPopoverVisible"
-                    placement="top-start"
-                    width="400"
-                    trigger="manual"
+                  <div
+                    class="emoji-btn"
+                    @click="addEmojiPopover(item)"
                   >
-                    <div class="emoji-popover-wrap">
-                      <div class="emoji-popover-head">
-                        <div
-                          class="popover-head-close"
-                          @click="addEmojiPopover(item)"
-                        >
-                          <i class="el-icon-close"></i>
-                        </div>
-                      </div>
-                      <el-tabs v-model="emojiTab">
-                        <el-tab-pane
-                          v-for="(emojiGroup, emojiIndex) in emojiList"
-                          :key="emojiIndex"
-                          :label="emojiGroup.name"
-                          :name="emojiGroup.label"
-                          style="height: 200px; overflow: auto"
-                        >
-                          <div class="emoji-box">
-                            <div
-                              v-for="(subItem, subIndex) in emojiGroup.value"
-                              :key="subIndex"
-                              @click="insertText(subItem, index, item)"
-                            >
-                              <span>{{ subItem }}</span>
-                            </div>
-                          </div>
-                        </el-tab-pane>
-                      </el-tabs>
-                    </div>
-                    <div
-                      class="emoji-btn"
-                      @click="addEmojiPopover(item)"
-                      slot="reference"
+                    <img
+                      src="../../static/image/sop/emoji@2x.png"
+                      alt="表情包"
+                    />
+                  </div>
+                  <el-collapse-transition>
+                  <div 
+                    class="emoji-popover-wrap"
+                    v-show="item.emojiPopoverVisible"
                     >
-                      <img
-                        src="../../static/image/sop/emoji@2x.png"
-                        alt="表情包"
-                      />
-                    </div>
-                  </el-popover>
+                    <el-tabs v-model="emojiTab">
+                      <el-tab-pane
+                        v-for="(emojiGroup, emojiIndex) in emojiList"
+                        :key="emojiIndex"
+                        :label="emojiGroup.name"
+                        :name="emojiGroup.label"
+                        style="height: 200px; overflow: auto"
+                      >
+                        <div class="emoji-box">
+                          <div
+                            v-for="(subItem, subIndex) in emojiGroup.value"
+                            :key="subIndex"
+                            @click="insertText(subItem, index, item)"
+                          >
+                            <span>{{ subItem }}</span>
+                          </div>
+                        </div>
+                      </el-tab-pane>
+                    </el-tabs>
+                  </div>
+                  </el-collapse-transition>
                 </div>
                 <br />
                 <!-- 附件列表 -->
@@ -530,27 +530,38 @@
               <div>
                 <template v-if="info.kpi_cycle_type === '2'">
                   <el-input-number
-                    v-model="info.kpi_cycle"
+                    v-model="info.kpi_cycle_2"
                     :controls="false"
                     :min="1"
                     :step="1"
                   ></el-input-number>
                   <span>天</span>
-                  <span v-if="info.kpi_cycle">
-                    ， 相对发送时间后 {{ info.kpi_cycle }} 天
+                  <span v-if="info.kpi_cycle_2">
+                    ， 相对发送时间后 {{ info.kpi_cycle_2 }} 天
                   </span>
                 </template>
                 <template v-if="info.kpi_cycle_type === '1'">
                   <el-date-picker
-                    v-model="info.kpi_cycle"
+                    v-model="info.kpi_cycle_1"
                     type="datetime"
                     placeholder="选择日期时间"
                     clearable
+                    format="yyyy-MM-dd HH:mm:ss"
+                    value-format="yyyy-MM-dd HH:mm:ss"
                   ></el-date-picker>
                 </template>
               </div>
             </el-form-item>
           </el-col>
+        </el-row>
+        <el-row>
+          <el-button 
+            size="mini" 
+            type="primary" 
+            :loading="test.btnLoading" 
+            @click="downLoadFile">
+            下载测试判断
+          </el-button>
         </el-row>
       </div>
     </el-form>
@@ -573,7 +584,9 @@
         ref="webPageForm"
         label-width="100px"
         label-position="top"
+        size="mini"
       >
+      {{getByteLen(webPageForm.title)}}
         <el-form-item label="网页标题：" prop="title">
           <el-input
             v-model="webPageForm.title"
@@ -641,8 +654,8 @@
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="cancelAddWebPage">取 消</el-button>
-        <el-button type="primary" @click="confirmAddWebPage">确 认</el-button>
+        <el-button  size="mini" @click="cancelAddWebPage">取 消</el-button>
+        <el-button  size="mini" type="primary" @click="confirmAddWebPage">确 认</el-button>
       </span>
     </el-dialog>
     <!-- 小程序附件 -->
@@ -658,6 +671,7 @@
         ref="wechatAppForm"
         label-width="100px"
         label-position="top"
+        size="mini"
       >
         <el-form-item label="小程序标题：" prop="title">
           <el-input
@@ -723,8 +737,8 @@
       </el-form>
       <span @click="changeAddWechatAppType(1)">选择添加的小程序</span>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="cancelWechatApp">取 消</el-button>
-        <el-button type="primary" @click="confirmWechatApp">确 认</el-button>
+        <el-button size="mini" @click="cancelWechatApp">取 消</el-button>
+        <el-button type="primary" size="mini" @click="confirmWechatApp">确 认</el-button>
       </span>
     </el-dialog>
   </div>
@@ -737,6 +751,14 @@
       props: {},
       data() {
         return {
+          sendTimePickerOptions: {
+            disabledDate (date) {
+              return date.getTime() < (Date.now() - 24 * 60 * 60 * 1000 )
+            }
+          },
+          test: {
+            btnLoading: false
+          },
           curInputIndex: null,
           pageTitle: "新建企业群发SOP",
           info: {},
@@ -750,6 +772,8 @@
             // KPI
             kpi_status: 1,
             kpi_cycle_type: "1",
+            kpi_cycle_1: "",
+            kpi_cycle_2: 1
           },
           base_group_list_item: {
             name: "",
@@ -768,13 +792,13 @@
           group_list: [],
           editableTabsValue: "",
           // 角色
-          roleStr: "",
+          // roleStr: "",
           writeBackChooseRole: [],
           // 标签
-          tagStr: "",
+          // tagStr: "",
           writeBackChooseTag: [],
           // 选人
-          memberOrgStr: "",
+          // memberOrgStr: "",
           writeBackSelectedMemberOrg: [],
           rules: {
             name: [
@@ -933,6 +957,7 @@
               },
             ],
           },
+          otherContentLoading: null
         };
       },
       created() {
@@ -949,6 +974,78 @@
       mounted() {},
       watch: {},
       methods: {
+        getByteLen,
+        downLoadFile() {
+          const url = 'https://unpkg.com/axios/dist/axios.min.js'
+          this.$set(this.test, 'btnLoading', true);
+          var xhr = new XMLHttpRequest();
+          xhr.open('GET', url, true);    // 也可用POST方式
+          xhr.responseType = "blob";
+          xhr.onload = function () {
+            if (this.status === 200) {
+              var blob = this.response;
+              if (navigator.msSaveBlob == null) {
+                var a = document.createElement('a');
+                var headerName = xhr.getResponseHeader("Content-disposition");
+                var fileName = decodeURIComponent(headerName).substring(20);
+                a.download = fileName;
+                a.href = URL.createObjectURL(blob);
+                document.body.append(a);    // 修复firefox中无法触发click
+                a.click();
+                URL.revokeObjectURL(a.href);
+                $(a).remove();
+              } else {
+                navigator.msSaveBlob(blob, fileName);
+              }
+            }
+            this.$set(this.test, 'btnLoading', false);
+          };
+          xhr.send()
+        },
+        downLoadFile1() {
+          // const url = 'https://control-workwechat-k8s.test.freshgood.cn/cw_message_group_send/customr_receive_export?type=1&cw_message_sop_id=27';
+          const url = 'https://unpkg.com/axios/dist/axios.min.js'
+          const fileName = 'file'
+          this.$set(this.test, 'btnLoading', true);
+          axios
+            .get(url, {
+              responseType: 'blob',
+              headers: new Headers({
+                Origin: location.origin
+              }),
+              mode: 'cors'
+            })
+            .then((data) => {
+              const a = document.createElement('a')
+              const blob = new Blob([data], { type: 'application/octet-stream' })
+              // data指需要下载的文本或字符串内容
+              a.download = fileName
+              a.href = window.URL.createObjectURL(blob)
+              document.body.appendChild(a)
+              a.click()
+              a.remove()
+              this.$set(this.test, 'btnLoading', false);
+            })
+        },
+        sendTimeChange(e) {
+          let choosed = new Date(e).getTime();
+          let minTime = new Date().getTime() + 30 * 60 * 1000;
+          console.log("t===",e, choosed, minTime, choosed < minTime);
+          if (choosed < minTime) {
+            let d = new Date(minTime);
+            let fd = d.getFullYear().toString()+"-"+((d.getMonth()+1).toString().length==2?(d.getMonth()+1).toString():"0"+(d.getMonth()+1).toString())+"-"+(d.getDate().toString().length==2?d.getDate().toString():"0"+d.getDate().toString())+" "+(d.getHours().toString().length==2?d.getHours().toString():"0"+d.getHours().toString())+":"+((parseInt(d.getMinutes()/5)*5).toString().length==2?(parseInt(d.getMinutes()/5)*5).toString():"0"+(parseInt(d.getMinutes()/5)*5).toString())+":00";
+            this.$set(this.info, 'send_time', fd);
+          }
+        },
+        testLoading() {
+          this.otherContentLoading = this.$loading({
+            lock: true,
+            text: '上传中',
+          });
+          // setTimeout(() => {
+          //   this.otherContentLoading.close();
+          // }, 2000);
+        },
         // 附件添加和关闭
         addOtherContent() {
           let i = parseInt(this.editableTabsValue);
@@ -980,9 +1077,11 @@
             this[`${type}`]["upload_url"] =
               "https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100";
           }
+          this.otherContentLoading.close();
         },
         handleImgUploadErr(err, file, fileList, type) {
           console.log("上传失败=======");
+          this.otherContentLoading.close();
         },
         beforeImgUpload(file) {
           const isIMAGE = /\.(gif|jpg|jpeg|png|bpm|BPM|GIF|JPG|PNG|JPEG)$/.test(
@@ -998,6 +1097,9 @@
             this.$message.error("上传文件大小不能超过 2MB!");
           }
           console.log(isIMAGE, file.type, isLt2M);
+          if (isIMAGE && isLt2M) {
+            this.testLoading();
+          }
           return isIMAGE && isLt2M;
         },
         // 附件加小程序
@@ -1071,7 +1173,11 @@
           }, 0);
         },
         addEmojiPopover(item) {
+          console.log(item.emojiPopoverVisible);
           item.emojiPopoverVisible = !item.emojiPopoverVisible;
+        },
+        getShowStr(arr, len, labelKey,) {
+          return `${arr.slice(0 , len).map((ele) => ele[`${labelKey}`]).join("，")}${(arr.length > len) ? '...' : ''}`;
         },
         // 人群包 标签选择
         handleClickTag() {
@@ -1080,20 +1186,20 @@
         },
         confirmChooseTag(r) {
           let labelKey = "name";
-          this.tagStr = r.map((ele) => ele[`${labelKey}`]).join("，") || "";
+          // this.tagStr = r.map((ele) => ele[`${labelKey}`]).join("，") || "";
           this.writeBackChooseTag = r;
+          this.$set(this.info, 'option_tag_F', this.getShowStr(r, 3, labelKey))
           this.$refs.addTagDialogRef.dialogVisible = false;
-          console.log("已选择标签=====", r, this.tagStr);
         },
         // 角色选择
         handleClickRole() {
           this.$refs.addRoleDialogRef.dialogVisible = true;
         },
         confirmChooseRole(r) {
-          this.roleStr = r.map((ele) => ele.role).join("，") || "";
+          // this.roleStr = r.map((ele) => ele.role).join("，") || "";
           this.writeBackChooseRole = r;
+          this.$set(this.info, 'option_role_F', this.getShowStr(r, 3, 'role'));
           this.$refs.addRoleDialogRef.dialogVisible = false;
-          console.log("已选择角色=====", r, this.roleStr);
         },
         // 选人确定
         handleClickMember() {
@@ -1109,8 +1215,9 @@
           this.writeBackSelectedMemberOrg = JSON.parse(
             JSON.stringify(confirmMemberOrg)
           );
-          this.memberOrgStr =
-            confirmMemberOrg.map((ele) => ele.name).join("，") || "";
+          // this.memberOrgStr =
+          //   confirmMemberOrg.map((ele) => ele.name).join("，") || "";
+          this.$set(this.info, 'option_department_F', this.getShowStr(confirmMemberOrg, 3, 'name'));
           this.$refs.addMemberDialogRef.dialogVisible = false;
         },
         handleRemoveTab(targetName) {
@@ -1161,6 +1268,7 @@
             ...JSON.parse(JSON.stringify(this.base_group_list_item)),
             name: `内容对照组`,
             type: "3",
+            emojiPopoverVisible: false
           };
           this.group_list.push(add_group_list_item);
           this.editableTabsValue = `${len}`;
@@ -1171,6 +1279,7 @@
             ...JSON.parse(JSON.stringify(this.base_group_list_item)),
             name: "实验组",
             type: "1",
+            emojiPopoverVisible: false
           };
           this.group_list = [base_group_list_item];
           this.editableTabsValue = `${0}`;
@@ -1283,6 +1392,13 @@
           this.group_list = group_list.filter(
             (group_item) => group_item.type !== "4"
           );
+          group_list.map(ele => {
+            // if (ele.type !== '1' && ele.type !== '4' ) {
+              if (ele.type !== '1') {  
+              ele.name = (ele.name).replace(/\d/g, '')
+              ele.emojiPopoverVisible = false
+            }
+          })
           this.noActionGroupItem = {
             ...JSON.parse(JSON.stringify(this.base_group_list_item)),
             name: "未触达对照组",
@@ -1302,8 +1418,9 @@
               role: "1161161161123",
             },
           ];
-          this.roleStr =
-            this.writeBackChooseRole.map((ele) => ele.role).join("，") || "";
+          // this.roleStr =
+          //   this.writeBackChooseRole.map((ele) => ele.role).join("，") || "";
+          this.$set(this.info, 'option_role_F', this.getShowStr(this.writeBackChooseRole, 3, 'role'));
           // 标签回显
           this.writeBackChooseTag = [
             {
@@ -1315,8 +1432,9 @@
               name: "2-1人群包c001",
             },
           ];
-          this.tagStr =
-            this.writeBackChooseTag.map((ele) => ele.name).join("，") || "";
+          // this.tagStr =
+          //   this.writeBackChooseTag.map((ele) => ele.name).join("，") || "";
+          this.$set(this.info, 'option_tag_F', this.getShowStr(this.writeBackChooseTag, 3, 'name'));
           // 人组织回显
           let tableData = [
             {
@@ -1336,9 +1454,10 @@
             },
           ];
           this.writeBackSelectedMemberOrg = this.formatTableData(tableData);
-          this.memberOrgStr =
-            this.writeBackSelectedMemberOrg.map((ele) => ele.name).join("，") ||
-            "";
+          this.$set(this.info, 'option_department_F', this.getShowStr(this.writeBackSelectedMemberOrg, 3, 'name'));
+          // this.memberOrgStr =
+          //   this.writeBackSelectedMemberOrg.map((ele) => ele.name).join("，") ||
+          //   "";
         },
         formatTableData(tableData) {
           return JSON.parse(JSON.stringify(tableData)).map((ele) => {
@@ -1365,6 +1484,17 @@
             });
         },
         saveSOP() {
+          let indexO = {}
+          // 内容对照组拼上序号
+          this.group_list.map(ele => {
+            if (ele.type && ele.type !== '1') {
+              let suffixBase = indexO[ele.type]; 
+              ele.name = `${ele.name}${suffixBase ? 1 : suffixBase + 1 }`
+            }
+          })
+          // 时间周期
+          this.$set(this.info, 'kpi_cycle', this.info[`kpi_cycle_${this.info.kpi_cycle_type}`]);
+          console.log("时间周期===", this.info.kpi_cycle);
           this.$message({
             message: "恭喜你，新建群发SOP成功！",
             type: "success",

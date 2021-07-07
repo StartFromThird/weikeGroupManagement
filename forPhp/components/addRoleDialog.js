@@ -70,7 +70,7 @@ Vue.component("add-role-dialog", {
               <img
                 class="selected-tick"
                 v-if="selectedIds.includes(data.id)"
-                :src="require('./img/tick@2x.png')"
+                src="../../static/image/components/tick@2x.png"
                 alt="已选"
               />
             </span>

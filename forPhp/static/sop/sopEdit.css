@@ -24,11 +24,13 @@
 
 .text-emoji-content-wrap {
   position: relative;
+  border: 1px solid #E4E7ED;
+  border-radius: 2px;
 }
 
 .text-emoji-content-wrap .emoji-btn {
-  position: absolute;
-  bottom: 5px;
+  position: relative;
+  bottom: 22px;
   left: 15px;
   cursor: pointer;
   width: 18px;
@@ -42,6 +44,7 @@
 
 .text-emoji-content-wrap .el-textarea textarea {
   padding-bottom: 20px;
+  border: none;
 }
 
 .emoji-popover-wrap {
@@ -168,6 +171,10 @@
   padding: 12px 14px;
   color: #171717;
   cursor: pointer;
+  background-image: url('../image/sop/chat_type@2x.png');
+  background-size: 42px 42px;
+  background-position: right bottom;
+  background-repeat: no-repeat;
 }
 
 .sop-edit-page-wrap .chat-type-option .chat-type-option-title {
@@ -184,7 +191,8 @@
 }
 
 .sop-edit-page-wrap .chat-type-option-active {
-  background: #1773fa;
+  background-color: #1773fa;
+  background-image: url('../image/sop/chat_type_active@2x.png');
   border: 1px solid #1773fa;
   color: #fff;
 }
@@ -224,6 +232,14 @@
 .sop-edit-page-wrap .group-list-wrap .touch-rate-wrap .touch-rate-row .touch-rate-row-left {
   display: flex;
   justify-content: space-between;
+  font-size: 14px;
+  font-weight: 400;
+  color: #000000;
+}
+.sop-edit-page-wrap .group-list-wrap .touch-rate-wrap .touch-rate-row .touch-rate-row-right {
+  font-size: 14px;
+  font-weight: 400;
+  color: #000000;
 }
 
 .sop-edit-page-wrap .group-list-wrap .touch-rate-wrap .touch-rate-row .touch-rate-row-left .step-tip {
@@ -285,7 +301,11 @@
   color: #303133;
   line-height: 20px;
 }
-
+.sop-add-other-content-dialog .el-dialog__body,
+.sop-add-other-content-dialog .el-dialog__body {
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
 .sop-add-other-content-dialog .uploader {
   width: 360px;
   height: 140px;
