@@ -1,0 +1,26 @@
+.crud-classify-tree {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  
+  .crud-classify-tree-wrap {
+    height: calc(100% - 60px);
+    overflow: auto;
+    .custom-tree-node {
+      align-items: center;
+      .left-label {
+        line-height: 26px;
+        font-size: 14px;
+        color: #606266;
+      }
+      .right-operate-btn {
+        padding: 0 4px 0 2px;
+        cursor: pointer;
+        i {
+          color: #c4c4c4;
+        }
+        
+      }
+    }
+  }
+}

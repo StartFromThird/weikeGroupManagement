@@ -1,0 +1,99 @@
+.page.member-code-list {
+  height: 100%;
+  overflow: hidden;
+  .content-wrap {
+    overflow: hidden;
+    padding-bottom: 0;
+    .content-head {
+      border-bottom: 2px solid #edeef2;
+    }
+    .content-main {
+      display: flex;
+      outline: 1px solid #f00;
+      box-sizing: border-box;
+      height: calc(100% - 64px);
+      >.left {
+        box-sizing: border-box;
+        width: 300px;
+        overflow-y: auto;
+      }
+      >.mid {
+        width: 30px;
+        height: 100%;
+        border: 16px solid #fff;
+        border-left: 12px solid #fff;
+        background-color: #edeef2;
+        box-sizing: border-box;
+      }
+      >.right {
+        overflow: hidden;
+        .table-head {
+          height: 64px;
+          align-items: center;
+          .table-head-left {
+            font-size: 16px;
+            font-weight: 500;
+            text-align: left;
+            color: #000000;
+            line-height: 24px;
+          }
+        }
+        .table-body {
+          height: calc(100% - 144px);
+          .empty-tree-data {
+            text-align: center;
+            height: 80px;
+            transform: translateY(-40px);
+            margin-top: 50%;
+            .empty-tree-data-txt {
+              font-size: 16px;
+              font-family: PingFangSC, PingFangSC-Regular;
+              font-weight: 400;
+              text-align: center;
+              color: #171717;
+              line-height: 22px;
+              margin-bottom: 27px;
+            }
+            
+          }
+          .table-row-tag-cell {
+            .table-row-tag-list-wrap {
+              height: auto;
+              overflow: auto;
+            }
+            .table-row-tag-list-wrap.table-row-tag-list-wrap-1-row {
+              height: 30px;
+              overflow: hidden;
+            }
+            .table-row-tag-more {
+              width: 20px;
+              height: 20px;
+              height: 100%;
+              cursor: pointer;
+              flex-basis: 20px;
+              flex-shrink: 0;
+              line-height: 20px;
+              text-align: right;
+            }
+
+          }
+          .table-row-tag-list-wrap.no-wrap {
+            // flex-wrap: nowrap;
+            // background: #ccc;
+            // width: 100%;
+            // overflow: hidden;
+          }
+        }
+        .table-pagination-wrap {
+          box-sizing: border-box;
+          padding-top: 24px;
+          padding-bottom: 24px;
+        }
+      }
+    }
+  }
+}
+.table-row-tag-list-wrap.table-row-tag-list-wrap-limit-height {
+  max-height: 325px;
+  overflow: auto;
+}
