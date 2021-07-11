@@ -41,6 +41,8 @@ Vue.component("role-authority", {
       var leafNode = document.getElementsByClassName("isFloat");
       for (var i = 0; i < leafNode.length; i++) {
         leafNode[i].parentNode.style.cssFloat = "left";
+        // leafNode[i].parentNode.parentNode.parentNode.style.display = "flex";
+        // leafNode[i].parentNode.parentNode.parentNode.style.flexWrap = "wrap";
       }
     },
     getTreeData() {
@@ -77,6 +79,30 @@ Vue.component("role-authority", {
                     {
                       name: "删除",
                       id: "6",
+                      isFloat: true,
+                      value: "del",
+                    },
+                    {
+                      name: "新增1",
+                      id: "14",
+                      isFloat: true,
+                      value: "add",
+                    },
+                    {
+                      name: "编辑1",
+                      id: "15",
+                      isFloat: true,
+                      value: "edit",
+                    },
+                    {
+                      name: "删除1删除1删除1删除1删除1删除1",
+                      id: "16",
+                      isFloat: true,
+                      value: "del",
+                    },
+                    {
+                      name: "删除2",
+                      id: "17",
                       isFloat: true,
                       value: "del",
                     },
