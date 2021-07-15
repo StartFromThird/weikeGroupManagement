@@ -9,7 +9,7 @@
     <script>
       const WIDTH = 750; //设计稿尺寸
       const setView = () => {
-        document.querySelector('html').style.fontSize =
+        document.querySelector("html").style.fontSize =
           (100 * screen.width) / WIDTH + "px";
       };
       window.onorientationchange = setView;
@@ -73,7 +73,16 @@
         color: #231916;
         list-style: 0.34rem;
       }
-      @media screen and (max-width: 380px) and (max-height: 800px){
+      * {
+        moz-user-select: -moz-none;
+        -moz-user-select: none;
+        -o-user-select: none;
+        -khtml-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+      @media screen and (max-width: 380px) and (max-height: 800px) {
         .page-wrap {
           padding: 0.3rem 0;
         }
