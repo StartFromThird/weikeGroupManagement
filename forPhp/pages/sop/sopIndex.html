@@ -175,9 +175,11 @@
           label="发送时间"
           show-overflow-tooltip
         ></el-table-column>
-        <el-table-column width="228" label="消息内容" show-overflow-tooltip>
+        <el-table-column width="250" label="消息内容">
           <template slot-scope="scope">
-            <div class="color-primary">{{ scope.row.content }}</div>
+            <div class="color-primary overflow-ellipsis" style="width: 209px;">
+              {{scope.row.content}}
+            </div>
           </template>
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="100">
@@ -325,7 +327,8 @@
             typeN: "群发消息给客户",
             createdT: "2021-05-20 13:20:13",
             sentT: "2021-05-20 13:20:13",
-            content: "【图片】【视频】【小程序】【网页】",
+            content: "【图片】【视频】【小程序】【网页】1",
+            // 😀😁
             isActive: false,
           };
           for (let i = 0; i < param.pageSize; i++) {

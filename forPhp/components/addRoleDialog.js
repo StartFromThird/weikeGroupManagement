@@ -1,6 +1,6 @@
 Vue.component("add-role-dialog", {
   template: `
-  <div>
+  <div  class="add-role-dialog-com">
   <slot>
     <el-button
       class="add-role-btn"
@@ -84,6 +84,7 @@ Vue.component("add-role-dialog", {
             :key="tag.id"
             @close="handleDel(i)"
             class="tag-item"
+            type="info"
           >
             <div class="tag-item-content">
               <el-tooltip

@@ -72,6 +72,7 @@ Vue.component("add-tag-dialog", {
               :key="tag.id"
               @close="handleDelRight(i, tag)"
               class="tag-item"
+              type="info"
             >
               <div class="tag-item-content">
                 <el-tooltip

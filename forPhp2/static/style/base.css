@@ -70,11 +70,25 @@ img {
 }
 
 /* flex */
+.flex-1 {
+  flex: 1;
+}
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
 .flex-row-between {
   display: flex;
   justify-content: space-between;
 }
-
+.flex-row-start {
+  display: flex;
+  justify-content: flex-start;
+}
 .flex-row-end {
   display: flex;
   justify-content: flex-end;
@@ -125,14 +139,85 @@ img {
   line-height: 32px;
 }
 /* 其他公用样式 */
+.fs-14 {
+  font-size: 14px;
+}
+.fs-16 {
+  font-size: 16px;
+}
+.fs-24 {
+  font-size: 24px;
+}
 .fw400 {
   font-weight: 400;
 }
+.p-8 {
+  padding: 8px;
+}
+.p-l-8 {
+  padding-left: 8px;
+}
+.p-r-8 {
+  padding-right: 8px;
+}
+.p-b-8 {
+  padding-bottom: 8px;
+}
+.p-t-8 {
+  padding-top: 8px;
+}
+
 .p-24 {
   padding: 24px;
 }
+.p-l-24 {
+  padding-left: 24px;
+}
+.p-r-24 {
+  padding-right: 24px;
+}
+.p-b-24 {
+  padding-bottom: 24px;
+}
+.p-t-24 {
+  padding-top: 24px;
+}
+
+.p-t-16 {
+  padding-top: 16px;
+}
+.p-b-16 {
+  padding-bottom: 16px;
+}
+.p-b-24 {
+  padding-bottom: 24px;
+}
+.p-r-16 {
+  padding-right: 16px;
+}
+.m-t-16 {
+  margin-top: 16px;
+}
+
+.m-b-8 {
+  margin-bottom: 8px;
+}
 .m-l-8 {
   margin-left: 8px;
+}
+.m-r-8 {
+  margin-right: 8px;
+}
+.m-b-0 {
+  margin-bottom: 0px!important;
+}
+
+
+.m-b-24 {
+  margin-bottom: 24px;
+}
+.m-r-24 {
+  margin-right: 24px!important;
 }
 .bg-grey {
   background: rgba(0, 0, 0, 0.04);
@@ -140,4 +225,10 @@ img {
 .h-100vh {
   height: 100vh;
   box-sizing: border-box;
+}
+.w-100percent {
+  width: 100%;
+}
+.bg-color-fff {
+  background-color: #fff;
 }

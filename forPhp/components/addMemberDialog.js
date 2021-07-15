@@ -27,7 +27,7 @@ Vue.component("select-member-org-tab", {
             @node-click="handleNodeClick"
             @node-expand="handleNodeExpand"
             :highlight-current="true"
-            :show-checkbox="isMultiple"
+            :show-checkbox="isMultipleCheckBox"
             check-strictly
             @check="handleCheck"
             render-after-expand
@@ -95,6 +95,7 @@ Vue.component("select-member-org-tab", {
           :key="tag.id"
           @close="handleDelMember(i)"
           class="tag-item"
+          type="info"
         >
           <div class="tag-item-content">
             <div class="tag-item-left">
@@ -124,7 +125,11 @@ Vue.component("select-member-org-tab", {
   </div>
 </div>`,
   props: {
-    isMultiple: {
+    isMultipleSelected: {
+      type: Boolean,
+      default: true
+    },
+    isMultipleCheckBox: {
       type: Boolean,
       default: false,
     },
@@ -146,6 +151,12 @@ Vue.component("select-member-org-tab", {
         return [];
       },
     },
+    customSelectedFn: {
+      type: Function,
+      default: function () {
+        return true;
+      },
+    }
   },
   data() {
     return {
@@ -189,9 +200,23 @@ Vue.component("select-member-org-tab", {
     },
     // 单选选中节点
     handleSelectMember(data) {
+      let d = this.customSelectedFn(data);
+      console.log("选人=======", d);
+      if (!this.customSelectedFn(data)) {
+        return ;
+      }
       if (!this.selectedMemberIds.includes(data.id)) {
-        this.selectedMembers.push(data);
-        this.selectedMemberIds.push(data.id);
+        if (this.isMultipleSelected) {
+          this.selectedMembers.push(data);
+          this.selectedMemberIds.push(data.id);
+        } else {
+          this.selectedMembers = [];
+          this.selectedMemberIds = [];
+          this.$nextTick(() => {
+            this.selectedMembers = [data];
+            this.selectedMemberIds = [data.id];
+          })
+        }
       }
     },
     // 已选中营运点成员 删除
@@ -231,7 +256,7 @@ Vue.component("select-member-org-tab", {
     async handleNodeClick(data, node) {
       // 点击成员节点 保存右侧
       if (!data.isOrg) {
-        if (!this.isMultiple) {
+        if (!this.isMultipleCheckBox) {
           this.handleSelectMember(data);
         }
         return;
@@ -409,7 +434,7 @@ Vue.component("select-member-org-tab", {
 });
 
 Vue.component("add-member-dialog", {
-  template: `<div>
+  template: `<div class="add-member-dialog-com">
   <slot>
   <el-button
     class="add-member-btn"
@@ -432,10 +457,12 @@ Vue.component("add-member-dialog", {
         <el-tab-pane v-for="(item) in headTypeArr" :key="item.value" :label="item.label" :name="item.value" >
           <select-member-org-tab 
             :ref="'member-org-tab-' + item.value" 
-            :isMultiple="isMultiple" 
+            :isMultipleSelected="isMultipleSelected"
+            :isMultipleCheckBox="isMultipleCheckBox" 
             :param="{'type': item.value}"
             :selectedMemberOrg="selectedMemberOrg"
             :dialogVisible="dialogVisible"
+            :customSelectedFn="customSelectedFn"
             >
           </select-member-org-tab>
         </el-tab-pane>
@@ -457,7 +484,13 @@ Vue.component("add-member-dialog", {
     }
   },
   props: {
-    isMultiple: {
+    // 右侧单选
+    isMultipleSelected: {
+      type: Boolean,
+      default: true
+    },
+    // 左侧 checkbox 控制
+    isMultipleCheckBox: {
       type: Boolean,
       default: false
     },
@@ -466,6 +499,9 @@ Vue.component("add-member-dialog", {
       default: function() {
         return []
       }
+    },
+    customSelectedFn: {
+      type: Function
     }
   },
   computed: {
@@ -513,11 +549,11 @@ Vue.component("add-member-dialog", {
     async getHeadTypeArr() {
       this.headTypeArr = [
         {
-          label: '企业微信',
+          label: '企业微信企业微信企业微信企业微信',
           value: 'QYWX'
         },
         {
-          label: 'EHR',
+          label: 'EHR字数测试字数测试字数测试',
           value: 'EHR'
         },
         {

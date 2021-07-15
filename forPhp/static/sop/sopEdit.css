@@ -80,7 +80,15 @@
   align-items: center;
   justify-content: center;
 }
-
+.fake-el-form-item__error {
+  color: #ff3b34;
+  font-size: 12px;
+  line-height: 1;
+  padding-top: 4px;
+}
+.fake-border__error {
+  border-color: #ff3b34;
+}
 .sop-edit-page-wrap {
   height: 100%;
   max-height: 100%;
@@ -134,7 +142,7 @@
 }
 
 .sop-edit-page-wrap .step-divider {
-  width: 1168px;
+  width: 100%;
   height: 4px;
   background: #f5f5f5;
 }
@@ -171,12 +179,17 @@
   padding: 12px 14px;
   color: #171717;
   cursor: pointer;
-  background-image: url('../image/sop/chat_type@2x.png');
+  /* background-image: url('../image/sop/chat_type@2x.png'); */
   background-size: 42px 42px;
   background-position: right bottom;
   background-repeat: no-repeat;
 }
-
+.sop-edit-page-wrap .chat-type-option0 {
+  background-image: url('../image/sop/chat_type0@2x.png');
+}
+.sop-edit-page-wrap .chat-type-option1 {
+  background-image: url('../image/sop/chat_type1@2x.png');
+}
 .sop-edit-page-wrap .chat-type-option .chat-type-option-title {
   font-size: 14px;
   font-weight: 500;
@@ -190,11 +203,17 @@
   line-height: 17px;
 }
 
-.sop-edit-page-wrap .chat-type-option-active {
+.sop-edit-page-wrap .chat-type-option-active0,
+.sop-edit-page-wrap .chat-type-option-active1 {
   background-color: #1773fa;
-  background-image: url('../image/sop/chat_type_active@2x.png');
   border: 1px solid #1773fa;
   color: #fff;
+}
+.sop-edit-page-wrap .chat-type-option-active0 {
+  background-image: url('../image/sop/chat_type_active0@2x.png');
+}
+.sop-edit-page-wrap .chat-type-option-active1 {
+  background-image: url('../image/sop/chat_type_active1@2x.png');
 }
 
 .sop-edit-page-wrap .group-list-wrap {
@@ -403,4 +422,9 @@
 
 .sop-other-content-wrap .other_content_item .right-operate .right-operate-del {
   color: #000000;
+}
+
+.sop-edit-page-wrap .flex-r-space-between .add-member-dialog-com,
+.sop-edit-page-wrap .flex-r-space-between .add-role-dialog-com {
+  width: 48%;
 }

@@ -59,9 +59,7 @@
   height: 24px;
   padding: 0 5px;
   line-height: 24px;
-  background-color: #f0f2f5;
   border-radius: 4px;
-  border-color: #d1e3fe;
   box-sizing: border-box;
   white-space: nowrap;
   display: flex;
@@ -78,10 +76,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.add-role-dialog .select-main-wrap .selectWrap .right .tag-item .el-icon-close {
-  margin-left: 8px;
 }
 
 .add-role-dialog .select-main-wrap .selectWrap .right .tag-item span {

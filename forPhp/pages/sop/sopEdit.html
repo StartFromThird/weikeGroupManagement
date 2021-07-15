@@ -75,6 +75,8 @@
                 type="datetime"
                 placeholder="选择日期时间"
                 clearable
+                @change="endTimeChange"
+                :picker-options="sendTimePickerOptions"
               ></el-date-picker>
             </el-form-item>
           </el-col>
@@ -103,7 +105,7 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <div class="under-tip" v-if="info.send_time">
+        <div class="under-tip" v-if="info.send_time" style="margin-bottom: 8px;">
           <span class="grey-txt">该消息将于</span>
           <span class="black-txt">{{ info.send_time }}</span>
           <span class="grey-txt">发给企微成员任务,由企微成员进行发送</span>
@@ -122,23 +124,24 @@
             :lg="12"
             class="chat-type-option-wrap flex-r-space-between"
           >
+          <template v-for="(item, index) in chatTypeOptions">
             <div
               class="chat-type-option"
-              v-for="item in chatTypeOptions"
               :key="item.value"
               :class="[
-                item.value == info.chat_type ? 'chat-type-option-active' : ''
+                item.value == info.chat_type ? ('chat-type-option-active' + (index + '')) : ('chat-type-option' + (index + ''))
               ]"
               @click="handleClickChatType(item)"
             >
               <div class="chat-type-option-title">{{ item.title }}</div>
               <div class="chat-type-option-desc">{{ item.desc }}</div>
             </div>
+          </template>
           </el-col>
         </el-row>
         <el-row :gutter="60">
           <el-col :sm="24" :md="12" :lg="12">
-            <el-form-item label="选择发送范围" prop="receive_type">
+            <el-form-item label="选择发送范围" prop="receive_type" style="margin-bottom: 4px;">
               <el-radio-group v-model="info.receive_type">
                 <template v-for="item in receiveTypeOptions">
                   <el-radio :label="item.value" :key="item.value">
@@ -177,6 +180,7 @@
             </el-form-item>
           </el-col>
           <el-col :sm="24" :md="12" :lg="12">
+            <el-button @click="clearMember">test</el-button>
             <el-form-item
               label="选择需要发送的企微成员（至少选择一个条件）"
               class="txtRedLabel"
@@ -185,6 +189,8 @@
                 <add-member-dialog 
                   ref="addMemberDialogRef"
                   :writeBackSelectedMemberOrg="writeBackSelectedMemberOrg"
+                  :isMultipleSelected="false"
+                  :customSelectedFn="customSelectedFn"
                   @confirm="confirmChooseMember"
                   >
                   <el-input
@@ -217,8 +223,13 @@
         </el-row>
         <div class="under-tip" v-if="info && (info.option_role_F || info.option_tag_F || info.option_department_F)">
           <span class="grey-txt" style="margin-bottom: 20px">
-            将发送消息给{{ info.option_department_F }}且满足“{{ info.option_role_F }}”等 {{writeBackSelectedMemberOrg.length}}
-            位企微成员所添加的满足&nbsp;“{{ info.option_tag_F }}”&nbsp;等标签的客户。
+            <span>将发送消息给</span>
+            <span v-if="info.option_department_F">{{ info.option_department_F }}{{(writeBackSelectedMemberOrg && writeBackSelectedMemberOrg.length > 3) ? '等' : ''}}</span>
+            <span v-if="info.option_department_F && info.option_role_F">且满足</span>
+            <span v-if="info.option_role_F">“{{ info.option_role_F }}”{{(writeBackChooseRole && writeBackChooseRole.length > 3) ? '等' : ''}}</span>  
+            <span>&nbsp;{{ writeBackSelectedMemberOrg.length }}位企微成员</span>
+            <span v-if="info.option_tag_F">所添加的满足&nbsp;“{{ info.option_tag_F }}”&nbsp;{{(writeBackChooseTag && writeBackChooseTag.length > 3) ? '等' : ''}}标签</span>
+            <span>的客户。</span>
           </span>
         </div>
         <!-- <div class="under-tip" v-if="roleStr || tagStr || memberOrgStr)">
@@ -227,12 +238,12 @@
             位企微成员所添加的满足&nbsp;“{{ tagStr }}”&nbsp;等标签的客户。
           </span>
         </div> -->
-        <div class="step-divider"></div>
       </div>
+      <div class="step-divider"></div>
       <!-- 四 -->
       <div class="step">
         <div class="step-title">
-          <div class="step-text">第 ④ 步：配置内容</div>
+          <div class="step-text">第 ④ 步：配置内容{{editableTabsValue}}</div>
         </div>
         <div class="group-list-wrap">
           <!-- tab 及新增 -->
@@ -251,15 +262,14 @@
               <div>
                 <!-- 文本 emoji 输入 -->
                 {{getByteLen(item.content)}}
-                <div class="text-emoji-content-wrap">
+                <div :class="['text-emoji-content-wrap', curContentErr ? 'fake-border__error' : '']" >
                   <el-input
                     :id="'editContent' + index"
                     type="textarea"
                     v-model="item.content"
                     placeholder="请输入内容"
-                    maxlength="2000"
                     :autosize="{ minRows: 10 }"
-                    show-word-limit
+                    @blur="validTextEmojiContent(item.content, 20, index)"
                   ></el-input>
                   <div
                     class="emoji-btn"
@@ -297,6 +307,7 @@
                   </div>
                   </el-collapse-transition>
                 </div>
+                <div v-if="curContentErr" class="fake-el-form-item__error">输入内容过长</div>
                 <br />
                 <!-- 附件列表 -->
                 <div class="sop-other-content-wrap">
@@ -428,7 +439,9 @@
             </el-button>
           </el-popover>
           <!-- 客户触达比例展示 -->
-          <div class="step-title touch-rate-title" v-show="info.chat_type === 'SINGLE'">
+          <div class="step-title touch-rate-title" 
+            v-show="info.chat_type === 'SINGLE'"
+            style="margin-bottom: -10px;">
             <div class="step-text">配置客户触达比例</div>
           </div>
           <div class="touch-rate-wrap" v-show="info.chat_type === 'SINGLE'">
@@ -508,7 +521,8 @@
         </el-row>
         <el-row :gutter="60">
           <el-col :sm="24" :md="12" :lg="12">
-            <el-form-item label="指标类型：" prop="kpi_type" class="flex">
+            <el-form-item label="指标类型：" prop="kpi_type" class="flex"
+              style="margin-bottom: 0;">
               <el-input
                 v-model="info.kpi_type"
                 placeholder="请输入指标类型"
@@ -527,7 +541,7 @@
                   </el-radio>
                 </template>
               </el-radio-group>
-              <div>
+              <div style="padding-top: 10px;">
                 <template v-if="info.kpi_cycle_type === '2'">
                   <el-input-number
                     v-model="info.kpi_cycle_2"
@@ -548,6 +562,8 @@
                     clearable
                     format="yyyy-MM-dd HH:mm:ss"
                     value-format="yyyy-MM-dd HH:mm:ss"
+                    @change="kpiCycleChange"
+                    :picker-options="sendTimePickerOptions"
                   ></el-date-picker>
                 </template>
               </div>
@@ -589,12 +605,11 @@
       {{getByteLen(webPageForm.title)}}
         <el-form-item label="网页标题：" prop="title">
           <el-input
+            @input="webPageForm.title = webPageForm.title.replace(noEmojiReg, '')"
             v-model="webPageForm.title"
             type="textarea"
-            placeholder="请输入标题（最长128个字节）"
-            maxlength="128"
+            placeholder="请输入标题（最长64个字节）"
             :autosize="{ minRows: 2 }"
-            show-word-limit
           ></el-input>
         </el-form-item>
         <el-form-item label="网页封面：" prop="upload_url">
@@ -634,22 +649,20 @@
         </el-form-item>
         <el-form-item label="网页描述：" prop="description">
           <el-input
+            @input="webPageForm.description = webPageForm.description.replace(noEmojiReg, '')"
             v-model="webPageForm.description"
             type="textarea"
             placeholder="请输入描述（最多512个字节）"
-            maxlength="512"
             :autosize="{ minRows: 2 }"
-            show-word-limit
           ></el-input>
         </el-form-item>
         <el-form-item label="网页链接：" prop="url">
           <el-input
+            @input="webPageForm.url = webPageForm.url.replace(noEmojiReg, '')"
             v-model="webPageForm.url"
             type="textarea"
             placeholder="请输入链接（最长2048个字节）"
-            maxlength="2048"
             :autosize="{ minRows: 2 }"
-            show-word-limit
           ></el-input>
         </el-form-item>
       </el-form>
@@ -675,6 +688,7 @@
       >
         <el-form-item label="小程序标题：" prop="title">
           <el-input
+            @input="wechatAppForm.title = wechatAppForm.title.replace(noEmojiReg, '')"
             v-model="wechatAppForm.title"
             type="textarea"
             placeholder="请输入标题（最多64个字节）"
@@ -720,6 +734,7 @@
         </el-form-item>
         <el-form-item label="小程序Appid：" prop="appid">
           <el-input
+            @input="wechatAppForm.appid = wechatAppForm.appid.replace(noEmojiReg, '').replace(/[^a-zA-Z0-9]/g,'')"
             v-model="wechatAppForm.appid"
             type="textarea"
             placeholder="请输入小程序Appid"
@@ -728,6 +743,7 @@
         </el-form-item>
         <el-form-item label="小程序Page路径：" prop="url">
           <el-input
+            @input="wechatAppForm.url = wechatAppForm.url.replace(noEmojiReg, '')"
             v-model="wechatAppForm.url"
             type="textarea"
             placeholder="请输入小程序Page路径"
@@ -744,20 +760,31 @@
   </div>
 </div>
 `;
-    new Vue({
+const validateLimitByteLen = (rule, value, callback, limitLen) => {
+  let len = this.getByteLen(value);
+  if (len > limitLen) {
+    callback(new Error("输入内容过长"));
+  } else {
+    callback();
+  }
+};
+new Vue({
       template: template,
       el: "#sopEdit",
       name: "sopEdit",
       props: {},
       data() {
         return {
+          curMessage: null,
+          noEmojiReg:
+            /[\uD83C|\uD83D|\uD83E][\uDC00-\uDFFF][\u200D|\uFE0F]|[\uD83C|\uD83D|\uD83E][\uDC00-\uDFFF]|[0-9|*|#]\uFE0F\u20E3|[0-9|#]\u20E3|[\u203C-\u3299]\uFE0F\u200D|[\u203C-\u3299]\uFE0F|[\u2122-\u2B55]|\u303D|[\A9|\AE]\u3030|\uA9|\uAE|\u3030/gi,
           sendTimePickerOptions: {
-            disabledDate (date) {
-              return date.getTime() < (Date.now() - 24 * 60 * 60 * 1000 )
-            }
+            disabledDate(date) {
+              return date.getTime() < Date.now() - 24 * 60 * 60 * 1000;
+            },
           },
           test: {
-            btnLoading: false
+            btnLoading: false,
           },
           curInputIndex: null,
           pageTitle: "新建企业群发SOP",
@@ -773,7 +800,7 @@
             kpi_status: 1,
             kpi_cycle_type: "1",
             kpi_cycle_1: "",
-            kpi_cycle_2: 1
+            kpi_cycle_2: 1,
           },
           base_group_list_item: {
             name: "",
@@ -790,7 +817,7 @@
           },
           noActionGroupItem: {},
           group_list: [],
-          editableTabsValue: "",
+          editableTabsValue: 0,
           // 角色
           // roleStr: "",
           writeBackChooseRole: [],
@@ -894,10 +921,9 @@
             title: [
               { required: true, message: "请输入网页标题", trigger: "blur" },
               {
-                min: 0,
-                max: 128,
-                message: "长度不超过 128 个字",
-                trigger: "blur",
+                required: true,
+                validator: (rule, value, callback) => validateLimitByteLen(rule, value, callback, 64),
+                trigger: ["blur", "change"],
               },
             ],
             description: [
@@ -908,6 +934,11 @@
                 message: "长度不超过 512 个字",
                 trigger: "blur",
               },
+              {
+                required: true,
+                validator: (rule, value, callback) => validateLimitByteLen(rule, value, callback, 512),
+                trigger: ["blur", "change"],
+              },
             ],
             url: [
               { required: true, message: "请输入网页链接", trigger: "blur" },
@@ -916,6 +947,11 @@
                 max: 2048,
                 message: "长度不超过 2048 个字",
                 trigger: "blur",
+              },
+              {
+                required: true,
+                validator: (rule, value, callback) => validateLimitByteLen(rule, value, callback, 2048),
+                trigger: ["blur", "change"],
               },
             ],
           },
@@ -938,6 +974,11 @@
                 message: "长度不超过 64 个字",
                 trigger: "blur",
               },
+              {
+                required: true,
+                validator: (rule, value, callback) => validateLimitByteLen(rule, value, callback, 64),
+                trigger: ["blur", "change"],
+              }
             ],
             upload_url: [
               {
@@ -948,6 +989,11 @@
             ],
             appid: [
               { required: true, message: "请输入小程序Appid", trigger: "blur" },
+              {
+                required: true,
+                validator: (rule, value, callback) => validateLimitByteLen(rule, value, callback, 512),
+                trigger: ["blur", "change"],
+              }
             ],
             url: [
               {
@@ -955,9 +1001,23 @@
                 message: "请输入小程序Page路径",
                 trigger: "blur",
               },
+              {
+                required: true,
+                validator: (rule, value, callback) => validateLimitByteLen(rule, value, callback, 2048),
+                trigger: ["blur", "change"],
+              }
             ],
           },
-          otherContentLoading: null
+          otherContentLoading: null,
+          curContentErr: false,
+          curContentI: 0,
+          customSelectedFn: (data) => {
+            if (data.isOrg) {
+              return false
+            } else {
+              return true;
+            }
+          }
         };
       },
       created() {
@@ -972,25 +1032,60 @@
         window.aaa = this;
       },
       mounted() {},
-      watch: {},
+      watch: {
+        editableTabsValue (n , o) {
+          if (n == parseInt(n)) {
+            let curTxt = (this.group_list[n] && this.group_list[n].content) || '';
+            this.validTextEmojiContent(curTxt, 20, parseInt(n));
+          }
+        },
+      },
+      computed: {
+      },
       methods: {
+        validateLimitByteLen,
         getByteLen,
+        clearMember() {
+          this.writeBackSelectedMemberOrg = [];
+        },
+        // 失焦调后台提示
+        validTextEmojiContent(v, limitLen, index) {
+          this.curContentI = index;
+          // 调后台接口
+          // mock 
+          setTimeout(() => {
+            console.log("记录==", this.curContentI, "当前===", parseInt(this.editableTabsValue));
+            if (this.curContentI != parseInt(this.editableTabsValue)) {
+              this.curContentErr = false;
+              return ;
+            }
+            if (this.getByteLen(v) > limitLen) {
+              if (this.curMessage) {
+                this.curMessage.close();
+              }
+              this.curMessage = this.$message.warning('输入内容过长');
+              this.curContentErr = true;
+            } else {
+              this.curContentErr = false;
+            }
+          }, 2000);
+        },
         downLoadFile() {
-          const url = 'https://unpkg.com/axios/dist/axios.min.js'
-          this.$set(this.test, 'btnLoading', true);
+          const url = "https://unpkg.com/axios/dist/axios.min.js";
+          this.$set(this.test, "btnLoading", true);
           var xhr = new XMLHttpRequest();
-          xhr.open('GET', url, true);    // 也可用POST方式
+          xhr.open("GET", url, true); // 也可用POST方式
           xhr.responseType = "blob";
           xhr.onload = function () {
             if (this.status === 200) {
               var blob = this.response;
               if (navigator.msSaveBlob == null) {
-                var a = document.createElement('a');
+                var a = document.createElement("a");
                 var headerName = xhr.getResponseHeader("Content-disposition");
                 var fileName = decodeURIComponent(headerName).substring(20);
                 a.download = fileName;
                 a.href = URL.createObjectURL(blob);
-                document.body.append(a);    // 修复firefox中无法触发click
+                document.body.append(a); // 修复firefox中无法触发click
                 a.click();
                 URL.revokeObjectURL(a.href);
                 $(a).remove();
@@ -998,49 +1093,61 @@
                 navigator.msSaveBlob(blob, fileName);
               }
             }
-            this.$set(this.test, 'btnLoading', false);
+            this.$set(this.test, "btnLoading", false);
           };
-          xhr.send()
+          xhr.send();
         },
         downLoadFile1() {
           // const url = 'https://control-workwechat-k8s.test.freshgood.cn/cw_message_group_send/customr_receive_export?type=1&cw_message_sop_id=27';
-          const url = 'https://unpkg.com/axios/dist/axios.min.js'
-          const fileName = 'file'
-          this.$set(this.test, 'btnLoading', true);
+          const url = "https://unpkg.com/axios/dist/axios.min.js";
+          const fileName = "file";
+          this.$set(this.test, "btnLoading", true);
           axios
             .get(url, {
-              responseType: 'blob',
+              responseType: "blob",
               headers: new Headers({
-                Origin: location.origin
+                Origin: location.origin,
               }),
-              mode: 'cors'
+              mode: "cors",
             })
             .then((data) => {
-              const a = document.createElement('a')
-              const blob = new Blob([data], { type: 'application/octet-stream' })
+              const a = document.createElement("a");
+              const blob = new Blob([data], {
+                type: "application/octet-stream",
+              });
               // data指需要下载的文本或字符串内容
-              a.download = fileName
-              a.href = window.URL.createObjectURL(blob)
-              document.body.appendChild(a)
-              a.click()
-              a.remove()
-              this.$set(this.test, 'btnLoading', false);
-            })
+              a.download = fileName;
+              a.href = window.URL.createObjectURL(blob);
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              this.$set(this.test, "btnLoading", false);
+            });
+        },
+        kpiCycleChange(e) {
+          this.limitConfirmTime(e, "kpi_cycle_1", 30);
+        },
+        endTimeChange(e) {
+          this.limitConfirmTime(e, "end_time", 30);
         },
         sendTimeChange(e) {
+          this.limitConfirmTime(e, "send_time", 30);
+        },
+        limitConfirmTime(e, key, minute) {
           let choosed = new Date(e).getTime();
-          let minTime = new Date().getTime() + 30 * 60 * 1000;
-          console.log("t===",e, choosed, minTime, choosed < minTime);
+          let minTime = new Date().getTime() + minute * 60 * 1000;
           if (choosed < minTime) {
-            let d = new Date(minTime);
-            let fd = d.getFullYear().toString()+"-"+((d.getMonth()+1).toString().length==2?(d.getMonth()+1).toString():"0"+(d.getMonth()+1).toString())+"-"+(d.getDate().toString().length==2?d.getDate().toString():"0"+d.getDate().toString())+" "+(d.getHours().toString().length==2?d.getHours().toString():"0"+d.getHours().toString())+":"+((parseInt(d.getMinutes()/5)*5).toString().length==2?(parseInt(d.getMinutes()/5)*5).toString():"0"+(parseInt(d.getMinutes()/5)*5).toString())+":00";
-            this.$set(this.info, 'send_time', fd);
+            this.$set(
+              this.info,
+              key,
+              new Date(minTime).format("yyyy-MM-dd hh:mm:ss")
+            );
           }
         },
         testLoading() {
           this.otherContentLoading = this.$loading({
             lock: true,
-            text: '上传中',
+            text: "上传中",
           });
           // setTimeout(() => {
           //   this.otherContentLoading.close();
@@ -1108,6 +1215,9 @@
         },
         addWechatApp() {
           this.wechatAppForm = { ...this.baseWechatAppForm };
+          this.$nextTick(() => {
+            this.$refs.wechatAppForm.clearValidate();
+          });
           this.wechatAppDialogVisible = true;
         },
         cancelWechatApp() {
@@ -1149,6 +1259,9 @@
         },
         addWebPage() {
           this.webPageForm = { ...this.baseWebPageForm };
+          this.$nextTick(() => {
+            this.$refs.webPageForm.clearValidate();
+          });
           this.webPageDialogVisible = true;
         },
         // 文本表情包
@@ -1176,8 +1289,11 @@
           console.log(item.emojiPopoverVisible);
           item.emojiPopoverVisible = !item.emojiPopoverVisible;
         },
-        getShowStr(arr, len, labelKey,) {
-          return `${arr.slice(0 , len).map((ele) => ele[`${labelKey}`]).join("，")}${(arr.length > len) ? '...' : ''}`;
+        getShowStr(arr, len, labelKey) {
+          return `${arr
+            .slice(0, len)
+            .map((ele) => ele[`${labelKey}`])
+            .join("，")}${arr.length > len ? "..." : ""}`;
         },
         // 人群包 标签选择
         handleClickTag() {
@@ -1188,7 +1304,7 @@
           let labelKey = "name";
           // this.tagStr = r.map((ele) => ele[`${labelKey}`]).join("，") || "";
           this.writeBackChooseTag = r;
-          this.$set(this.info, 'option_tag_F', this.getShowStr(r, 3, labelKey))
+          this.$set(this.info, "option_tag_F", this.getShowStr(r, 3, labelKey));
           this.$refs.addTagDialogRef.dialogVisible = false;
         },
         // 角色选择
@@ -1198,7 +1314,7 @@
         confirmChooseRole(r) {
           // this.roleStr = r.map((ele) => ele.role).join("，") || "";
           this.writeBackChooseRole = r;
-          this.$set(this.info, 'option_role_F', this.getShowStr(r, 3, 'role'));
+          this.$set(this.info, "option_role_F", this.getShowStr(r, 3, "role"));
           this.$refs.addRoleDialogRef.dialogVisible = false;
         },
         // 选人确定
@@ -1217,7 +1333,11 @@
           );
           // this.memberOrgStr =
           //   confirmMemberOrg.map((ele) => ele.name).join("，") || "";
-          this.$set(this.info, 'option_department_F', this.getShowStr(confirmMemberOrg, 3, 'name'));
+          this.$set(
+            this.info,
+            "option_department_F",
+            this.getShowStr(confirmMemberOrg, 3, "name")
+          );
           this.$refs.addMemberDialogRef.dialogVisible = false;
         },
         handleRemoveTab(targetName) {
@@ -1252,7 +1372,21 @@
           }
         },
         handleClickChatType(item) {
-          this.info.chat_type = item.value;
+          this.$confirm("当前编辑的内容未保存，切换编辑的数据将被清空，确定切换吗？", "温馨提示", {
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            type: "warning",
+          })
+          .then(() => {
+            this.info.chat_type = item.value;
+            if (this.info.chat_type === "GROUP") {
+              this.writeBackChooseTag = [];
+              this.info.option_tag_F = '';
+            } 
+          })
+          .catch(() => {
+            console.log("取消切换=====");
+          });
         },
         addContentTryGroup() {
           let arrT3 = this.group_list.filter((ele) => ele.type == 3) || [];
@@ -1268,7 +1402,7 @@
             ...JSON.parse(JSON.stringify(this.base_group_list_item)),
             name: `内容对照组`,
             type: "3",
-            emojiPopoverVisible: false
+            emojiPopoverVisible: false,
           };
           this.group_list.push(add_group_list_item);
           this.editableTabsValue = `${len}`;
@@ -1279,7 +1413,7 @@
             ...JSON.parse(JSON.stringify(this.base_group_list_item)),
             name: "实验组",
             type: "1",
-            emojiPopoverVisible: false
+            emojiPopoverVisible: false,
           };
           this.group_list = [base_group_list_item];
           this.editableTabsValue = `${0}`;
@@ -1389,24 +1523,27 @@
               ],
             },
           ];
-          this.group_list = group_list.filter(
+          group_list = group_list.filter(
             (group_item) => group_item.type !== "4"
           );
-          group_list.map(ele => {
+          this.group_list = group_list.map((ele) => {
             // if (ele.type !== '1' && ele.type !== '4' ) {
-              if (ele.type !== '1') {  
-              ele.name = (ele.name).replace(/\d/g, '')
-              ele.emojiPopoverVisible = false
+            if (ele.type !== "1") {
+              ele.name = ele.name.replace(/\d/g, "");
             }
-          })
+            ele.emojiPopoverVisible = false;
+            return ele;
+          });
           this.noActionGroupItem = {
             ...JSON.parse(JSON.stringify(this.base_group_list_item)),
             name: "未触达对照组",
           };
           this.info = {
+            kpi_cycle_type: '1',
             chat_type: "SINGLE",
             receive_type: 1,
-          }
+            kpi_cycle_1: "2021-07-13 00:00:00"
+          };
           // 角色回显
           this.writeBackChooseRole = [
             {
@@ -1420,7 +1557,11 @@
           ];
           // this.roleStr =
           //   this.writeBackChooseRole.map((ele) => ele.role).join("，") || "";
-          this.$set(this.info, 'option_role_F', this.getShowStr(this.writeBackChooseRole, 3, 'role'));
+          this.$set(
+            this.info,
+            "option_role_F",
+            this.getShowStr(this.writeBackChooseRole, 3, "role")
+          );
           // 标签回显
           this.writeBackChooseTag = [
             {
@@ -1434,7 +1575,11 @@
           ];
           // this.tagStr =
           //   this.writeBackChooseTag.map((ele) => ele.name).join("，") || "";
-          this.$set(this.info, 'option_tag_F', this.getShowStr(this.writeBackChooseTag, 3, 'name'));
+          this.$set(
+            this.info,
+            "option_tag_F",
+            this.getShowStr(this.writeBackChooseTag, 3, "name")
+          );
           // 人组织回显
           let tableData = [
             {
@@ -1454,7 +1599,11 @@
             },
           ];
           this.writeBackSelectedMemberOrg = this.formatTableData(tableData);
-          this.$set(this.info, 'option_department_F', this.getShowStr(this.writeBackSelectedMemberOrg, 3, 'name'));
+          this.$set(
+            this.info,
+            "option_department_F",
+            this.getShowStr(this.writeBackSelectedMemberOrg, 3, "name")
+          );
           // this.memberOrgStr =
           //   this.writeBackSelectedMemberOrg.map((ele) => ele.name).join("，") ||
           //   "";
@@ -1484,16 +1633,20 @@
             });
         },
         saveSOP() {
-          let indexO = {}
+          let indexO = {};
           // 内容对照组拼上序号
-          this.group_list.map(ele => {
-            if (ele.type && ele.type !== '1') {
-              let suffixBase = indexO[ele.type]; 
-              ele.name = `${ele.name}${suffixBase ? 1 : suffixBase + 1 }`
+          this.group_list.map((ele) => {
+            if (ele.type && ele.type !== "1") {
+              let suffixBase = indexO[ele.type];
+              ele.name = `${ele.name}${suffixBase ? 1 : suffixBase + 1}`;
             }
-          })
+          });
           // 时间周期
-          this.$set(this.info, 'kpi_cycle', this.info[`kpi_cycle_${this.info.kpi_cycle_type}`]);
+          this.$set(
+            this.info,
+            "kpi_cycle",
+            this.info[`kpi_cycle_${this.info.kpi_cycle_type}`]
+          );
           console.log("时间周期===", this.info.kpi_cycle);
           this.$message({
             message: "恭喜你，新建群发SOP成功！",
