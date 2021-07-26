@@ -1,0 +1,28 @@
+.table-row-tag-cell.tag-in-table-cell {
+  .table-row-tag-list-wrap {
+    height: auto;
+    overflow: auto;
+  }
+
+  .table-row-tag-list-wrap.table-row-tag-list-wrap-1-row {
+    height: 30px;
+    overflow: hidden;
+  }
+
+  .table-row-tag-more {
+    width: 20px;
+    height: 20px;
+    height: 100%;
+    cursor: pointer;
+    flex-basis: 20px;
+    flex-shrink: 0;
+    line-height: 20px;
+    text-align: right;
+  }
+
+}
+
+.table-row-tag-list-wrap.table-row-tag-list-wrap-limit-height {
+  max-height: 325px;
+  overflow: auto;
+}

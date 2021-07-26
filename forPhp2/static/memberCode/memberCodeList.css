@@ -5,16 +5,26 @@
 
 .page.member-code-list .content-wrap {
   overflow: hidden;
-  padding-bottom: 0;
+  padding: 0 24px;
 }
 
 .page.member-code-list .content-wrap .content-head {
+  height: 64px;
   border-bottom: 2px solid #edeef2;
+  box-sizing: border-box;
+}
+
+.page.member-code-list .content-wrap .content-head .content-head-txt {
+  opacity: 0.85;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: left;
+  color: #000000;
+  line-height: 64px;
 }
 
 .page.member-code-list .content-wrap .content-main {
   display: flex;
-  outline: 1px solid #f00;
   box-sizing: border-box;
   height: calc(100% - 64px);
 }
@@ -53,18 +63,28 @@
 
 .page.member-code-list .content-wrap .content-main > .right .table-body {
   height: calc(100% - 144px);
+  position: relative;
+}
+
+.page.member-code-list .content-wrap .content-main > .right .table-body .image-slot {
+  text-align: center;
+  height: 42px;
+}
+
+.page.member-code-list .content-wrap .content-main > .right .table-body .image-slot > i {
+  line-height: 42px;
 }
 
 .page.member-code-list .content-wrap .content-main > .right .table-body .empty-tree-data {
   text-align: center;
   height: 80px;
-  transform: translateY(-40px);
-  margin-top: 50%;
+  position: relative;
+  top: 50%;
+  margin-top: -40px;
 }
 
 .page.member-code-list .content-wrap .content-main > .right .table-body .empty-tree-data .empty-tree-data-txt {
   font-size: 16px;
-  font-family: PingFangSC, PingFangSC-Regular;
   font-weight: 400;
   text-align: center;
   color: #171717;
@@ -102,4 +122,32 @@
 .table-row-tag-list-wrap.table-row-tag-list-wrap-limit-height {
   max-height: 325px;
   overflow: auto;
+}
+
+.sop-detail-name-list-dialog .el-dialog__body {
+  padding: 16px 24px 24px;
+}
+
+.sop-detail-name-list-dialog .list-wrap {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.sop-detail-name-list-dialog .list-item {
+  font-size: 14px;
+  width: 530px;
+  line-height: 32px;
+}
+
+.sop-detail-name-list-dialog .list-item::after {
+  content: " ";
+  display: block;
+  height: 1px;
+  width: 100%;
+  background: #F0F0F0;
+  transform: scale(1, 0.5);
+}
+
+.sop-detail-name-list-dialog .table-pagination-wrap {
+  margin-top: 10px;
 }

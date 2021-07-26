@@ -11,39 +11,57 @@
         <i slot="prefix" class="el-input__icon el-icon-search"></i>
       </el-input>
       <el-button size="mini" @click="handleClickAdd()">新建分组</el-button>
-      <el-button size="mini" @click="test()">11</el-button>
     </div>
     <div class="crud-classify-tree-wrap flex-1">
       <!-- :props="defaultProps" -->
+      <!-- :filter-node-method="filterNode" -->
       <el-tree
         class="filter-tree"
         :data="treeData"
         node-key="id"
         highlight-current
         default-expand-all
-        :filter-node-method="filterNode"
         ref="filterTree"
+        draggable
+        @node-drop="handleDropTreeNode"
+        @node-drag-end="handleDragEnd"
+        @node-click="handleNodeClick"
+        :indent="8"
       >
         <div
           class="custom-tree-node flex-1 flex-row-between"
           slot-scope="{ node, data }"
         >
-          <div class="left-label">{{ node.label }}</div>
-          <el-popover placement="right" width="84" trigger="hover">
+          <div class="left-label">
+            <el-tooltip 
+              popper-class="crud-classify-tree-label-popover"
+              :content="node.label" 
+              placement="top-start">
+              <div class="overflow-ellipsis p-r-8 left-label-txt">
+                {{ node.label }}
+              </div>
+            </el-tooltip>
+            <div class="mock-info-badge" v-if="data.hits_num">{{(data.hits_num > 99) ? '99+' : data.hits_num}}</div>
+          </div>
+          <!-- trigger="click" -->
+          <el-popover 
+            popper-class="crud-classify-tree-operate-popover"
+            placement="right-start" 
+            trigger="hover"
+            :visible-arrow="false">
             <div class="right-operate-wrap">
-              <!-- {{operateList}} -->
               <div
+                class="right-operate-item"
                 v-for="item in operateList"
                 :key="item.name"
-                @click="handleClickOperateItem(item)"
+                @click.stop="handleClickOperateItem(item, data)"
               >
                 {{ item.name }}
               </div>
             </div>
-            <span class="right-operate-btn" slot="reference">
-              <i class="el-icon-more"></i>
+            <span @click.stop="() => {}" class="right-operate-btn" slot="reference">
+              <i class="el-icon-more fs-14"></i>
             </span>
-            <!-- <el-button slot="reference">click 激活</el-button> -->
           </el-popover>
         </div>
       </el-tree>
@@ -56,7 +74,8 @@
       <el-form 
         size="mini" 
         label-position="top"
-        :model="form">
+        :model="form"
+        ref="crudClassifyForm">
         <el-form-item 
           label="分组名称"
           prop="name"
@@ -84,9 +103,11 @@
 module.exports = {
   name: "crudClassifyTree",
   props: {
-    subject: {
-      type: String,
-      default: "",
+    parentSearchParams: {
+      type: Object,
+      default: function() {
+        return {}
+      },
     },
   },
   data() {
@@ -104,7 +125,7 @@ module.exports = {
         },
         {
           name: "删除",
-          methods: "delCurrent",
+          methods: "delCurrentConfirm",
         }
       ],
       dialog: {
@@ -114,7 +135,8 @@ module.exports = {
         name: "",
       },
       form: {
-        name: ''
+        name: '',
+        parentId: 0
       }
     };
   },
@@ -129,61 +151,153 @@ module.exports = {
   beforeDestroy() {},
   mounted() {},
   watch: {
-    keyword(val) {
-      this.searchByKey();
+    keyword(val) {d
+      this.getTreeData();
     },
+    // parentSearchParams(n, o) {
+      // this.getTreeData();
+    // }
   },
   methods: {
-    test() {
-      let id = this.$refs.filterTree.getCurrentKey()
-      console.log("id===", id);
+    resetTree() {
+      this.keyword = '';
+      this.getTreeData();
+    },
+    editCurrent(data) {
+      console.log("编辑====", data);
+      this.dialog.title = '编辑分组名称';
+      this.form.name = data.label;
+      this.dialog.visible = true;
+    },
+    addChildren(data) {
+      console.log("加字节点==", data);
+      this.dialog.title = '新建分组名称';
+      this.form.name = '';
+      this.form.parentId = data.id || 0;
+      this.dialog.visible = true;
+      this.$nextTick(() => {
+        if (this.$refs.crudClassifyForm) {
+          this.$refs.crudClassifyForm.clearValidate();
+        }
+      })
+    },
+    delConfirm(data) {
+      console.log("删除====", data, data.id);
+      // 删除后回调刷新 tree 数据
+      // this.getTreeData();
+    },
+    delCurrentConfirm(data) {
+      if (data.children && data.children.length) {
+        this.$confirm('当前分组下有子级分组，删除该组会把子级分组都会删除！', '提示', {
+          confirmButtonText: '确认',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.delConfirm(data);
+        }).catch(() => {
+          // this.$message({
+          //   type: 'info',
+          //   message: '已取消删除'
+          // });          
+        });
+      } else {
+        this.delConfirm(data);
+      }
+    },
+    handleDropTreeNode (draggingNode, dropNode, dropType, ev) {
+      // console.log("dropA====", ...arguments);
+      // let id = draggingNode.data && draggingNode.data.id
+      // let did = dropNode && dropNode.id
+      // console.log("拖拽id===", id, "释放", did);
+      var paramData = [];
+		  // 当拖拽类型不为inner,说明只是同级或者跨级排序，只需要寻找目标节点的父ID，获取其对象以及所有的子节点，并为子节点设置当前对象的ID为父ID即可
+		  // 当拖拽类型为inner，说明拖拽节点成为了目标节点的子节点，只需要获取目标节点对象即可
+		  var data = dropType != "inner" ? dropNode.parent.data : dropNode.data;
+		  var nodeData = dropNode.level == 1 && dropType != "inner" ? data : data.children;
+		  // 设置父ID,当level为1说明在第一级，pid为空
+		  nodeData.forEach(element => {
+		    element.pid = dropNode.level == 1 ? "" : data.id;
+		  });
+		  nodeData.forEach((element, i) => {
+		    var dept = {
+		      deptId: element.id,
+		      parentDeptId: element.pid || 0,
+		      order: i
+		    };
+		    paramData.push(dept);
+		  });
+      console.log("拖拽=====", paramData);
+		
+
+    },
+    handleDragEnd(draggingNode, dropNode, dropType, ev) {
+      console.log('drag end: ', dropNode && dropNode.label, dropType);
     },
     handleClickAdd(v) {
+      this.form = {
+        name: '',
+        parentId: 0
+      }
       this.$set(this.dialog, "type", "add");
       this.$set(this.dialog, "title", "新建分组名称");
       this.$set(this.dialog, "visible", true);
+      this.$nextTick(() => {
+        if (this.$refs.crudClassifyForm) {
+          this.$refs.crudClassifyForm.clearValidate();
+        }
+      })
     },
     dialogCancel() {
       this.$set(this.dialog, "visible", false);
     },
     dialogConfirm() {
+      console.log("tree save ====", this.form);
       this.$set(this.dialog, "visible", false);
     },
-    handleClickOperateItem(item) {
-      console.log("======", item);
+    handleClickOperateItem(item, data) {
+      console.log("======", item, data);
+      this[item.methods](data);
     },
-    searchByKey() {
-      this.$refs.filterTree.filter(this.keyword);
-    },
+    // searchByKeyFront(v) {
+      // this.$refs.filterTree.filter(this.keyword);
+    // },
     filterNode(value, data) {
       if (!value) return true;
       return data.label.indexOf(value) !== -1;
     },
+    handleNodeClick(data, node) {
+      this.$emit('updatecurrenttreedata', data)
+    },
     getTreeData() {
+      console.log("树查询参数===", this.parentSearchParams);
+      // mock start
       this.treeData = [
         {
           id: 1,
           pid: 0,
           sort: 0,
-          label: "天下为公",
+          label: "天下为公天下为公天下为公天下为公天下为公",
           children: [
             {
               id: 3,
               pid: 1,
               sort: 0,
-              label: "天下为公-11",
+              label: "天下为公天下为公天下为公天下为公-11",
+              hits_num: 199,
             },
             {
               id: 4,
               pid: 1,
               sort: 0,
               label: "天下为公-4",
+              hits_num: 55,
               children: [
                 {
                   id: 5,
                   pid: 1,
                   sort: 0,
                   label: "天下为公-5",
+                  hits_num: 11,
                 },
                 {
                   id: 6,
@@ -342,6 +456,8 @@ module.exports = {
           label: "天下为公2",
         },
       ];
+      // this.treeData = []
+      // mock end
       if (this.treeData && this.treeData.length) {
         if (this.treeData[0] && this.treeData[0].id) {
           let cd = JSON.parse(JSON.stringify(this.treeData[0]))
@@ -364,7 +480,33 @@ module.exports = {
 </style>
 <style>
 .crud-classify-tree-dialog .el-dialog__body {
-  padding-top: 16px;
-  padding-bottom: 16px;
+  padding: 24px;
+  /* padding-top: 16px;
+  padding-bottom: 16px; */
+}
+.crud-classify-tree-operate-popover {
+  padding: 0;
+  width: 84px!important;
+  box-sizing: border-box;
+  min-width: 84px;
+}
+/* .crud-classify-tree .el-popover.el-popper {
+  padding: 0;
+} */
+.crud-classify-tree-operate-popover .right-operate-item {
+  padding: 0 11px;
+  line-height: 24px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #171717;
+  cursor: pointer;
+}
+.crud-classify-tree-operate-popover .right-operate-item:hover {
+  background: #1773FA;
+  color: #fff;
+}
+.crud-classify-tree-label-popover .left-label-txt {
+  padding-right: 6px;
+  /* color: #f00; */
 }
 </style>

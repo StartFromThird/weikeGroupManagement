@@ -1,0 +1,245 @@
+.welcome-text-and-file {
+
+  // 表情包
+  .text-emoji-content-wrap {
+    position: relative;
+    border: 1px solid #E4E7ED;
+    border-radius: 2px;
+  }
+  .emoji-tab-label:first-child {
+    
+
+  }
+  .text-emoji-content-wrap .emoji-btn {
+    position: absolute;
+    bottom: 4px;
+    left: 15px;
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+  }
+
+  .text-emoji-content-wrap .emoji-btn img {
+    width: 100%;
+    height: 100%;
+  }
+
+  .text-emoji-content-wrap .el-textarea textarea {
+    padding-bottom: 32px;
+    border: none;
+  }
+
+  .emoji-popover-wrap {
+    height: 262px;
+    .el-tabs__nav-scroll {
+      margin: 0 16px;
+    }
+  }
+
+  .emoji-popover-wrap .emoji-popover-head {
+    position: relative;
+    height: 10px;
+  }
+
+  .emoji-popover-wrap .popover-head-close {
+    position: absolute;
+    right: -0px;
+    top: -10px;
+    padding: 3px;
+    cursor: pointer;
+  }
+
+  .emoji-popover-wrap .emoji-box {
+    white-space: break-spaces;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .emoji-popover-wrap .emoji-box div {
+    font-size: 19px;
+    width: 30px;
+    text-align: center;
+    margin: 10px 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .fake-el-form-item__error {
+    color: #ff3b34;
+    font-size: 12px;
+    line-height: 1;
+    padding-top: 4px;
+  }
+
+  .fake-border__error {
+    border-color: #ff3b34;
+  }
+
+  // 上传
+  .uploader {
+    width: 360px;
+    height: 140px;
+    background: #ffffff;
+    border-radius: 4px;
+    border: 1px dashed #d8dce6;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .uploader .uploader-icon {
+    margin-bottom: 14px;
+  }
+
+  .uploader .action-txt {
+    font-size: 14px;
+    font-weight: 400;
+    color: #171717;
+    line-height: 14px;
+  }
+
+  .uploader .tip {
+    font-size: 12px;
+    font-weight: 400;
+    color: #c4c4c4;
+    line-height: 14px;
+    margin-top: 12px;
+  }
+
+  // 展示
+  .other-content-wrap {
+    .other_content_item {
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+      height: 60px;
+      background: #ffffff;
+      border-radius: 4px;
+      border: 1px solid #d8dce6;
+      display: flex;
+      padding: 8px;
+      box-sizing: border-box;
+      margin-bottom: 8px;
+
+      .image-err-slot {
+        text-align: center;
+        height: 100%;
+
+        i {
+          font-size: 20px;
+          line-height: 44px;
+        }
+      }
+
+      .middle-txt {
+        flex: 1;
+        overflow: hidden;
+        padding: 0 8px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        .title {
+          font-size: 14px;
+          font-weight: 400;
+          color: #000000;
+          line-height: 20px;
+          max-width: 100%;
+        }
+
+        .desc {
+          font-size: 12px;
+          font-weight: 300;
+          color: #999999;
+          line-height: 17px;
+          max-width: 100%;
+        }
+      }
+
+      .right-operate {
+        flex-basis: 50px;
+        display: flex;
+        align-items: center;
+        width: 50px;
+
+        .right-operate-btn {
+          padding: 5px;
+          cursor: pointer;
+        }
+
+        .right-operate-success {
+          color: #67c23a;
+        }
+
+        .right-operate-del {
+          color: #000000;
+        }
+      }
+    }
+  }
+}
+
+// 附件
+.add-other-content-wrap {
+  padding: 7px 3px;
+}
+
+.add-other-content-wrap .add-other-content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 40px;
+}
+
+.add-other-content-wrap .add-other-content-header span {
+  font-size: 16px;
+  font-weight: 400;
+  color: #303133;
+  line-height: 16px;
+}
+
+.add-other-content-wrap .add-other-content-header i {
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.add-other-content-wrap .add-other-content-main {
+  display: flex;
+  justify-content: space-between;
+}
+
+.add-other-content-item {
+  width: 86px;
+  height: 86px;
+  padding: 14px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border-radius: 4px;
+  border: 1px solid #d8dce6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.add-other-content-item img {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+}
+
+.add-other-content-item span {
+  font-size: 14px;
+  font-weight: 400;
+  color: #303133;
+  line-height: 20px;
+}
+
+.sop-add-other-content-dialog .el-dialog__body,
+.sop-add-other-content-dialog .el-dialog__body {
+  padding-top: 24px;
+  padding-bottom: 24px;
+}

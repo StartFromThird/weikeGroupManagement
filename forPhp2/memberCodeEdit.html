@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>成员活码新增/编辑</title>
+    <link rel="stylesheet" href="./static/libs/element/element.css" />
+    <script src="./static/libs/vue-dev.js"></script>
+    <script src="./static/libs/http-vue-loader.js"></script>
+    <script src="./static/libs/element/element.js"></script>
+    <script src="./static/libs/vueRouter.js"></script>
+    <link rel="stylesheet" href="./static/elementTheme/theme/index.css" />
+    <script src="https://cdn.jsdelivr.net/npm/ant-design-vue@1.6.5/dist/antd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/ant-design-vue@1.6.5/dist/antd.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="./static/style/base.css" />
+    <script src="./util/common.js"></script>
+    <script src="./util/emoji.js"></script>
+  </head>
+  <body>
+    <div id="memberCodeEdit" class="h-100vh" >
+      <member-code-edit />
+    </div>
+    <script>
+      new Vue({
+        components: {
+          memberCodeEdit: httpVueLoader("./views/memberCode/memberCodeEdit.vue"),
+        },
+        el: "#memberCodeEdit",
+        name: "memberCodeEdit",
+      });
+    </script>
+  </body>
+</html>

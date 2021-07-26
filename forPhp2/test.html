@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>测试页面</title>
+    <link rel="stylesheet" href="./static/libs/element/element.css" />
+    <link rel="stylesheet" href="./static/style/base.css" />
+    <script src="./static/libs/vue-dev.js"></script>
+    <script src="./static/libs/http-vue-loader.js"></script>
+    <script src="./static/libs/element/element.js"></script>
+    <script src="./static/libs/vueRouter.js"></script>
+    <script src="./static/libs/vuex.js"></script>
+    <link rel="stylesheet" href="./static/elementTheme/theme/index.css" />
+    <!-- <script src="./store/index.js"></script> -->
+    <!-- <script src="./route/tagRoute.js"></script> -->
+    <script src="./static/libs/Sortable.min.js"></script>
+    <script src="./static/libs/vuedraggable.js"></script>
+  </head>
+  <body>
+    <div id="indexApp">
+      <app />
+    </div>
+    <script>
+      new Vue({
+        components: {
+          app: httpVueLoader("./views/test/index.vue"),
+        },
+        el: "#indexApp",
+        name: "indexApp",
+      });
+    </script>
+  </body>
+</html>

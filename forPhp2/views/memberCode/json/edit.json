@@ -1,0 +1,21 @@
+{
+	"group_id": "25",             //所选分组ID
+	"code_name": "六一儿童节", //成员活码名称
+	"code_description": "六一儿童节的成员活码",  //成员活码描述
+	"is_tag": "1", //是否勾选标签，1：勾选  2：未勾选
+	"is_welcome": "1",//是否设置欢迎语，1：是  2：否
+	"tag_id": "5,6", //标签ID
+	"welcome_msg_data": "{"text_message":"您好欢迎光临","attachment_data":[{"msg_type":"VIDEO","qw_media_idx":"","qw_pic_url":"","qw_link_title":"","qw_link_picurl":"","qw_link_desc":"","qw_link_url":"","qw_miniprogram_title":"","qw_miniprogram_pic_media_id":"","qw_miniprogram_appid":"","qw_miniprogram_page":"","qw_video_media_id":"1111"},{"msg_type":"IMAGE","qw_media_idx":"12121","qw_pic_url":"","qw_link_title":"","qw_link_picurl":"","qw_link_desc":"","qw_link_url":"","qw_miniprogram_title":"","qw_miniprogram_pic_media_id":"","qw_miniprogram_appid":"","qw_miniprogram_page":"","qw_video_media_id":""},{"msg_type":"IMAGE","qw_media_idx":"","qw_pic_url":"www.baidu.com","qw_link_title":"","qw_link_picurl":"","qw_link_desc":"","qw_link_url":"","qw_miniprogram_title":"","qw_miniprogram_pic_media_id":"","qw_miniprogram_appid":"","qw_miniprogram_page":"","qw_video_media_id":""},{"msg_type":"LINK","qw_media_idx":"","qw_pic_url":"","qw_link_title":"网站测试","qw_link_picurl":"www.baidu.com","qw_link_desc":"网站在测试","qw_link_url":"www.bejson.com","qw_miniprogram_title":"","qw_miniprogram_pic_media_id":"","qw_miniprogram_appid":"","qw_miniprogram_page":"","qw_video_media_id":""},{"msg_type":"MINIPROGRAM","qw_media_idx":"","qw_pic_url":"","qw_link_title":"","qw_link_picurl":"","qw_link_desc":"","qw_link_url":"","qw_miniprogram_title":1,"qw_miniprogram_pic_media_id":1,"qw_miniprogram_appid":1,"qw_miniprogram_page":1,"qw_video_media_id":""}]}",
+	"begin_time": "2021-07-14 10:00:00",  //规则有效时间
+	"end_time": "2021-07-16 10:00:00",//规则结束时间
+	"rule_name": "六一活动节1", //规则名称
+	"rule_description": "六一儿童节",//规则描述
+	"rule_type": "2",//规则类型：1单人 2多人
+	"diversion_rule": "2", // 分流类型 ：1客户数限制  2随机
+	"add_people_number_limit": "100", // 添加人数限制
+	"scans_number_limit": 0, //扫码人数限制
+	"is_use": "1", // 是否启用 1启用 2未启用
+	"is_pass": "1", //是否自动通过 1通过 2未通过
+	"is_long_term": "2", //是否长期有效 1是 2否
+	"member_id": "76,51" //所选成员ID
+}

@@ -8,52 +8,65 @@
           size="mini"
           class="demo-form-inline"
         >
-          <el-form-item label="成员活码名称：" class="m-b-0">
+          <el-form-item label="成员活码名称：" class="m-b-0 m-r-24">
             <el-input
               size="mini"
               placeholder="请输入名称"
               v-model="search.code_name"
+              maxlength="10"
+              show-word-limit
+              clearable
             ></el-input>
           </el-form-item>
           <el-form-item label="创建时间：" class="m-b-0">
             <el-date-picker
+              style="width: 320px"
               size="mini"
               v-model="search.create_time"
-              type="datetime"
+              type="datetimerange"
               placeholder="选择日期时间"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              format="yyyy-MM-dd HH:mm:ss"
             >
             </el-date-picker>
           </el-form-item>
         </el-form>
       </div>
       <div class="search-head-right">
-        <el-button size="mini">重置</el-button>
-        <el-button type="primary" size="mini">查询</el-button>
+        <el-button size="mini" @click="resetHeadSearch">重置</el-button>
+        <el-button type="primary" size="mini" @click="headSearch"
+          >查询</el-button
+        >
       </div>
     </div>
     <div class="content-wrap flex-column flex-1 bg-color-fff p-24 m-t-16">
-      <div class="content-head flex-row-between p-b-24">
+      <div class="content-head flex-row-between">
         <div class="content-head-txt">数据列表</div>
-        <el-button size="mini">批量操作</el-button>
       </div>
       <div class="content-main flex-row-start flex-1">
         <div class="left p-t-16 p-b-16">
-          <crud-classify-tree 
+          <crud-classify-tree
             ref="crudClassifyTree"
-            @updatecurrenttreedata="updateCurrentTreeData">
+            :parent-search-params="search"
+            @updatecurrenttreedata="updateCurrentTreeData"
+          >
           </crud-classify-tree>
         </div>
         <div class="mid"></div>
         <div class="right flex-1 flex-column">
           <div class="table-head flex-row flex-row-between">
-            <div class="table-head-left">
-              {{ currentTreeData.label || "-" }}
+            <div class="table-head-left overflow-ellipsis">
+              {{ currentTreeData.label || "" }}
             </div>
             <div class="table-head-right">
               <el-button
                 v-if="currentTreeData && currentTreeData.id"
                 type="primary"
                 size="mini"
+                @click="handleListItemAdd"
               >
                 新增成员活码
               </el-button>
@@ -77,7 +90,7 @@
                     @click="previewCodeImg(scope.row)"
                   >
                     <div slot="error" class="image-slot">
-                      <i class="el-icon-picture-outline"></i>
+                      <i class="el-icon-picture-outline fs-24"></i>
                     </div>
                   </el-image>
                 </template>
@@ -86,11 +99,18 @@
                 label="成员活码名称"
                 prop="code_name"
                 show-overflow-tooltip
+                min-width="120px"
               >
               </el-table-column>
               <el-table-column
                 label="描述"
                 prop="description"
+                show-overflow-tooltip
+              >
+              </el-table-column>
+              <el-table-column
+                label="分组名称"
+                prop="group_name"
                 show-overflow-tooltip
               >
               </el-table-column>
@@ -104,6 +124,7 @@
                 label="引流数量（人）"
                 prop="people_num"
                 show-overflow-tooltip
+                min-width="120px"
               >
               </el-table-column>
               <el-table-column label="关联标签" width="620px">
@@ -138,8 +159,12 @@
                       trigger="hover"
                       width="542"
                     >
-                      <div class="table-row-tag-list-wrap table-row-tag-list-wrap-limit-height">
-                        <!-- ,...scope.row.tag_list,...scope.row.tag_list, ...scope.row.tag_list -->
+                      <div
+                        class="
+                          table-row-tag-list-wrap
+                          table-row-tag-list-wrap-limit-height
+                        "
+                      >
                         <div
                           v-for="(tag, index) in [...scope.row.tag_list]"
                           :key="index"
@@ -166,21 +191,31 @@
                   </div>
                 </template>
               </el-table-column>
-              <el-table-column label="操作" width="150px">
+              <el-table-column label="操作" width="150px" fixed="right">
                 <template slot-scope="scope">
-                  <el-button type="text" size="mini">查看详情</el-button>
-                  <el-button type="text" size="mini">编辑</el-button>
-                  <el-button type="text" size="mini" v-if="scope.row.is_del"
+                  <el-button
+                    type="text"
+                    size="mini"
+                    @click="handleListItemDetail(scope.row, scope.index)"
+                    >查看详情</el-button
+                  >
+                  <el-button
+                    type="text"
+                    size="mini"
+                    @click="handleListItemEdit(scope.row, scope.index)"
+                    >编辑</el-button
+                  >
+                  <el-button
+                    type="text"
+                    size="mini"
+                    @click="handleListItemDel(scope.row, scope.index)"
                     >删除</el-button
                   >
                 </template>
               </el-table-column>
             </el-table>
             <!-- v-else-if="tableData && (!tableData.length)" -->
-            <div
-              
-              class="empty-tree-data"
-            >
+            <div class="empty-tree-data" v-else-if="tableData && (!tableData.length)">
               <div class="empty-tree-data-txt">暂无分组！</div>
               <el-button size="mini" type="primary" @click="addNewClassify"
                 >新建分组</el-button
@@ -249,8 +284,42 @@ module.exports = {
     this.getTableData();
   },
   methods: {
+    handleListItemAdd() {
+      let id = (this.currentTreeData && this.currentTreeData.id) || 0;
+      let name =
+        (this.currentTreeData && this.currentTreeData.label.substring(0, 10)) ||
+        "";
+      location.href = `./memberCodeEdit.html?type=add${
+        id ? `&group_id=${id}` : ""
+      }${name ? `&group_name=${name}` : ""}`;
+    },
+    handleListItemEdit(row, index) {
+      location.href = `./memberCodeEdit.html?type=edit&id=${row.id}`;
+    },
+    handleListItemDetail(row, index) {
+      location.href = `./memberCodeDetail.html?id=${row.id}`;
+    },
+    handleListItemDel(row, index) {
+      this.$confirm("确认删除该条成员活码?", "提示", {
+        confirmButtonText: "确认",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          this.$message({
+            type: "success",
+            message: "删除成功!",
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除",
+          });
+        });
+    },
     updateCurrentTreeData(d) {
-      this.currentTreeData = d.id ? d : {};
+      this.currentTreeData = d.id ? JSON.parse(JSON.stringify(d)) : {};
       this.pageNo = 1;
       this.getTableData();
     },
@@ -271,13 +340,19 @@ module.exports = {
       $(a).remove();
     },
     getTableData() {
+      if (!this.currentTreeData.id) {
+        this.tableData = [];
+        return;
+      }
       // 查询参数
       let param = {
+        ...this.search,
         pageNo: this.pageNo,
         pageSize: this.pageSize,
         classify: this.currentTreeData.id,
       };
-      console.log("param====", param);
+      console.log("table参数====", param);
+      // mock start
       let tableData = [
         {
           id: 1,
@@ -308,7 +383,7 @@ module.exports = {
               tag_name: "一十六",
               group_tag_type: "SERVICE",
               succ_class_num: "2",
-            },
+            }
           ],
         },
         {
@@ -318,8 +393,229 @@ module.exports = {
           type: "ADD",
           subject_name: "主体",
           succ_class_num: "客户数量",
+          code_name: "天下为公活码名称11111111111",
           is_del: 0,
           tag_list: [
+            {
+              group_name: "总部标签组名称",
+              tag_name: "标签名",
+              group_tag_type: "HQ",
+              succ_class_num: "1",
+            },
+            {
+              group_name: "一二三",
+              tag_name: "一十六",
+              group_tag_type: "SERVICE",
+              succ_class_num: "2",
+            },
+            {
+              group_name: "总部标签组名称",
+              tag_name: "标签名",
+              group_tag_type: "HQ",
+              succ_class_num: "1",
+            },
+            {
+              group_name: "一二三",
+              tag_name: "一十六",
+              group_tag_type: "SERVICE",
+              succ_class_num: "2",
+            },
+            {
+              group_name: "总部标签组名称",
+              tag_name: "标签名",
+              group_tag_type: "HQ",
+              succ_class_num: "1",
+            },
+            {
+              group_name: "一二三",
+              tag_name: "一十六",
+              group_tag_type: "SERVICE",
+              succ_class_num: "2",
+            },
+            {
+              group_name: "总部标签组名称",
+              tag_name: "标签名",
+              group_tag_type: "HQ",
+              succ_class_num: "1",
+            },
+            {
+              group_name: "一二三",
+              tag_name: "一十六",
+              group_tag_type: "SERVICE",
+              succ_class_num: "2",
+            },
+            {
+              group_name: "总部标签组名称",
+              tag_name: "标签名",
+              group_tag_type: "HQ",
+              succ_class_num: "1",
+            },
+            {
+              group_name: "一二三",
+              tag_name: "一十六",
+              group_tag_type: "SERVICE",
+              succ_class_num: "2",
+            },
+            {
+              group_name: "总部标签组名称",
+              tag_name: "标签名",
+              group_tag_type: "HQ",
+              succ_class_num: "1",
+            },
+            {
+              group_name: "一二三",
+              tag_name: "一十六",
+              group_tag_type: "SERVICE",
+              succ_class_num: "2",
+            },
+            {
+              group_name: "总部标签组名称",
+              tag_name: "标签名",
+              group_tag_type: "HQ",
+              succ_class_num: "1",
+            },
+            {
+              group_name: "一二三",
+              tag_name: "一十六",
+              group_tag_type: "SERVICE",
+              succ_class_num: "2",
+            },
+            {
+              group_name: "总部标签组名称",
+              tag_name: "标签名",
+              group_tag_type: "HQ",
+              succ_class_num: "1",
+            },
+            {
+              group_name: "一二三",
+              tag_name: "一十六",
+              group_tag_type: "SERVICE",
+              succ_class_num: "2",
+            },
+            {
+              group_name: "一二三四五六",
+              tag_name: "一二三四五六七",
+              group_tag_type: "HQ",
+              succ_class_num: "1",
+            },
+            {
+              group_name: "一二三四五六七八九十",
+              tag_name: "一二三四五六七八九十",
+              group_tag_type: "HQ",
+              succ_class_num: "1",
+            },
+            {
+              group_name: "一二三四五六七八九十",
+              tag_name: "一二三四五六七八九",
+              group_tag_type: "SERVICE",
+              succ_class_num: "2",
+            },
+            {
+              group_name: "总部标签组名称总部标签组名称",
+              tag_name: "标签名总部标签组名称",
+              group_tag_type: "HQ",
+              succ_class_num: "1",
+            },
+            {
+              group_name:
+                "服务标签组名称总部标签组名称总部标签组名称总部标签组名称",
+              tag_name: "标签名总部标签组名称",
+              group_tag_type: "SERVICE",
+              succ_class_num: "1",
+            },
+            {
+              group_name: "一二三四五六",
+              tag_name: "一二三四五六七",
+              group_tag_type: "HQ",
+              succ_class_num: "1",
+            },
+            {
+              group_name: "一二三四五六七八九十",
+              tag_name: "一二三四五六七八九十",
+              group_tag_type: "HQ",
+              succ_class_num: "1",
+            },
+            {
+              group_name: "一二三四五六七八九十",
+              tag_name: "一二三四五六七八九",
+              group_tag_type: "SERVICE",
+              succ_class_num: "2",
+            },
+            {
+              group_name: "总部标签组名称总部标签组名称",
+              tag_name: "标签名总部标签组名称",
+              group_tag_type: "HQ",
+              succ_class_num: "1",
+            },
+            {
+              group_name:
+                "服务标签组名称总部标签组名称总部标签组名称总部标签组名称",
+              tag_name: "标签名总部标签组名称",
+              group_tag_type: "SERVICE",
+              succ_class_num: "1",
+            },
+            {
+              group_name: "一二三四五六",
+              tag_name: "一二三四五六七",
+              group_tag_type: "HQ",
+              succ_class_num: "1",
+            },
+            {
+              group_name: "一二三四五六七八九十",
+              tag_name: "一二三四五六七八九十",
+              group_tag_type: "HQ",
+              succ_class_num: "1",
+            },
+            {
+              group_name: "一二三四五六七八九十",
+              tag_name: "一二三四五六七八九",
+              group_tag_type: "SERVICE",
+              succ_class_num: "2",
+            },
+            {
+              group_name: "总部标签组名称总部标签组名称",
+              tag_name: "标签名总部标签组名称",
+              group_tag_type: "HQ",
+              succ_class_num: "1",
+            },
+            {
+              group_name:
+                "服务标签组名称总部标签组名称总部标签组名称总部标签组名称",
+              tag_name: "标签名总部标签组名称",
+              group_tag_type: "SERVICE",
+              succ_class_num: "1",
+            },
+            {
+              group_name: "一二三四五六",
+              tag_name: "一二三四五六七",
+              group_tag_type: "HQ",
+              succ_class_num: "1",
+            },
+            {
+              group_name: "一二三四五六七八九十",
+              tag_name: "一二三四五六七八九十",
+              group_tag_type: "HQ",
+              succ_class_num: "1",
+            },
+            {
+              group_name: "一二三四五六七八九十",
+              tag_name: "一二三四五六七八九",
+              group_tag_type: "SERVICE",
+              succ_class_num: "2",
+            },
+            {
+              group_name: "总部标签组名称总部标签组名称",
+              tag_name: "标签名总部标签组名称",
+              group_tag_type: "HQ",
+              succ_class_num: "1",
+            },
+            {
+              group_name:
+                "服务标签组名称总部标签组名称总部标签组名称总部标签组名称",
+              tag_name: "标签名总部标签组名称",
+              group_tag_type: "SERVICE",
+              succ_class_num: "1",
+            },
             {
               group_name: "一二三四五六",
               tag_name: "一二三四五六七",
@@ -376,7 +672,9 @@ module.exports = {
         row.isTagOver = tagsTxtLen - 1;
       });
       // tableData = []
+      // mock end
       this.tableData = tableData;
+      this.totalNo = 150;
     },
     handleSizeChange(val) {
       this.pageSize = val;
@@ -386,6 +684,16 @@ module.exports = {
     handleCurrentChange(val) {
       this.pageNo = val;
       this.getTableData();
+    },
+    resetHeadSearch() {
+      this.search = {};
+      this.$refs.crudClassifyTree.resetTree();
+    },
+    headSearch() {
+      console.log("index 参数==", this.search);
+      this.$refs.crudClassifyTree.getTreeData();
+      // this.pageNo = 1;
+      // this.getTableData();
     },
   },
   components: {

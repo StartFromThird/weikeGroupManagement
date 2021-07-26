@@ -1,0 +1,41 @@
+{
+  "current_page": "1",
+  "total_page_num": 3,
+  "drainage_total_num": 150,
+  "drainage_user_num": 120,
+  "record_list": [
+    {
+      "rule_name": "六一活动节",
+      "member_name": "林金涛",
+      "qw_external_name": "霜",
+      "qw_gender": "1",
+      "deleted_state": "互为好友",
+      "qw_createtime": 1618213158,
+      "qw_avatar": "http://wx.qlogo.cn/mmhead/Xmnun9Io49QUtqYpcxYKs8sMibVYiasNTlS980txlb6BfTAhl9bTQpGw/0",
+      "qw_type": "1",
+      "add_date": "2021-04-12 15: 39: 18"
+    },
+    {
+      "rule_name ": "六一活动节 ",
+      "member_name ": "林金涛 ",
+      "qw_external_name ": "姚杨 kiki ",
+      "qw_gender ": "1 ",
+      "deleted_state ": "互为好友 ",
+      "qw_createtime ": 1625544607,
+      "qw_avatar ": "http:  //wx.qlogo.cn/mmhead/Q3auHgzwzM6uk51ic9K9lYS34cVesO6NaDvwvwHWaNGxg7JbSfscGOQ/0",
+      "qw_type": "1",
+      "add_date": "2021-07-06 12: 10: 07 "
+    },
+    {
+      "rule_name ": "六一活动节 ",
+      "member_name ": "林金涛 ",
+      "qw_external_name ": "Frank - Fu ",
+      "qw_gender ": "1 ",
+      "deleted_state ": "客户删除成员 ",
+      "qw_createtime ": 1612409280,
+      "qw_avatar ": "http:  //wx.qlogo.cn/mmhead/PiajxSqBRaEJXrOjw5YwvM2iaibRibt07VZszqAHibeCNNzcMontkbHaOyQ/0",
+      "qw_type": "1",
+      "add_date": "2021-02-04 11: 28: 00 "
+    }
+  ]
+}
