@@ -2,254 +2,648 @@
 <html lang='en'>
 <head>
     <meta charset='UTF-8'>
-    <title>素材管理</title>
-    <link rel="stylesheet" href="./static/libs/element/element.css">
-    <link rel="stylesheet" href="./static/admin/admin.css">
-    <script src="./static/libs/vue.js"></script>
-    <script src="./static/libs/element/element.js"></script>
-    <script src="./static/libs/Sortable.min.js"></script>
-    <script src="./static/libs/vuedraggable.js"></script>
-    <script src="./static/libs/moment.js"></script>
-    <script src="./static/jquery/jquery.js"></script>
-    <script src="./static/libs/api.js"></script>
+    <title>数据看板</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="/static/libs/element/element.css">
+    <link rel="stylesheet" href="/static/admin/admin.css">
+
+
+    <style>
+        body{
+            margin: 0;
+        }
+        .container{
+            padding: 20px 20px;
+            margin: 0;
+            background: #f0f2f5
+        }
+        .card{
+            text-align: center;
+            background: white;
+        }
+        .card-head{
+            width: 100%;
+            height: 80px;
+            margin: 10px 10px 10px 0px;
+            display: flex;
+            justify-content: center;
+        }
+        .top-select{
+            align-self: center;
+        }
+        .card-main{
+            padding: 10px;
+            margin: 10px;
+        }
+        .box-card{
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+        .border-box{
+            padding-top: 5px;
+            height: 100px;
+            border: #d0d0d0 solid 1px;
+            border-radius: 5px;
+            color:#d0d0d0 ;
+        }
+        .val-title{
+            text-align: center;
+            color: #0C0C0C;
+            font-size: 22px;
+            margin: 10px 10px 10px 10px;
+        }
+        .val-title-green{
+            text-align: center;
+            color: green;
+
+        }
+        .val-title-red{
+             text-align: center;
+             color: red;
+
+         }
+        .text-center{
+            text-align: center;
+            color: #d0d0d0;
+        }
+        .el-card__header{
+            border-bottom: none;
+            color:#;
+        }
+        .rank_btn_group{
+            font-size: 8px;
+            margin-bottom: 10px;
+        }
+        .chart{
+            width: auto;
+            height: 600px;
+        }
+
+    </style>
 </head>
 <body>
-<div id="ListIndex" v-cloak style="height: calc(100vh - 63px);">
-    <div>
-        <div class="btn-box">
-            <div class="display-flex">
-                <div class="btn-common refresh-btn">
-                    <i class="el-icon-refresh" @click="goRefresh"></i>
-                </div>
-                <el-button type="primary" @click="itemOpt('create')" icon="el-icon-plus" size="small">新增</el-button>
-            </div>
-            <div>
-                <el-input placeholder="请输入标题" suffix-icon="el-icon-search" v-model="searchKey">
-                </el-input>
-            </div>
-        </div>
-        <div>
-            <el-table ref="multipleTable" :data="listData" tooltip-effect="dark" style="width: 100%" border
-                      @selection-change="handleSelectionChange" fit="true">
-                <el-table-column type="selection">
-                </el-table-column>
-                <el-table-column label="id" width="80">
-                    <template slot-scope="scope">
-                        <div>[[ scope.row.id]]</div>
-                    </template>
-                </el-table-column>
-                <el-table-column label="素材名称">
-                    <template slot-scope="scope">
-                        <div>[[ scope.row.source_name]]</div>
-                    </template>
-                </el-table-column>
-                <el-table-column label="素材唯一id" :show-overflow-tooltip="true">
-                    <template slot-scope="scope">
-                        <div>[[ scope.row.media_id]]</div>
-                    </template>
-                </el-table-column>
-                <el-table-column label="文件查看">
-                    <template slot-scope="scope">
-                        <el-image
-                         v-if="scope.row.source_type == '图片'"
-                        style="width: 100px; height: 100px"
-                        :src="scope.row.url"
-                        fit="scale-down"></el-image>
-                        <el-button v-else type="text"  @click="download(scope.row.url)" size="mini">下载</el-button>
-                    </template>
-                </el-table-column>
-                <el-table-column label="素材类型">
-                    <template slot-scope="scope">
-                        <div>[[ scope.row.source_type]]</div>
-                    </template>
-                </el-table-column>
-                <el-table-column label="上传时间">
-                    <template slot-scope="scope">
-                        <div>[[ scope.row.upload_time]]</div>
-                    </template>
-                </el-table-column>
-                <el-table-column label="有效期">
-                    <template slot-scope="scope">
-                        <div>[[ scope.row.validity_time]]</div>
-                    </template>
-                </el-table-column>
-                <el-table-column fixed="right" label="操作">
-                    <template slot-scope="scope">
-<!--                        <el-button type="text"  @click="itemOpt('edit',scope.row.id)" size="mini">编辑</el-button>-->
-                        <el-button type="text" @click="itemOpt('del',scope.row.id)" size="mini">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
+<div id="board" class="container" v-loading.fullscreen.lock="loading">
+    <!--顶部-->
+    <div class="card card-head">
+        <div class="top-select">
+            <el-cascader :props="area_props" ref='refSubCat' placeholder="百果园集团" v-model="area_val" class="cascader" @change="handleSelect()" size="medium" filterable></el-cascader>
         </div>
     </div>
-    <div class="display-flex" style="justify-content: space-between;margin: 30px 0;">
-        <div class="display-flex">
-            <el-button type="danger"  @click="itemOpt('del',null)"  icon="el-icon-delete" size="small">删除</el-button>
-        </div>
-        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
-                       :page-sizes="[10, 20, 30, 40]" :page-size="limit" layout="total, sizes, prev, pager, next, jumper"
-                       :total="totalPage">
-        </el-pagination>
-    </div>
+    <el-row :gutter="20">
+        <!--左侧-->
+        <el-col :span="18">
+            <el-row :gutter="20">
+                <el-col :span="12">
+                    <el-card class="box-card">
+                        <div slot="header" class="clearfix">
+                            <span>客户统计</span>
+                            <el-button style="float: right; padding: 3px 0" type="text">
+                                <el-link href="/cw_data_board/customer_list" >more</el-link>
+                            </el-button>
+                        </div>
+                        <div  class="text item">
+                            <el-row :gutter="20">
+                                <el-col :span="8">
+                                    <div class="border-box">
+                                        <span style="margin-left: 10px">好友总数</span>
+                                        <p class="val-title">
+                                            [[stat_data.customer.friend_num]]
+                                        </p>
+                                    </div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="border-box">
+                                        <span style="margin-left: 10px">今日新增好友总数</span>
+                                        <p class="val-title">
+                                            [[stat_data.customer.today_add_num]]
+                                        </p>
+
+                                        <p v-if="stat_data.customer.friend_add_trend>0" class="val-title-red">
+                                            ↑ [[stat_data.customer.friend_add_trend]]
+                                        </p>
+                                        <p  v-else-if="stat_data.customer.friend_add_trend==0" class="text-center">
+                                            --
+                                        </p>
+                                        <p  v-else class="val-title-green">
+                                            ↓ [[stat_data.customer.friend_add_trend]]
+                                        </p>
+                                    </div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="border-box">
+                                        <span style="margin-left: 10px">今日流失好友总数</span>
+                                        <p class="val-title">
+                                            [[stat_data.customer.today_lost_num]]
+                                        </p>
+                                        <p v-if="stat_data.customer.friend_lost_trend>0" class="val-title-red">
+                                            ↑ [[stat_data.customer.friend_lost_trend]]
+                                        </p>
+                                        <p  v-else-if="stat_data.customer.friend_lost_trend==0" class="text-center">
+                                            --
+                                        </p>
+                                        <p  v-else class="val-title-green">
+                                            ↓ [[stat_data.customer.friend_lost_trend]]
+                                        </p>
+                                    </div>
+                                </el-col>
+                            </el-row>
+
+                        </div>
+                    </el-card>
+                </el-col>
+                <el-col :span="12">
+                    <el-card class="box-card">
+                        <div slot="header" class="clearfix">
+                            <span>群统计</span>
+                            <el-button style="float: right; padding: 3px 0" type="text">
+                                <el-link href="/cw_data_board/groupchat_list">more</el-link>
+                            </el-button>
+                        </div>
+                        <div  class="text item">
+                            <el-row :gutter="20">
+                                <el-col :span="8">
+                                    <div class="border-box">
+                                        <span style="margin-left: 10px">客户群总数</span>
+                                        <p class="val-title">
+                                            [[stat_data.chat.chat_num]]
+                                        </p>
+                                    </div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="border-box">
+                                        <span style="margin-left: 10px">今日新增群成员</span>
+                                        <p class="val-title">
+                                            [[stat_data.chat.today_add_num]]
+                                        </p>
+
+                                        <p v-if="stat_data.chat.add_trend>0" class="val-title-red">
+                                            ↑ [[stat_data.chat.add_trend]]
+                                        </p>
+                                        <p  v-else-if="stat_data.chat.add_trend==0" class="text-center">
+                                            --
+                                        </p>
+                                        <p  v-else class="val-title-green">
+                                            ↓ [[stat_data.chat.add_trend]]
+                                        </p>
+                                    </div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="border-box">
+                                        <span style="margin-left: 10px">今日流失群成员</span>
+                                        <p class="val-title">
+                                            [[stat_data.chat.today_lost_num]]
+                                        </p>
+                                        <p v-if="stat_data.chat.lost_trend>0" class="val-title-red">
+                                            ↑ [[stat_data.chat.lost_trend]]
+                                        </p>
+                                        <p  v-else-if="stat_data.chat.lost_trend==0" class="text-center">
+                                            --
+                                        </p>
+                                        <p  v-else class="val-title-green">
+                                            ↓ [[stat_data.chat.lost_trend]]
+                                        </p>
+                                    </div>
+                                </el-col>
+                            </el-row>
+                        </div>
+                    </el-card>
+                </el-col>
+            </el-row>
+            <el-row :gutter="20">
+                <el-col :span="24">
+                    <el-card class="box-card">
+                        <div slot="header" class="clearfix">
+                            <span>社群销售</span>
+                            <el-button style="float: right; padding: 3px 0" type="text"></el-button>
+                        </div>
+                        <div  class="text item text-center">
+                            未上线
+                            <br>
+                            <br>
+                            敬请期待
+                        </div>
+                    </el-card>
+                </el-col>
+            </el-row>
+            <el-row :gutter="20">
+                <el-col :span="24">
+                    <el-card class="box-card">
+                        <div slot="header" class="clearfix">
+                            <span>趋势图</span>
+                            <el-button @click="lastweek()" size="small">近7日</el-button>
+                            <el-button @click="lastmonth()" size="small">近30日</el-button>
+                            <div style="float: right; padding: 3px 0">
+                                <el-button @click='export_file'>导出</el-button>
+                                <el-date-picker
+                                    v-model="date_range"
+                                    type="daterange"
+                                    range-separator="至"
+                                    start-placeholder="开始日期"
+                                    :picker-options="pickerOptions"
+                                    end-placeholder="结束日期" value-format="timestamp" @change="range_change()">
+                                </el-date-picker>
+                            </div>
+                        </div>
+                        <div  class="text item">
+                            <el-radio-group v-model="data_type" style="margin-bottom: 30px;" @change="handleTab()">
+                                <el-radio-button label="new_contact_cnt">好友分析</el-radio-button>
+                                <el-radio-button label="chat_cnt">聊天总数</el-radio-button>
+                                <el-radio-button label="message_cnt">发消息数</el-radio-button>
+                                <el-radio-button label="reply_percentage">已回复聊天占比</el-radio-button>
+                                <el-radio-button label="avg_reply_time">平均首次回复时长</el-radio-button>
+                                <el-radio-button label="group_active">群活跃</el-radio-button>
+                                <el-radio-button label="community_market">社群销售</el-radio-button>
+                            </el-radio-group>
+                            <div v-if="data_type=='new_contact_cnt'">
+                                <el-row :gutter="20">
+                                    <el-col :span="14">
+                                        <div id="chart">
+                                        </div>
+                                    </el-col>
+                                    <el-col :span="10">
+                                        <div class="rank_list">
+                                            <el-radio-group v-model="rank_type" style="margin-bottom: 30px;" @change="handleRankType()" size="mini">
+                                                <el-radio-button label="new_contact_cnt">新增客户数排名</el-radio-button>
+                                                <el-radio-button label="new_apply_cnt">成员发起好友数排名</el-radio-button>
+                                                <el-radio-button label="negative_feedback_cnt">流失客户数排名</el-radio-button>
+                                            </el-radio-group>
+                                            <el-table
+                                                :data="rank_list"
+                                                border
+                                                style="width: 100%" >
+                                                <el-table-column
+                                                    type="index"
+                                                    :index="indexMethod"
+                                                    label="排名"
+                                                >
+
+                                                </el-table-column>
+                                                <el-table-column
+                                                    prop="qw_name"
+                                                    label="名称"
+                                                >
+                                                </el-table-column>
+                                                <el-table-column
+                                                    prop="number"
+                                                    label="数量">
+                                                </el-table-column>
+                                            </el-table>
+
+                                        </div>
+                                    </el-col>
+                                </el-row>
+                            </div>
+                            <div v-if="data_type=='chat_cnt'">
+                                <el-row :gutter="20">
+                                    <el-col :span="24">
+                                        <div id="chart" class="chart">
+                                        </div>
+                                    </el-col>
+                                </el-row>
+                            </div>
+                            <div v-if="data_type=='message_cnt'">
+                                <el-row :gutter="20">
+                                    <el-col :span="24">
+                                        <div id="chart" class="chart">
+                                        </div>
+                                    </el-col>
+                                </el-row>
+                            </div>
+                            <div v-if="data_type=='reply_percentage'">
+                                <el-row :gutter="20">
+                                    <el-col :span="24">
+                                        <div id="chart" class="chart">
+                                        </div>
+                                    </el-col>
+                                </el-row>
+                            </div>
+                            <div v-if="data_type=='avg_reply_time'">
+                                <el-row :gutter="20">
+                                    <el-col :span="24">
+                                        <div id="chart" class="chart" >
+                                        </div>
+                                    </el-col>
+                                </el-row>
+                            </div>
+                            <div v-if="data_type=='group_active'">
+                                <el-row :gutter="20">
+                                    <el-col :span="24">
+                                        <div id="chart" class="chart" hidden="hidden">
+                                        </div>
+                                        <div  class="text item text-center chart">
+                                            未上线
+                                            <br>
+                                            <br>
+                                            敬请期待
+                                        </div>
+                                    </el-col>
+                                </el-row>
+                            </div>
+                            <div v-if="data_type=='community_market'">
+                                <el-row :gutter="20">
+                                    <el-col :span="24">
+                                        <div id="chart" class="chart" hidden="hidden">
+                                        </div>
+                                        <div  class="text item text-center chart">
+                                            未上线
+                                            <br>
+                                            <br>
+                                            敬请期待
+                                        </div>
+                                    </el-col>
+                                </el-row>
+                            </div>
+
+                        </div>
+                    </el-card>
+                </el-col>
+            </el-row>
+            <div class="grid-content bg-purple">
+            </div>
+        </el-col>
+        <!--右侧-->
+        <el-col :span="6">
+            <div class="grid-content bg-purple">
+                <el-card class="box-card">
+                    <div slot="header" class="clearfix">
+                        <span>事件提醒</span>
+                        <el-button style="float: right; padding: 3px 0" type="text"></el-button>
+                    </div>
+                    <div  class="text item text-center">
+                        未上线
+                        <br>
+                        <br>
+                        敬请期待
+                    </div>
+                </el-card>
+                <el-card class="box-card">
+                    <div slot="header" class="clearfix">
+                        <span>任务中心</span>
+                        <el-button style="float: right; padding: 3px 0" type="text">
+                            ↑↓ 时间/完成率</el-button>
+                    </div>
+                    <div  class="text item text-center">
+                        未上线
+                        <br>
+                        <br>
+                        敬请期待
+                    </div>
+                </el-card>             <el-card class="box-card">
+                    <div slot="header" class="clearfix">
+                        <span>常用功能</span>
+                        <el-button style="float: right; padding: 3px 0" type="text"></el-button>
+                    </div>
+                    <div  class="text item text-center">
+                        未上线
+                        <br>
+                        <br>
+                        敬请期待
+                    </div>
+                </el-card>
+            </div>
+        </el-col>
+    </el-row>
+
 </div>
 </body>
+
+<!-- 引入组件库 -->
+<script src="/static/jquery/jquery.js"></script>
+<script src="/static/libs/vue.js"></script>
+<script src="/static/libs/element/element.js"></script>
+<script src="/static/libs/p2lot.js"></script>
+<script src="/static/libs/api.js"></script>
 <script>
-    var ListIndex = new Vue({
-        el: "#ListIndex",
+    const { Line } = G2Plot;
+    new Vue({
+        el: '#board',
         delimiters: ['[[', ']]'],
-        data() {
+        data: function() {
+            const _self = this;
             return {
-                listData: [],
-                multipleSelection: [],
-                searchKey: '',
-                sort: 'id',
-                order: 'desc',
-                offset: 0,
-                limit: 10,
-                totalPage: 0,
-                currentPage: 1,
-                rowDel: false,
-                allDel: false,
-                currentIndex: null,
+                visible: false,
+                loading:true,
+                export_url:'/export',
+                date_range:[],
+                stat_data:{
+                    chat: {
+                        chat_num: 0,
+                        add_trend: 0,
+                        lost_trend: 0,
+                        today_add_num: 0,
+                        today_lost_num: 0,
+                    },
+                    customer: {
+                        friend_add_trend: 0,
+                        friend_lost_trend: 0,
+                        friend_num: 0,
+                        today_add_num: 0,
+                        today_lost_num: 0,
+                    },
+                },
+                post_key:{'1':"area_d_id",'2':'area_q_id','3':'area_f_id','4':'area_p_id'},
+                pickerOptions: {
+                    onPick: ({ maxDate, minDate }) => {
+                    this.pickerMinDate = minDate.getTime()
+                if (maxDate) {
+                    this.pickerMinDate = ''
+                }
+            },
+                disabledDate: time => {
+                if (this.pickerMinDate !== "") {
+                    const day30 = (30-1) * 24 * 3600 * 1000;
+                    let maxTime = this.pickerMinDate + day30;
+                    let minTime = this.pickerMinDate - day30;
+                    if (maxTime > new Date()) {
+                        maxTime = new Date();
+                    }
+                    return time.getTime() > maxTime||time.getTime() < minTime;
+                }
+                return time.getTime() > Date.now();
             }
         },
-        created() {
-            this.getListData();
-        },
-        methods: {
-            download(url){
-                window.open(url)
+            data_type:'new_contact_cnt',
+                area_props:{
+                label: 'name',
+                    value: 'code',
+                    lazy: true,
+                    checkStrictly: true,
+                    lazyLoad:this.getArea
             },
-            //获取列表数据
-            getListData(){
-                let that = this;
-                Admin.api.ajax({
-                    url: 'cw_sources',
-                    loading: true,
-                    type: 'GET',
-                    data: {
-                        search: that.searchKey,
-                        offset: that.offset,
-                        limit: that.limit,
-                        order:that.sort+' '+that.order,
+            area_val:0,
+                chart_data:[],
+                rank_list:'',
+                rank_type:'new_contact_cnt',
+                line:{},
+            loading: true
+        }
+        },
+        mounted(){
+
+            this.line = new Line('chart', {
+                data:  this.chart_data,
+                xField: 'time',
+                yField: 'value',
+                seriesField: 'category',
+            });
+            this.line.render();
+        },
+        created(){
+            this.get_data();
+            this.lastweek();
+            this.get_chart_data();
+        },
+        watch:{
+        },
+        methods:{
+            indexMethod(index) {
+                return index+1;
+            },
+            handleTab(){
+                if(this.data_type != 'group_active'&&this.data_type!='community_market'){
+                    this.get_chart_data();
+                }else {
+                    this.line.destroy;
+                }
+            },
+            handleRankType(){
+                this.get_chart_data();
+            },
+            handleSelect(){
+                this.get_data();
+                this.get_chart_data();
+            },
+            get_chart_data(){
+                let that = this
+                that.loading=true;
+                if(this.data_type != 'group_active'&&this.data_type!='community_market'){
+                    let params = {};
+                    let parent=0;
+                    let level=0;
+//                    console.log(this.area_val);
+                    if(this.area_val){
+                        let code = this.area_val[this.area_val.length - 1];
+                        let levelNum = this.area_val.length-1;
+                        let key= this.post_key[levelNum];
+                        params ={[key]:code};
+                        parent=code;
+                        level=levelNum+1;
                     }
+                    params.type = this.data_type
+                    if(this.date_range){
+                        params.start_time = this.date_range[0];
+                        params.end_time = this.date_range[1];
+                    }
+                    if(this.rank_type){
+                        params.rank_type = this.rank_type
+                    }
+                    params.parent=parent;
+                    params.level=level;
+                    Admin.api.ajax({
+                        url: '/cw_data_borad/chart_data',
+                        async:false,
+                        type: 'get',
+                        data:params
+                    }, function (ret, res) {
+                        let datar = res.data
+                        that.chart_data = res.data.chart;
+                        if(res.data.rank_data){
+                            that.rank_list = JSON.parse(JSON.stringify(datar.rank_data))
+
+                        }
+                        that.loading=false;
+                        that.export_url=res.data.export_url;
+                    })
+                }
+                this.line.update({data:that.chart_data})
+            },
+            lastweek(){
+                let end = new Date().getTime();
+                let start = new Date().getTime();
+                end   -=   3600 * 24 * 1 * 1000
+                start -= 3600 * 24 * 7 * 1000;
+                this.date_range = [start,end];
+                this.get_chart_data();
+            },
+            lastmonth(){
+                let end = new Date().getTime();
+                let start = new Date().getTime();
+                end   -=  3600 * 24 * 1 * 1000
+                start -= 3600 * 24 * 30 * 1000;
+                this.date_range = [start,end];
+                this.get_chart_data();
+            },
+            range_change(){
+                this.get_chart_data();
+            },
+            get_data(){
+                let that = this
+                let params = {};
+                if(this.area_val){
+                    let code = this.area_val[this.area_val.length - 1];
+                    let levelNum = this.area_val.length-1;
+                    let key= this.post_key[levelNum];
+                    params ={[key]:code};
+                }
+                Admin.api.ajax({
+                    url: '/cw_data_board',
+                    loading: false,
+                    async:false,
+                    type: 'get',
+                    data:params
                 }, function (ret, res) {
-                    that.listData = res.data;
-                    that.listData.forEach(i => {
-                        i.showFlag = false;
-                        i.rowDel = false;
-                    });
-                    that.totalPage = res.count;
-                    return false;
+                    that.stat_data = res.data
                 })
             },
-            //选项卡切换(需要是使用)
-            tabOpt(tab, event) {
-                this.activeStatus = tab.name
-            },
-            //单行操作按钮
-            itemOpt(type, id) {
-                let that = this;
-                switch (type) {
-                    case 'create':
-                        location.href = "/cw_sources/add";
-                        break;
-                    case 'edit':
-                        location.href = "/cw_sources/update?cw_cw_sources_id=" +id;
-                        break;
-                    case 'del':
-                        let ids;
-                        if (id) {
-                            ids = id;
-                        } else {
-                            let idArr = []
-                            if (that.multipleSelection.length > 0) {
-                                that.multipleSelection.forEach(i => {
-                                    idArr.push(i.id)
-                                })
-                                ids = idArr.join(',')
-                            }
-                        }
-                        if (ids) {
-                            that.$confirm('此操作将删除选项, 是否继续?', '提示', {
-                                confirmButtonText: '确定',
-                                cancelButtonText: '取消',
-                                type: 'warning'
-                            }).then(() => {
-                                Admin.api.ajax({
-                                    url: '/cw_sources/delete/' + ids,
-                                    loading: true,
-                                    type: 'POST'
-                                }, function (ret, res) {
-                                    that.$notify({
-                                        title: '成功',
-                                        message: '删除成功',
-                                        type: 'success'
-                                    });
-                                    that.getListData();
-                                    return false;
-                                })
-                            }).catch(() => {
-                                this.$message({
-                                    type: 'info',
-                                    message: '已取消删除'
-                                });
-                            });
-                        }
-                        break;
-                    default:
-                }
-            },
-            //当前选项冒泡
-            popoverOpt(index) {
-                this.currentIndex = index;
-            },
-            //排序
-            sortOrder(sort, order) {
-                this.sort = sort;
-                this.order = order;
-                this.getListData();
-            },
-            //刷新按钮
-            goRefresh() {
-                this.getListData();
-            },
-            //处理已选选项
-            handleSelectionChange(val) {
-                this.multipleSelection = val;
-            },
-            //修改单页数量
-            handleSizeChange(val) {
-                this.offset = 0
-                this.limit = val;
-                this.getListData()
-            },
-            //处理翻页
-            handleCurrentChange(val) {
-                this.offset = (val - 1) * this.limit;
-                this.getListData()
-            },
-        },
-        watch: {
-            //搜索词监听
-            searchKey(newVal, oldVal) {
-                if (newVal != oldVal) {
-                    this.offset = 0;
-                    this.limit = 10;
-                    this.getListData();
-                }
-            },
-        },
-    })
-</script>
-<style>
-    .searchWrap {
-        display: flex;
-        justify-content: space-between;
-    }
-    .searchItem {
-        max-width: 200px;
-    }
-</style>
-</html>
+            getArea(node, resolve){
+                const { data } = node;
+                const tag_list =[ ];
+                let code = 0;
+                let level = 0;
+                if(data){
+                    code  = data.code
+                    level = Number(data.levelNum)+1
 
+                }
+
+                Admin.api.ajax({
+                    url: '/cw_data_borad/area_list',
+                    loading: true,
+                    type: 'get',
+                    data: {
+                        parent:code,
+                        levelNum:level
+                    }
+                }, function (ret, res) {
+                    res.data.forEach(function (item,index){
+                        tag_list.push({
+                            code:item.code,
+                            levelNum: item.levelNum,
+                            name:item.name,
+                            parentCatClassCode:item.parentCatClassCode,
+                            path:item.path
+                        });
+                    })
+                    resolve(tag_list);
+                });
+
+            },
+            export_file(){
+                var area_name='';
+                if(this.area_val==0){
+                    area_name='百果园集团';
+                }else{
+                    area_name=this.$refs["refSubCat"].getCheckedNodes()[0].pathLabels;
+                    area_name=area_name.join('/')
+                }
+
+                this.export_url=this.export_url+'&area_name='+area_name;
+                window.open(this.export_url);
+
+            }
+        }
+    })
+
+
+</script>
+</html>
