@@ -32,6 +32,10 @@ module.exports = {
         return [];
       },
     },
+    maxTagNum: {
+      type: Number,
+      default: 10,
+    }
   },
   data() {
     return {
@@ -292,7 +296,7 @@ module.exports = {
         tagWrap.className = "table-row-tag-list-wrap table-row-tag-list-wrap-padding";
       }
       let h = "";
-      let formator_arr = [...this.tags].slice(0, 10);
+      let formator_arr = [...this.tags].slice(0, this.maxTagNum);
       console.log(formator_arr);
       formator_arr.forEach((tag, index) => {
         let closeDom = document.createElement("div");
@@ -319,7 +323,7 @@ module.exports = {
         tagWrap.className = "table-row-tag-list-wrap table-row-tag-list-wrap-padding";
       }
       let h = "";
-      let formator_arr = [...this.tags].slice(0, 10);
+      let formator_arr = [...this.tags].slice(0, this.maxTagNum);
       console.log(formator_arr);
       formator_arr.forEach((tag, index) => {
         let closeDom = document.createElement("div");
@@ -340,9 +344,9 @@ module.exports = {
   },
   watch: {
     enterprise_label: function (newVal, oldVAl) {
-      if (newVal.length > 10) {
+      if (newVal.length > this.maxTagNum) {
         this.$message({
-          message: "最多只支持10选择项",
+          message: `最多只支持${this.maxTagNum}选择项`,
           duration: 1500,
           type: "warning",
         });

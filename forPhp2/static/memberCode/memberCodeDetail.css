@@ -85,12 +85,18 @@
 }
 
 .member-code-detail .pane-overview .overview-r2 .grid-content .fill-content .fill-height {
+  min-height: 85px;
   overflow: auto;
   height: 100%;
 }
 
 .member-code-detail .pane-overview .overview-r2 .grid-content .fill-content .fill-height.other-content-wrap {
   height: auto;
+}
+
+.member-code-detail .pane-overview .overview-r2 .grid-content .tag-content-height {
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .member-code-detail .pane-overview .overview-r2 .grid-content .no-grid-content {

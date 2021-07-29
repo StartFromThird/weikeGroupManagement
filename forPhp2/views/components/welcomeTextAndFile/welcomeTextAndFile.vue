@@ -402,13 +402,13 @@
       </el-form>
       <span
         style="color: #1773fa; cursor: pointer"
-        v-if="addWechatAppType == 0"
+        v-if="addWechatAppType == 0 && allowAddWechatAppType.includes(1)"
         @click="changeAddWechatAppType(1)"
         >选择添加的小程序</span
       >
       <span
         style="color: #1773fa; cursor: pointer"
-        v-if="addWechatAppType == 1"
+        v-if="addWechatAppType == 1 && allowAddWechatAppType.includes(0)"
         @click="changeAddWechatAppType(0)"
         >自定义配置小程序</span
       >
@@ -539,6 +539,12 @@ module.exports = {
       default: function () {
         return {};
       },
+    },
+    allowAddWechatAppType: {
+      type: Array,
+      default:  function () {
+        return [0, 1];
+      }
     },
   },
   data() {
@@ -773,14 +779,20 @@ module.exports = {
       });
     },
     handleImgUploadErr(err, file, fileList, type) {
-      console.log("上传失败=======");
       this.$nextTick(() => {
         this.otherContentLoading.close();
       });
     },
     beforeVideoUpload(file) {
-      this.sopLoading();
-
+      const isVideo = /\.(mp4)$/.test(
+        file.name
+      );
+      if (!isVideo) {
+        this.$message.error(
+          "上传文件只能是 mp4 视频格式!"
+        );
+        return false;
+      }
       const self = this;
       const isLt10MB = file.size / 1024 / 1024 < 10;
 
@@ -788,9 +800,7 @@ module.exports = {
         self.videoForm.upload_url = "";
         self.videoForm.media_url = "";
         self.videoForm.source_id = "";
-
         setTimeout(function () {
-          self.otherContentLoading.close();
           self.$message({
             message: "上传视频大小不能超过10MB！",
             type: "error",
@@ -798,6 +808,8 @@ module.exports = {
         }, 500);
         return false;
       }
+      this.sopLoading();
+      // self.otherContentLoading.close();
     },
     beforeImgUpload(file) {
       const isIMAGE = /\.(gif|jpg|jpeg|png|bpm|BPM|GIF|JPG|PNG|JPEG)$/.test(
@@ -855,7 +867,6 @@ module.exports = {
         });
       } else {
         //选择小程序
-        console.log("this.minipro_id", this.minipro_id);
         if (!this.minipro_id) {
           this.$message({
             message: "请选择小程序",
@@ -986,7 +997,6 @@ module.exports = {
     },
     // 失焦调后台提示
     validTextEmojiContent(v, limitLen) {
-      console.log("blur===", v);
       // 调后台接口
       let that = this;
       // Admin.api.ajax(
@@ -1007,7 +1017,6 @@ module.exports = {
       };
       // if (res.code == 0) {
       let length = res.data.length;
-      console.log("===", length, limitLen);
       if (length > limitLen) {
         that.curContentErr = true;
       } else {
@@ -1036,7 +1045,6 @@ module.exports = {
   watch: {
     writeBackWelcome: {
       handler(n, o) {
-        console.log("监听变化", n, this.writeBackWelcome);
         this.info = { ...this.writeBackWelcome };
       },
       immediate: true,

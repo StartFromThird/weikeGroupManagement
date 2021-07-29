@@ -126,8 +126,12 @@
           end-placeholder="结束日期"
           format="yyyy-MM-dd HH:mm:ss"
           value-format="yyyy-MM-dd HH:mm:ss"
-
+          @change="timeRangeChange" 
+          :picker-options="sendTimePickerOptions"
         >
+        <!-- 如果限制时间判断 -->
+        <!-- @change="timeRangeChange" 
+          :picker-options="sendTimePickerOptions" -->
         </el-date-picker>
       </div>
     </el-form-item>
@@ -173,6 +177,11 @@ module.exports = {
   },
   data() {
     return {
+      sendTimePickerOptions: {
+        disabledDate(date) {
+          return date.getTime() < Date.now() - 24 * 60 * 60 * 1000;
+        },
+      },
       baseInfo: {
         rule_name: "",
         rule_type: "1",
@@ -195,7 +204,7 @@ module.exports = {
           { required: true, message: "请选择有效时间", trigger: "blur" },
         ],
         member_id: [
-          { required: true, message: "请选择使用成员", trigger: "change" },
+          { required: true, message: "请选择使用成员", trigger: ['blur', 'change'] },
         ],
         scans_number_limit: [
           { required: true, message: "请填写扫码次数", trigger: "blur" },
@@ -246,6 +255,36 @@ module.exports = {
     // }
   },
   methods: {
+    getQueryVariable,
+    resetFormFields() {
+      this.$refs.memberCodeRuleForm.resetFields();
+    },
+    // 开始时间 此刻以后
+    timeRangeChange(e) {
+      let type = this.getQueryVariable("type");
+      if (type === 'add') {
+        let arr = [];
+        arr[0] = this.limitConfirmTime(e[0], "", 0);
+        arr[1] = e[1];
+        this.$set(this.info, 'timeRange', arr);
+      }
+    },
+    // 限制时间
+    limitConfirmTime(e, key, minute) {
+      let choosed = new Date(e).getTime();
+      let minTime = new Date().getTime() + minute * 60 * 1000;
+      if (choosed < minTime) {
+        if (key) {
+          this.$set(
+            this.info,
+            key,
+            new Date(minTime).format("yyyy-MM-dd hh:mm:ss")
+          );
+        } else {
+          return new Date(minTime).format("yyyy-MM-dd hh:mm:ss")
+        }
+      }
+    },
     validateForm() {
       return new Promise((res, rej) => {
         this.$refs.memberCodeRuleForm.validate((valid) => {
@@ -307,6 +346,7 @@ module.exports = {
           this.info = {
             ...this.baseInfo
           }
+          this.writeBackSelectedMemberOrg = [];
           // Object.assign(this.info, this.baseInfo);
           console.log("新增===", this.info);
         }

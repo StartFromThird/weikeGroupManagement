@@ -27,6 +27,8 @@
                 tree-default-expand-all
                 :tree-data="groupTreeData"
                 :replace-fields="replaceFields"
+                :filter-tree-node="filterGroupTreeNode"
+                treeNodeFilterProp="title"
               >
               </a-tree-select>
             </el-form-item>
@@ -50,6 +52,7 @@
               <select-tag
                 ref="selectTag"
                 :write-back-selected-tag="info.tag_arr"
+                :max-tag-num="200"
               >
               </select-tag>
             </el-form-item>
@@ -57,7 +60,10 @@
               <div class="welcome-tip-txt">
                 不填成员活码欢迎语，则默认发送成员欢迎语，如无成员欢迎语则发送通用欢迎语！
               </div>
-              <welcome-text-and-file :write-back-welcome="writeBackWelcome">
+              <welcome-text-and-file
+                :write-back-welcome="writeBackWelcome"
+                :allow-add-wechat-app-type="[0]"
+              >
               </welcome-text-and-file>
             </el-form-item>
           </el-form>
@@ -90,11 +96,10 @@
     <div v-if="this.pageType === 'add'">
       <el-row>
         <el-col :sm="16" :md="12" :lg="12">
-          <!-- @update-choose-member="updateChooseMember" -->
           <member-code-rule-form ref="addMemberCodeForm" type="add">
           </member-code-rule-form>
           <div class="flex-row-end m-t-16">
-            <el-button size="mini">取消</el-button>
+            <el-button size="mini" @click="backToList">取消</el-button>
             <el-button size="mini" type="primary" @click="saveAdd"
               >提交</el-button
             >
@@ -106,7 +111,7 @@
     <div v-if="this.pageType === 'edit'">
       <member-code-rule ref="memberCodeRule"> </member-code-rule>
       <div class="flex-row-end m-t-16">
-        <el-button size="mini">取消</el-button>
+        <el-button size="mini" @click="backToList">取消</el-button>
         <el-button size="mini" type="primary">提交</el-button>
       </div>
     </div>
@@ -140,6 +145,7 @@ module.exports = {
       // 分组名称
       treeExpandedKeys: [],
       groupTreeData: [],
+      searchKey: '',
       replaceFields: {
         children: "child_group",
         title: "name",
@@ -158,6 +164,16 @@ module.exports = {
   },
   methods: {
     getQueryVariable,
+    filterGroupTreeNode (searchKey, node) {
+      if (node.data.props && node.data.props.name.includes(searchKey)) {
+        return true;
+      }
+    },
+    backToList() {
+      let groupId = this.getQueryVariable("group_id");
+      let pageNo = this.getQueryVariable("page_no");
+      location.href = `./memberCodeList.html?back_tree_id=${groupId}&back_table_page_no=${pageNo}`;
+    },
     addRule() {
       this.$refs.memberCodeRule.handleAddRule();
     },

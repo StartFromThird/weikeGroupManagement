@@ -21,6 +21,10 @@
   width: fit-content;
   margin-right: 8px;
   margin-bottom: 8px;
+  height: 22px;
+  box-sizing: border-box;
+  align-items: flex-start;
+  align-content: flex-start;
   /* overflow: hidden; */
 }
 

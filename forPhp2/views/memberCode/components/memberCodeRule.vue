@@ -32,7 +32,7 @@
       >
       </el-table-column>
       <el-table-column
-        label="单用户扫码次数上限"
+        label="单客户扫码次数上限"
         prop="diversion_rule_N"
         width="150px"
       >
@@ -98,11 +98,13 @@
     </div>
     <el-dialog title="配置引流规则" :visible.sync="dialogVisible" width="568px">
       <member-code-rule-form 
+        ref="memberCodeRuleForm"
         :write-back-rule="currentRule" 
         :type="dialogType">
       </member-code-rule-form>
       <span slot="footer" class="dialog-footer">
-        <el-button size="mini" @click="dialogVisible = false">取 消</el-button>
+        <!-- dialogVisible = false -->
+        <el-button size="mini" @click="closeMemberCodeRuleForm">取 消</el-button>
         <el-button size="mini" type="primary" @click="submit">确 定</el-button>
       </span>
     </el-dialog>
@@ -221,6 +223,10 @@ module.exports = {
     this.initRuleTable();
   },
   methods: {
+    closeMemberCodeRuleForm() {
+      this.$refs.memberCodeRuleForm.resetFormFields();
+      this.dialogVisible = false;
+    },
     initRuleTable() {
       this.pageNo = 1;
       this.ruleMemberPageNo = 1;
@@ -260,7 +266,8 @@ module.exports = {
         this.dialogVisible = true;
       });
     },
-    submit() {
+    async submit() {
+      let check = await this.$refs.memberCodeRuleForm.validateForm();
       // 调后台存规则
       // this.pageNo = 1;
       // this.getTableData();
@@ -390,9 +397,16 @@ module.exports = {
           Array.isArray(formatEle.member_arr) &&
           formatEle.member_arr.length
         ) {
+          let memberIdArr = [];
           formatEle.member_arr_N = formatEle.member_arr
-            .map((m) => m.name || "")
+            .map((m) => {
+              memberIdArr.push(m.id);
+              return (m.name || "")
+            })
             .join(",");
+
+            formatEle.member_id = memberIdArr.join(",");
+
         }
         return formatEle;
       });

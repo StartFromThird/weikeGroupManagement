@@ -89,6 +89,7 @@
 
         .fill-content {
           .fill-height {
+            min-height: 85px;
             overflow: auto;
             height: 100%;
 
@@ -96,6 +97,10 @@
               height: auto;
             }
           }
+        }
+        .tag-content-height {
+          display: flex;
+          flex-wrap: wrap;
         }
 
 

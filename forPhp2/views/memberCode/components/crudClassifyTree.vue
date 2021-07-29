@@ -13,8 +13,9 @@
       <el-button size="mini" @click="handleClickAdd()">新建分组</el-button>
     </div>
     <div class="crud-classify-tree-wrap flex-1">
-      <!-- :props="defaultProps" -->
-      <!-- :filter-node-method="filterNode" -->
+      <!-- 前端搜索 -->
+      <!-- :props="defaultProps"
+      :filter-node-method="filterNode" -->
       <el-tree
         class="filter-tree"
         :data="treeData"
@@ -32,23 +33,30 @@
           class="custom-tree-node flex-1 flex-row-between"
           slot-scope="{ node, data }"
         >
-          <div class="left-label">
-            <el-tooltip 
+          <div class="left-label" @mouseover="(e) => {return mouseenterTree(e, data)}" :label="data.label" :id="node.id">
+            <el-tooltip
+              v-if="data.isPopover"
               popper-class="crud-classify-tree-label-popover"
-              :content="node.label" 
-              placement="top-start">
+              :content="node.label"
+              placement="top-start"
+            >
               <div class="overflow-ellipsis p-r-8 left-label-txt">
                 {{ node.label }}
               </div>
             </el-tooltip>
-            <div class="mock-info-badge" v-if="data.hits_num">{{(data.hits_num > 99) ? '99+' : data.hits_num}}</div>
+            <div v-else class="overflow-ellipsis p-r-8 left-label-txt">
+              {{ node.label }}
+            </div>
+            <div class="mock-info-badge" v-if="data.hits_num">
+              {{ data.hits_num > 99 ? "99+" : data.hits_num }}
+            </div>
           </div>
-          <!-- trigger="click" -->
-          <el-popover 
+          <el-popover
             popper-class="crud-classify-tree-operate-popover"
-            placement="right-start" 
+            placement="right-start"
             trigger="hover"
-            :visible-arrow="false">
+            :visible-arrow="false"
+          >
             <div class="right-operate-wrap">
               <div
                 class="right-operate-item"
@@ -59,29 +67,34 @@
                 {{ item.name }}
               </div>
             </div>
-            <span @click.stop="() => {}" class="right-operate-btn" slot="reference">
+            <span
+              @click.stop="() => {}"
+              class="right-operate-btn"
+              slot="reference"
+            >
               <i class="el-icon-more fs-14"></i>
             </span>
           </el-popover>
         </div>
       </el-tree>
     </div>
-    <el-dialog 
-      :visible.sync="dialog.visible" 
+    <el-dialog
+      :visible.sync="dialog.visible"
       width="418px"
-      custom-class="crud-classify-tree-dialog">
+      custom-class="crud-classify-tree-dialog"
+    >
       <div slot="title">{{ dialog.title }}</div>
-      <el-form 
-        size="mini" 
+      <el-form
+        size="mini"
         label-position="top"
         :model="form"
-        ref="crudClassifyForm">
-        <el-form-item 
+        ref="crudClassifyForm"
+      >
+        <el-form-item
           label="分组名称"
           prop="name"
-          :rules="[
-            { required: true, message: '分组名称不可为空'}
-          ]">
+          :rules="[{ required: true, message: '分组名称不可为空' }]"
+        >
           <el-input
             placeholder="请输入分组名称"
             v-model="form.name"
@@ -93,7 +106,9 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button size="mini" @click="dialogCancel">取 消</el-button>
-        <el-button size="mini" type="primary" @click="dialogConfirm">确 定</el-button>
+        <el-button size="mini" type="primary" @click="dialogConfirm"
+          >确 定</el-button
+        >
       </span>
     </el-dialog>
   </div>
@@ -105,8 +120,8 @@ module.exports = {
   props: {
     parentSearchParams: {
       type: Object,
-      default: function() {
-        return {}
+      default: function () {
+        return {};
       },
     },
   },
@@ -126,7 +141,7 @@ module.exports = {
         {
           name: "删除",
           methods: "delCurrentConfirm",
-        }
+        },
       ],
       dialog: {
         visible: false,
@@ -135,9 +150,9 @@ module.exports = {
         name: "",
       },
       form: {
-        name: '',
-        parentId: 0
-      }
+        name: "",
+        parentId: 0,
+      },
     };
   },
   computed: {
@@ -151,35 +166,38 @@ module.exports = {
   beforeDestroy() {},
   mounted() {},
   watch: {
-    keyword(val) {d
+    keyword(val) {
+      d;
       this.getTreeData();
     },
-    // parentSearchParams(n, o) {
-      // this.getTreeData();
-    // }
   },
   methods: {
+    getQueryVariable,
+    mouseenterTree(e, data) {
+      let {target} = e;
+      if (target.scrollWidth > target.clientWidth) {
+        this.$set(data, 'isPopover', true);
+      }
+    },
     resetTree() {
-      this.keyword = '';
+      this.keyword = "";
       this.getTreeData();
     },
     editCurrent(data) {
-      console.log("编辑====", data);
-      this.dialog.title = '编辑分组名称';
+      this.dialog.title = "编辑分组名称";
       this.form.name = data.label;
       this.dialog.visible = true;
     },
     addChildren(data) {
-      console.log("加字节点==", data);
-      this.dialog.title = '新建分组名称';
-      this.form.name = '';
+      this.dialog.title = "新建分组名称";
+      this.form.name = "";
       this.form.parentId = data.id || 0;
       this.dialog.visible = true;
       this.$nextTick(() => {
         if (this.$refs.crudClassifyForm) {
           this.$refs.crudClassifyForm.clearValidate();
         }
-      })
+      });
     },
     delConfirm(data) {
       console.log("删除====", data, data.id);
@@ -188,56 +206,61 @@ module.exports = {
     },
     delCurrentConfirm(data) {
       if (data.children && data.children.length) {
-        this.$confirm('当前分组下有子级分组，删除该组会把子级分组都会删除！', '提示', {
-          confirmButtonText: '确认',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          this.delConfirm(data);
-        }).catch(() => {
-          // this.$message({
-          //   type: 'info',
-          //   message: '已取消删除'
-          // });          
-        });
+        this.$confirm(
+          "当前分组下有子级分组，删除该组会把子级分组都会删除！",
+          "提示",
+          {
+            confirmButtonText: "确认",
+            cancelButtonText: "取消",
+            type: "warning",
+          }
+        )
+          .then(() => {
+            this.delConfirm(data);
+          })
+          .catch(() => {
+            // this.$message({
+            //   type: 'info',
+            //   message: '已取消删除'
+            // });
+          });
       } else {
         this.delConfirm(data);
       }
     },
-    handleDropTreeNode (draggingNode, dropNode, dropType, ev) {
+    handleDropTreeNode(draggingNode, dropNode, dropType, ev) {
       // console.log("dropA====", ...arguments);
       // let id = draggingNode.data && draggingNode.data.id
       // let did = dropNode && dropNode.id
       // console.log("拖拽id===", id, "释放", did);
       var paramData = [];
-		  // 当拖拽类型不为inner,说明只是同级或者跨级排序，只需要寻找目标节点的父ID，获取其对象以及所有的子节点，并为子节点设置当前对象的ID为父ID即可
-		  // 当拖拽类型为inner，说明拖拽节点成为了目标节点的子节点，只需要获取目标节点对象即可
-		  var data = dropType != "inner" ? dropNode.parent.data : dropNode.data;
-		  var nodeData = dropNode.level == 1 && dropType != "inner" ? data : data.children;
-		  // 设置父ID,当level为1说明在第一级，pid为空
-		  nodeData.forEach(element => {
-		    element.pid = dropNode.level == 1 ? "" : data.id;
-		  });
-		  nodeData.forEach((element, i) => {
-		    var dept = {
-		      deptId: element.id,
-		      parentDeptId: element.pid || 0,
-		      order: i
-		    };
-		    paramData.push(dept);
-		  });
+      // 当拖拽类型不为inner,说明只是同级或者跨级排序，只需要寻找目标节点的父ID，获取其对象以及所有的子节点，并为子节点设置当前对象的ID为父ID即可
+      // 当拖拽类型为inner，说明拖拽节点成为了目标节点的子节点，只需要获取目标节点对象即可
+      var data = dropType != "inner" ? dropNode.parent.data : dropNode.data;
+      var nodeData =
+        dropNode.level == 1 && dropType != "inner" ? data : data.children;
+      // 设置父ID,当level为1说明在第一级，pid为空
+      nodeData.forEach((element) => {
+        element.pid = dropNode.level == 1 ? "" : data.id;
+      });
+      nodeData.forEach((element, i) => {
+        var dept = {
+          deptId: element.id,
+          parentDeptId: element.pid || 0,
+          order: i,
+        };
+        paramData.push(dept);
+      });
       console.log("拖拽=====", paramData);
-		
-
     },
     handleDragEnd(draggingNode, dropNode, dropType, ev) {
-      console.log('drag end: ', dropNode && dropNode.label, dropType);
+      console.log("drag end: ", dropNode && dropNode.label, dropType);
     },
     handleClickAdd(v) {
       this.form = {
-        name: '',
-        parentId: 0
-      }
+        name: "",
+        parentId: 0,
+      };
       this.$set(this.dialog, "type", "add");
       this.$set(this.dialog, "title", "新建分组名称");
       this.$set(this.dialog, "visible", true);
@@ -245,7 +268,7 @@ module.exports = {
         if (this.$refs.crudClassifyForm) {
           this.$refs.crudClassifyForm.clearValidate();
         }
-      })
+      });
     },
     dialogCancel() {
       this.$set(this.dialog, "visible", false);
@@ -258,15 +281,16 @@ module.exports = {
       console.log("======", item, data);
       this[item.methods](data);
     },
+    // 前端筛选
     // searchByKeyFront(v) {
-      // this.$refs.filterTree.filter(this.keyword);
+    // this.$refs.filterTree.filter(this.keyword);
     // },
     filterNode(value, data) {
       if (!value) return true;
       return data.label.indexOf(value) !== -1;
     },
     handleNodeClick(data, node) {
-      this.$emit('updatecurrenttreedata', data)
+      this.$emit("updatecurrenttreedata", data);
     },
     getTreeData() {
       console.log("树查询参数===", this.parentSearchParams);
@@ -459,15 +483,24 @@ module.exports = {
       // this.treeData = []
       // mock end
       if (this.treeData && this.treeData.length) {
-        if (this.treeData[0] && this.treeData[0].id) {
-          let cd = JSON.parse(JSON.stringify(this.treeData[0]))
-          delete cd.children
-          this.$emit('updatecurrenttreedata', cd)
+        let cd = {};
+        let back_tree_id = this.getQueryVariable("back_tree_id");
+        let back_table_page_no = this.getQueryVariable("back_table_page_no");
+        if (back_tree_id) {
           this.$nextTick(() => {
-            this.$refs.filterTree.setCurrentKey(cd.id)
-          })
+            this.$refs.filterTree.setCurrentKey(back_tree_id);
+            cd = this.$refs.filterTree.getCurrentNode();
+            delete cd.children;
+            this.$emit("updatecurrenttreedata", cd, back_table_page_no);
+          });
+        } else if (this.treeData[0] && this.treeData[0].id) {
+          cd = JSON.parse(JSON.stringify(this.treeData[0]));
+          delete cd.children;
+          this.$emit("updatecurrenttreedata", cd);
+          this.$nextTick(() => {
+            this.$refs.filterTree.setCurrentKey(cd.id);
+          });
         }
-        
       }
     },
   },
@@ -481,18 +514,13 @@ module.exports = {
 <style>
 .crud-classify-tree-dialog .el-dialog__body {
   padding: 24px;
-  /* padding-top: 16px;
-  padding-bottom: 16px; */
 }
 .crud-classify-tree-operate-popover {
   padding: 0;
-  width: 84px!important;
+  width: 84px !important;
   box-sizing: border-box;
   min-width: 84px;
 }
-/* .crud-classify-tree .el-popover.el-popper {
-  padding: 0;
-} */
 .crud-classify-tree-operate-popover .right-operate-item {
   padding: 0 11px;
   line-height: 24px;
@@ -502,11 +530,10 @@ module.exports = {
   cursor: pointer;
 }
 .crud-classify-tree-operate-popover .right-operate-item:hover {
-  background: #1773FA;
+  background: #1773fa;
   color: #fff;
 }
 .crud-classify-tree-label-popover .left-label-txt {
   padding-right: 6px;
-  /* color: #f00; */
 }
 </style>

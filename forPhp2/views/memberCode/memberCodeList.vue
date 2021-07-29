@@ -10,6 +10,7 @@
         >
           <el-form-item label="成员活码名称：" class="m-b-0 m-r-24">
             <el-input
+              style="width: 210px"
               size="mini"
               placeholder="请输入名称"
               v-model="search.code_name"
@@ -294,10 +295,12 @@ module.exports = {
       }${name ? `&group_name=${name}` : ""}`;
     },
     handleListItemEdit(row, index) {
-      location.href = `./memberCodeEdit.html?type=edit&id=${row.id}`;
+      let id = (this.currentTreeData && this.currentTreeData.id) || 0;
+      location.href = `./memberCodeEdit.html?type=edit&id=${row.id}&group_id=${id}&page_no=${this.pageNo}`;
     },
     handleListItemDetail(row, index) {
-      location.href = `./memberCodeDetail.html?id=${row.id}`;
+      let id = (this.currentTreeData && this.currentTreeData.id) || 0;
+      location.href = `./memberCodeDetail.html?id=${row.id}&group_id=${id}&page_no=${this.pageNo}`;
     },
     handleListItemDel(row, index) {
       this.$confirm("确认删除该条成员活码?", "提示", {
@@ -318,9 +321,9 @@ module.exports = {
           });
         });
     },
-    updateCurrentTreeData(d) {
+    updateCurrentTreeData(d, pageNo) {
       this.currentTreeData = d.id ? JSON.parse(JSON.stringify(d)) : {};
-      this.pageNo = 1;
+      this.pageNo = parseInt(pageNo) || 1;
       this.getTableData();
     },
     addNewClassify() {
