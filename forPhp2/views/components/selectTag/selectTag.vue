@@ -48,9 +48,8 @@ module.exports = {
       casLevel0KeyArr: [],
       enterprise_label: [],
       currentIndex: null,
-      // info: {
-        tags: []
-      // }
+      tags: [],
+      showLen: 99,
     };
   },
   computed: {
@@ -298,8 +297,9 @@ module.exports = {
       let h = "";
       let formator_arr = [...this.tags].slice(0, this.maxTagNum);
       console.log(formator_arr);
+      const showLen = this.showLen;
       formator_arr.forEach((tag, index) => {
-        let closeDom = document.createElement("div");
+        if (index < showLen) {
         h += `<div class="table-row-tag-item table-row-tag-item-${tag.tag_type}">
                 <div class="left tag-txt">${tag.group_name}</div>
                 <div class="right">
@@ -307,6 +307,9 @@ module.exports = {
                   <div class="right-num right-close" index="${index}"><i class="el-icon-close" index="${index}"></i></div>
                 </div>
               </div>`;
+        } else if (index === showLen) {
+          h += `<div class="table-row-over-show-len-tag">${showLen}+</div>`;
+        }
       });
       tagWrap.innerHTML = h;
       if (type === "new") {
@@ -325,7 +328,9 @@ module.exports = {
       let h = "";
       let formator_arr = [...this.tags].slice(0, this.maxTagNum);
       console.log(formator_arr);
+      const showLen = this.showLen;
       formator_arr.forEach((tag, index) => {
+        if (index < showLen) {
         let closeDom = document.createElement("div");
         h += `<div class="table-row-tag-item table-row-tag-item-${tag.tag_type}">
                 <div class="left tag-txt">${tag.group_name}</div>
@@ -334,6 +339,9 @@ module.exports = {
                   <div class="right-num right-close" index="${index}"><i class="el-icon-close" index="${index}"></i></div>
                 </div>
               </div>`;
+        } else if (index === showLen) {
+          h += `<div class="table-row-over-show-len-tag">${showLen}+</div>`;
+        }
       });
       tagWrap.innerHTML = h;
       if (type === "new") {
@@ -411,5 +419,18 @@ module.exports = {
 }
 #tag-select {
   margin-top: 6px;
+}
+.table-row-over-show-len-tag {
+  background-color: #909399;
+  border-radius: 10px;
+  color: #fff;
+  display: inline-block;
+  font-size: 12px;
+  height: 20px;
+  line-height: 18px;
+  padding: 0 6px;
+  text-align: center;
+  white-space: nowrap;
+  border: 1px solid #fff;
 }
 </style>

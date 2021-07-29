@@ -490,10 +490,14 @@ module.exports = {
           this.$nextTick(() => {
             this.$refs.filterTree.setCurrentKey(back_tree_id);
             cd = this.$refs.filterTree.getCurrentNode();
-            delete cd.children;
-            this.$emit("updatecurrenttreedata", cd, back_table_page_no);
+            if (cd) {
+              delete cd.children;
+              this.$emit("updatecurrenttreedata", cd, back_table_page_no);
+              return ;
+            } 
           });
-        } else if (this.treeData[0] && this.treeData[0].id) {
+        }
+        if (this.treeData[0] && this.treeData[0].id) {
           cd = JSON.parse(JSON.stringify(this.treeData[0]));
           delete cd.children;
           this.$emit("updatecurrenttreedata", cd);

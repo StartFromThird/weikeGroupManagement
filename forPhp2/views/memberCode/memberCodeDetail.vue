@@ -64,6 +64,7 @@
                         <div
                           :class="[
                             overviewCollapse ? 'limit-height' : 'fill-height',
+                            'tag-content-height'
                           ]"
                         >
                           <template v-if="tagList && tagList.length">
@@ -415,6 +416,10 @@
         </div>
       </el-tab-pane>
     </el-tabs>
+    <div class="page-right-top-btns">
+      <el-button size="mini" type="text" @click="goBack">返回</el-button>
+      <el-button size="mini" type="primary" @click="goToEdit">编辑</el-button>
+    </div>
   </div>
 </template>
 <script>
@@ -460,6 +465,8 @@ module.exports = {
       pageNo: 1,
       pageSizes: [10, 15, 20],
       totalNo: 0,
+      back_table_page_no: 1,
+      back_tree_id: 0
     };
   },
   mounted() {
@@ -489,7 +496,8 @@ module.exports = {
     },
     initPage() {
       this.id = this.getQueryVariable("id");
-      console.log("id====", this.id);
+      this.back_table_page_no = this.getQueryVariable("page_no") || 1;
+      this.back_tree_id = this.getQueryVariable("group_id") || 0;
       this.handleClick({ name: this.activeTab });
     },
     // 概览
@@ -559,31 +567,19 @@ module.exports = {
       this.tagList = [
         {
           group_name:
-            "总部标签组名称总部标签组名称总部标签组名称总部标签组名称",
+            "总部标签",
           tag_name: "标签名",
           group_tag_type: "HQ",
           succ_class_num: "1",
         },
         {
-          group_name: "一二三四五六七八九十",
+          group_name: "一二三四",
           tag_name: "一十六",
           group_tag_type: "SERVICE",
           succ_class_num: "2",
         },
         {
-          group_name: "总部标签组名称",
-          tag_name: "标签名",
-          group_tag_type: "HQ",
-          succ_class_num: "1",
-        },
-        {
-          group_name: "一二三",
-          tag_name: "一十六",
-          group_tag_type: "SERVICE",
-          succ_class_num: "2",
-        },
-        {
-          group_name: "总部标签组名称",
+          group_name: "总部标签组名称标签组名称标签组名称",
           tag_name: "标签名",
           group_tag_type: "HQ",
           succ_class_num: "1",
@@ -594,6 +590,18 @@ module.exports = {
           group_tag_type: "SERVICE",
           succ_class_num: "2",
         },
+        // {
+        //   group_name: "总部标签组名称",
+        //   tag_name: "标签名",
+        //   group_tag_type: "HQ",
+        //   succ_class_num: "1",
+        // },
+        // {
+        //   group_name: "一二三",
+        //   tag_name: "一十六",
+        //   group_tag_type: "SERVICE",
+        //   succ_class_num: "2",
+        // },
       ];
       // this.tagList = [];
     },
@@ -1108,6 +1116,12 @@ module.exports = {
     handleListItemDetail(row, i) {
       // location.href = `./memberCodeDetail.html?id=${row.id}`;
     },
+    goBack() {
+      location.href = `./memberCodeList.html?${ this.back_tree_id ? `group_id=${this.back_tree_id}` : ''}&back_table_page_no=${this.back_table_page_no}`;
+    },
+    goToEdit() {
+      location.href = `./memberCodeEdit.html?type=edit&id=${this.id}&${ this.back_tree_id ? `group_id=${this.back_tree_id}` : ''}&page_no=${this.back_table_page_no}&from_page=memberCodeDetail`;
+    }
   },
 
   components: {

@@ -1,3 +1,13 @@
+.member-code-detail {
+  position: relative;
+}
+
+.member-code-detail .page-right-top-btns {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+}
+
 .member-code-detail .el-tabs__header {
   margin-bottom: 0;
 }
@@ -97,6 +107,7 @@
 .member-code-detail .pane-overview .overview-r2 .grid-content .tag-content-height {
   display: flex;
   flex-wrap: wrap;
+  align-content: flex-start;
 }
 
 .member-code-detail .pane-overview .overview-r2 .grid-content .no-grid-content {

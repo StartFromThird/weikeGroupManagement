@@ -1,4 +1,10 @@
 .member-code-detail {
+  position: relative;
+  .page-right-top-btns {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+  }
   .el-tabs__header {
     margin-bottom: 0;
   }
@@ -101,6 +107,7 @@
         .tag-content-height {
           display: flex;
           flex-wrap: wrap;
+          align-content: flex-start;
         }
 
 

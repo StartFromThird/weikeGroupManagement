@@ -263,8 +263,9 @@ module.exports = {
       this.dialogType = "add";
       this.currentRule = { ...this.baseRule };
       this.$nextTick(() => {
-        this.dialogVisible = true;
+        this.$refs.memberCodeRuleForm.ruleFormClearValidate();
       });
+      this.dialogVisible = true;
     },
     async submit() {
       let check = await this.$refs.memberCodeRuleForm.validateForm();
@@ -400,7 +401,7 @@ module.exports = {
           let memberIdArr = [];
           formatEle.member_arr_N = formatEle.member_arr
             .map((m) => {
-              memberIdArr.push(m.id);
+              memberIdArr.push(m.id || m.member_id);
               return (m.name || "")
             })
             .join(",");
@@ -428,8 +429,9 @@ module.exports = {
       this.dialogType = "edit";
       this.currentRule = { ...this.baseRule, ...row };
       this.$nextTick(() => {
-        this.dialogVisible = true;
+        this.$refs.memberCodeRuleForm.ruleFormClearValidate();
       });
+      this.dialogVisible = true;
     },
     handleListItemDel(row, index) {},
     handleRuleMemberSizeChange(val) {

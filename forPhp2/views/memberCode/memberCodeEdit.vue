@@ -170,9 +170,11 @@ module.exports = {
       }
     },
     backToList() {
-      let groupId = this.getQueryVariable("group_id");
-      let pageNo = this.getQueryVariable("page_no");
-      location.href = `./memberCodeList.html?back_tree_id=${groupId}&back_table_page_no=${pageNo}`;
+      let groupId = this.getQueryVariable("group_id") || 0;
+      let pageNo = this.getQueryVariable("page_no") || 1;
+      let fromPage = this.getQueryVariable("from_page") || 'memberCodeList';
+      
+      location.href = `./${fromPage}.html?back_tree_id=${groupId}&back_table_page_no=${pageNo}`;
     },
     addRule() {
       this.$refs.memberCodeRule.handleAddRule();

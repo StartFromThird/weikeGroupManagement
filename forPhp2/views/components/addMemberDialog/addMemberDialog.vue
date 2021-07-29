@@ -152,6 +152,7 @@ module.exports = {
       // this.inputValue = this.getShowStr(param, 3, "name");
       console.log("显示值====", param, this.inputValue);
       this.$emit("confirm", param);
+      // 用户input框 显示值
       if (this.customInputValueFn) {
         this.inputValue = this.customInputValueFn(param);
       }

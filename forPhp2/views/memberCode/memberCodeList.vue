@@ -296,11 +296,11 @@ module.exports = {
     },
     handleListItemEdit(row, index) {
       let id = (this.currentTreeData && this.currentTreeData.id) || 0;
-      location.href = `./memberCodeEdit.html?type=edit&id=${row.id}&group_id=${id}&page_no=${this.pageNo}`;
+      location.href = `./memberCodeEdit.html?type=edit&id=${row.id}&group_id=${id}&page_no=${this.pageNo}&from_page=memberCodeList`;
     },
     handleListItemDetail(row, index) {
       let id = (this.currentTreeData && this.currentTreeData.id) || 0;
-      location.href = `./memberCodeDetail.html?id=${row.id}&group_id=${id}&page_no=${this.pageNo}`;
+      location.href = `./memberCodeDetail.html?id=${row.id}&group_id=${id}&page_no=${this.pageNo}&from_page=memberCodeList`;
     },
     handleListItemDel(row, index) {
       this.$confirm("确认删除该条成员活码?", "提示", {

@@ -279,7 +279,7 @@
             action="/api_cw_sources/add"
             :data="mini_info"
             :multiple="false"
-            accept="image/jpg, image/jpeg, image/bmp, image/gif, image/png"
+            accept="image/jpg, image/jpeg, image/png"
             :show-file-list="false"
             :on-success="
               (response, file, fileList) =>
@@ -295,7 +295,7 @@
               (err, file, fileList) =>
                 handleImgUploadErr(err, file, fileList, 'wechatAppForm')
             "
-            :before-upload="beforeImgUpload"
+            :before-upload="e => beforeImgUpload(e, 'wechatApp')"
           >
             <el-image
               style="width: 100px; height: 100px"
@@ -368,7 +368,7 @@
             action="/api_cw_sources/add"
             :data="mini_info"
             :multiple="false"
-            accept="image/jpg, image/jpeg, image/bmp, image/gif, image/png"
+            accept="image/jpg, image/jpeg, image/png"
             :show-file-list="false"
             :on-success="
               (response, file, fileList) =>
@@ -384,7 +384,7 @@
               (err, file, fileList) =>
                 handleImgUploadErr(err, file, fileList, 'wechatAppForm')
             "
-            :before-upload="beforeImgUpload"
+            :before-upload="e => beforeImgUpload(e, 'wechatApp')"
           >
             <el-image
               style="width: 100px; height: 100px"
@@ -811,14 +811,21 @@ module.exports = {
       this.sopLoading();
       // self.otherContentLoading.close();
     },
-    beforeImgUpload(file) {
-      const isIMAGE = /\.(gif|jpg|jpeg|png|bpm|BPM|GIF|JPG|PNG|JPEG)$/.test(
-        file.name
-      );
+    beforeImgUpload(file, type) {
+      let isIMAGE = false;
+      if (type === 'wechatApp') {
+        isIMAGE = /\.(jpg|jpeg|png|JPG|PNG|JPEG)$/.test(
+          file.name
+        );
+      } else {
+        isIMAGE = /\.(gif|jpg|jpeg|png|bmp|BMP|GIF|JPG|PNG|JPEG)$/.test(
+          file.name
+        );
+      }
       const isLt2M = file.size / 1024 / 1024 < 2;
       if (!isIMAGE) {
         this.$message.error(
-          "上传文件只能是 jpg，jpeg，bmp，gif，png 图片格式!"
+          "上传文件只能是 jpg，jpeg，png 图片格式!"
         );
       }
       if (!isLt2M) {

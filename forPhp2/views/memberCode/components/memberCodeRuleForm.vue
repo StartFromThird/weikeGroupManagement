@@ -256,8 +256,10 @@ module.exports = {
   },
   methods: {
     getQueryVariable,
-    resetFormFields() {
-      this.$refs.memberCodeRuleForm.resetFields();
+    ruleFormClearValidate() {
+      if (this.$refs.memberCodeRuleForm) {
+        this.$refs.memberCodeRuleForm.clearValidate();
+      }
     },
     // 开始时间 此刻以后
     timeRangeChange(e) {
@@ -313,7 +315,7 @@ module.exports = {
     confirmChooseMember(r) {
       console.log("选人=====", r);
       this.writeBackSelectedMemberOrg = r;
-      if (r && Array.isArray(r) && r.length) {
+      if (r && Array.isArray(r)) {
         let member_id = r.map(ele => ele.id).join(',');
         this.$set(this.info, 'member_id', member_id);
         this.$set(this.info, 'member_arr', r);
