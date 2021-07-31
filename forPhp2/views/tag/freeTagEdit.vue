@@ -444,7 +444,10 @@ module.exports = {
             !this.info.custom ||
             (this.info.custom && !this.info.custom.length)
           ) {
-            this.$message.error("选择客户不可为空，请选择");
+            this.$message({
+              message: "选择客户不可为空，请选择",
+              type: "error",
+            });
             return;
           }
           const h = `

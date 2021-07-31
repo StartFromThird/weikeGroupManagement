@@ -788,9 +788,10 @@ module.exports = {
         file.name
       );
       if (!isVideo) {
-        this.$message.error(
-          "上传文件只能是 mp4 视频格式!"
-        );
+        this.$message({
+          message: "上传文件只能是 mp4 视频格式!",
+          type: "error",
+        });
         return false;
       }
       const self = this;
@@ -813,23 +814,21 @@ module.exports = {
     },
     beforeImgUpload(file, type) {
       let isIMAGE = false;
-      if (type === 'wechatApp') {
-        isIMAGE = /\.(jpg|jpeg|png|JPG|PNG|JPEG)$/.test(
-          file.name
-        );
-      } else {
-        isIMAGE = /\.(gif|jpg|jpeg|png|bmp|BMP|GIF|JPG|PNG|JPEG)$/.test(
-          file.name
-        );
-      }
+      const imgReg = type === 'wechatApp' ? /\.(jpg|jpeg|png|JPG|PNG|JPEG)$/ : /\.(gif|jpg|jpeg|png|bmp|BMP|GIF|JPG|PNG|JPEG)$/;
+      const msgTxt = `上传文件只能是 ${type === 'wechatApp' ? 'jpg，jpeg，png' : 'jpg，jpeg，png, bmp, gif'} 图片格式!`; 
+      isIMAGE = imgReg.test(file.name);
       const isLt2M = file.size / 1024 / 1024 < 2;
       if (!isIMAGE) {
-        this.$message.error(
-          "上传文件只能是 jpg，jpeg，png 图片格式!"
-        );
+        this.$message({
+          message: msgTxt,
+          type: "error",
+        });
       }
       if (!isLt2M) {
-        this.$message.error("上传文件大小不能超过 2MB!");
+        this.$message({
+          message: "上传文件大小不能超过 2MB!",
+          type: "error",
+        });
       }
       console.log(isIMAGE, file.type, isLt2M);
 

@@ -236,8 +236,9 @@ module.exports = {
     },
     // 单选选中节点
     handleSelectMember(data) {
-      let d = this.customSelectedFn(data);
-      if (!this.customSelectedFn(data)) {
+      let curLen = this.selectedMembers.length;
+      let d = this.customSelectedFn(data, curLen);
+      if (!this.customSelectedFn(data, curLen)) {
         return;
       }
       if (!this.selectedMemberIds.includes(data.id)) {

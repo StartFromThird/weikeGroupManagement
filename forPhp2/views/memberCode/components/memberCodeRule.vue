@@ -421,7 +421,10 @@ module.exports = {
       // 成功回调刷新 this.getTableData()
       // 失败要把 row.is_use 状态改回来
       if (row.is_use === '1') {
-        this.$message.success('已开启，引流规则只允许选择一条生效规则！');
+        this.$message({
+          message: "已开启，引流规则只允许选择一条生效规则！",
+          type: "success"
+        });
       }
     },
     handleListItemEdit(row, index) {

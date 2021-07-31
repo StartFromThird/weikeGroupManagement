@@ -153,6 +153,7 @@ module.exports = {
         name: "",
         parentId: 0,
       },
+      activeData: null
     };
   },
   computed: {
@@ -167,7 +168,6 @@ module.exports = {
   mounted() {},
   watch: {
     keyword(val) {
-      d;
       this.getTreeData();
     },
   },
@@ -291,8 +291,9 @@ module.exports = {
     },
     handleNodeClick(data, node) {
       this.$emit("updatecurrenttreedata", data);
+      this.activeData = JSON.parse(JSON.stringify(data));
     },
-    getTreeData() {
+    async getTreeData() {
       console.log("树查询参数===", this.parentSearchParams);
       // mock start
       this.treeData = [
@@ -482,30 +483,26 @@ module.exports = {
       ];
       // this.treeData = []
       // mock end
-      if (this.treeData && this.treeData.length) {
-        let cd = {};
-        let back_tree_id = this.getQueryVariable("back_tree_id");
-        let back_table_page_no = this.getQueryVariable("back_table_page_no");
-        if (back_tree_id) {
-          this.$nextTick(() => {
-            this.$refs.filterTree.setCurrentKey(back_tree_id);
-            cd = this.$refs.filterTree.getCurrentNode();
-            if (cd) {
-              delete cd.children;
-              this.$emit("updatecurrenttreedata", cd, back_table_page_no);
-              return ;
-            } 
-          });
+      let back_tree_id = this.getQueryVariable("back_tree_id");
+      let back_table_page_no = this.getQueryVariable("back_table_page_no") || 1;
+      let cd = null;
+      this.$nextTick(() => {
+        // 有选中 或 第一次页面加载带 back_tree_id 回显
+        let backTreeId = (this.activeData ? this.activeData.id : back_tree_id) || '';
+        if (backTreeId) {
+          this.$refs.filterTree.setCurrentKey(backTreeId);
+          cd = this.$refs.filterTree.getCurrentNode();
+        } 
+        // 默认第一个
+        if (!cd) {
+          cd = this.treeData[0];
+          this.$refs.filterTree.setCurrentKey(cd.id);
         }
-        if (this.treeData[0] && this.treeData[0].id) {
-          cd = JSON.parse(JSON.stringify(this.treeData[0]));
-          delete cd.children;
-          this.$emit("updatecurrenttreedata", cd);
-          this.$nextTick(() => {
-            this.$refs.filterTree.setCurrentKey(cd.id);
-          });
-        }
-      }
+        cd = JSON.parse(JSON.stringify(cd));
+        delete cd.children;
+        this.activeData = cd;
+        this.$emit("updatecurrenttreedata", cd, back_table_page_no);
+      })
     },
   },
   components: {},

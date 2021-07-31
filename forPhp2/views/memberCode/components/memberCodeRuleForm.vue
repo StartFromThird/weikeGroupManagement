@@ -294,14 +294,24 @@ module.exports = {
         });
       })
     },
-    customSelectedFn(data) {
-      return !data.isOrg;
+    customSelectedFn(data, len) {
+      const maxLen = 10;
       // 单成员只能选人
-      // if (this.info.rule_type === "1") {
-      //   return !data.isOrg;
-      // } else {
-      //   return true;
-      // }
+      if (this.info.rule_type === "1") {
+        return !data.isOrg;
+      } else {
+        if (data.isOrg) {
+          return false;
+        }  else if (len >= maxLen) {
+          this.$message({
+            message: `最多支持客户人数${maxLen}人`,
+            type: "error",
+          })
+          return false;
+        } else {
+          return true;
+        }
+      }
     },
     ruleTypeChange(v) {
       this.writeBackSelectedMemberOrg = [];

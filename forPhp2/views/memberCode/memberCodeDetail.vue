@@ -447,9 +447,9 @@ module.exports = {
         },
         disabledDate: (time) => {
           if (this.pickerMinDate !== "") {
-            const day30 = (30 - 1) * 24 * 3600 * 1000;
-            let maxTime = this.pickerMinDate + day30;
-            let minTime = this.pickerMinDate - day30;
+            const day90 = (90 - 1) * 24 * 3600 * 1000;
+            let maxTime = this.pickerMinDate + day90;
+            let minTime = this.pickerMinDate - day90;
             if (maxTime > new Date()) {
               maxTime = new Date();
             }
